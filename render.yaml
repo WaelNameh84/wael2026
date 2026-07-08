@@ -5,8 +5,8 @@ services:
     plan: starter
     region: oregon
     rootDir: temp_unzip/attendx-render
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    startCommand: npm start
+    buildCommand: cd temp_unzip/attendx-render && npm install --legacy-peer-deps && npm run build
+    startCommand: cd temp_unzip/attendx-render && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
