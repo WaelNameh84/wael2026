@@ -145,6 +145,7 @@ function MessagesContent() {
     if (selected?.id === id) setSelected(null);
     qc.invalidateQueries({ queryKey: ["messages-inbox"] });
     qc.invalidateQueries({ queryKey: ["messages-sent"] });
+    qc.invalidateQueries({ queryKey: ["messages-unread-count"] });
     setDeleting(null);
   }
 
