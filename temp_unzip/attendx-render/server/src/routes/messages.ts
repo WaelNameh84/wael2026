@@ -18,7 +18,8 @@ router.get("/unread-count", requireAuth, async (req: any, res) => {
             eq(messagesTable.receiverId, userId),
             eq(messagesTable.isBroadcast, true)
           ),
-          eq(messagesTable.isRead, false)
+          eq(messagesTable.isRead, false),
+          isNull(messagesTable.parentId)
         )
       );
     return res.json({ count: rows.length });

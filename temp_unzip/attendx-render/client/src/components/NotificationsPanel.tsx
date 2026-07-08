@@ -234,14 +234,16 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
           )}
         </div>
 
-        <div className="px-4 py-2.5 border-t border-border">
-          <Link href="/action-center" onClick={onClose}>
-            <Button variant="ghost" size="sm" className="w-full gap-1.5 text-xs text-primary hover:text-primary">
-              <ExternalLink className="w-3.5 h-3.5" />
-              {t("open_action_center")}
-            </Button>
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="px-4 py-2.5 border-t border-border">
+            <Link href="/action-center" onClick={onClose}>
+              <Button variant="ghost" size="sm" className="w-full gap-1.5 text-xs text-primary hover:text-primary">
+                <ExternalLink className="w-3.5 h-3.5" />
+                {t("open_action_center")}
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* ── Notification Detail Dialog ── */}
