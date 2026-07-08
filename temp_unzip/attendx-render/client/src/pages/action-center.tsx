@@ -175,6 +175,29 @@ function ActionCenterContent() {
     } finally { setActionLoading(null); }
   }
 
+  async function handleSalaryAdvanceAction(notifId: number, advanceId: number, action: "approved" | "rejected") {
+    setActionLoading(`${action}-${notifId}`);
+    try {
+      const res = await fetch(apiUrl(`/api/salary-advances/${advanceId}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ status: action }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error ?? (isArabic ? "فشلت العملية" : "Operation failed"));
+      }
+      await archiveNotif(notifId);
+      toast({
+        title: action === "approved"
+          ? (isArabic ? "✅ تمت الموافقة على السلفة" : "✅ Salary advance approved")
+          : (isArabic ? "❌ تم رفض طلب السلفة" : "❌ Salary advance rejected"),
+      });
+    } catch (e: any) {
+      toast({ title: e.message ?? t("error"), variant: "destructive" });
+    } finally { setActionLoading(null); }
+  }
+
   async function handleRequestAction(notifId: number, requestId: number, action: "approved" | "rejected") {
     setActionLoading(`${action}-${notifId}`);
     try {
@@ -432,7 +455,24 @@ function ActionCenterContent() {
                         </>
                       )}
 
-                      {(n.type === "LATE_CHECKIN" || (n.type === "SYSTEM_ALERT" && !(n.relatedType === "request" && n.relatedId))) && (
+                      {n.type === "SYSTEM_ALERT" && n.relatedType === "salary_advance" && n.relatedId && (
+                        <>
+                          <Button size="sm" className="gap-1.5 h-8 bg-green-600 hover:bg-green-700 text-white border-0"
+                            disabled={actionLoading === `approved-${n.id}`}
+                            onClick={() => handleSalaryAdvanceAction(n.id, n.relatedId, "approved")}>
+                            {actionLoading === `approved-${n.id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                            {t("approve")}
+                          </Button>
+                          <Button size="sm" variant="destructive" className="gap-1.5 h-8"
+                            disabled={actionLoading === `rejected-${n.id}`}
+                            onClick={() => handleSalaryAdvanceAction(n.id, n.relatedId, "rejected")}>
+                            {actionLoading === `rejected-${n.id}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                            {t("reject")}
+                          </Button>
+                        </>
+                      )}
+
+                      {(n.type === "LATE_CHECKIN" || (n.type === "SYSTEM_ALERT" && !["request", "salary_advance"].includes(n.relatedType) && !n.relatedId)) && (
                         <Button size="sm" variant="outline" className="gap-1.5 h-8"
                           onClick={() => { markRead(n.id); archiveNotif(n.id); }}>
                           {isArabic ? "إغلاق" : "Dismiss"}
