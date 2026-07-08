@@ -1,0 +1,44 @@
+2026-07-08T10:48:31.151412308Z ==> Cloning from https://github.com/WaelNameh84/wael2026
+2026-07-08T10:48:31.76813827Z ==> Checking out commit f08dfdaf2555f89bf60c9bba0e3a3c31fdc6a14a in branch main
+2026-07-08T10:48:33.203624857Z ==> Requesting Node.js version 20.x
+2026-07-08T10:48:33.385742059Z ==> Using Node.js version 20.20.2 via /opt/render/project/src/package.json
+2026-07-08T10:48:33.38575521Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2026-07-08T10:48:33.385885612Z ==> Installing Node.js version 20.20.2...
+2026-07-08T10:48:34.302455748Z ==> Running build command 'npm ci --omit=dev --legacy-peer-deps'...
+2026-07-08T10:49:45.371264521Z npm error Exit handler never called!
+2026-07-08T10:49:45.371297312Z npm error This is an error with npm itself. Please report this error at:
+2026-07-08T10:49:45.371399204Z npm error   <https://github.com/npm/cli/issues>
+2026-07-08T10:49:45.371638099Z npm error A complete log of this run can be found in: /opt/render/.cache/_logs/2026-07-08T10_48_34_368Z-debug-0.log
+2026-07-08T10:49:46.712925948Z ==> Uploading build...
+2026-07-08T10:49:49.174766209Z ==> Uploaded in 1.7s. Compression took 0.7s
+2026-07-08T10:49:49.187797038Z ==> Build successful 🎉
+2026-07-08T10:49:53.082321867Z ==> Deploying...
+2026-07-08T10:49:53.191253038Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-07-08T10:49:59.619064629Z ==> Running 'npm start'
+2026-07-08T10:50:00.63060653Z 
+2026-07-08T10:50:00.630641922Z > attendx@1.0.0 start
+2026-07-08T10:50:00.630648333Z > node server/dist/index.cjs
+2026-07-08T10:50:00.630653833Z 
+2026-07-08T10:50:01.922365033Z /opt/render/project/src/server/dist/index.cjs:50072
+2026-07-08T10:50:01.922435037Z       throw new Error("DATABASE_URL must be set. Add it to your Render environment variables.");
+2026-07-08T10:50:01.922442758Z       ^
+2026-07-08T10:50:01.922445428Z 
+2026-07-08T10:50:01.922448728Z Error: DATABASE_URL must be set. Add it to your Render environment variables.
+2026-07-08T10:50:01.922451308Z     at db/src/index.ts (/opt/render/project/src/server/dist/index.cjs:50072:13)
+2026-07-08T10:50:01.922457268Z     at __init (/opt/render/project/src/server/dist/index.cjs:9:56)
+2026-07-08T10:50:01.922459959Z     at Object.<anonymous> (/opt/render/project/src/server/dist/index.cjs:68516:1)
+2026-07-08T10:50:01.922462369Z     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+2026-07-08T10:50:01.922464909Z     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+2026-07-08T10:50:01.922467279Z     at Module.load (node:internal/modules/cjs/loader:1266:32)
+2026-07-08T10:50:01.922469659Z     at Module._load (node:internal/modules/cjs/loader:1091:12)
+2026-07-08T10:50:01.922472039Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+2026-07-08T10:50:01.92247508Z     at node:internal/main/run_main_module:28:49
+2026-07-08T10:50:01.92247738Z 
+2026-07-08T10:50:01.92248001Z Node.js v20.20.2
+2026-07-08T10:50:02.968750903Z ==> Exited with status 1
+2026-07-08T10:50:02.973115954Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-07-08T10:50:06.781415926Z ==> Running 'npm start'
+2026-07-08T10:50:07.786997571Z 
+2026-07-08T10:50:07.787029283Z > attendx@1.0.0 start
+2026-07-08T10:50:07.787034943Z > node server/dist/index.cjs
+2026-07-08T10:50:07.787039233Z 

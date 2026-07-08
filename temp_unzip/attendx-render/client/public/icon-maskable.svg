@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Maskable icon: safe zone is the inner 80% circle, fill full square with bg -->
+  <rect width="512" height="512" fill="#FF3C00"/>
+  <circle cx="256" cy="240" r="88" stroke="white" stroke-width="16" fill="none"/>
+  <line x1="256" y1="240" x2="256" y2="192" stroke="white" stroke-width="16" stroke-linecap="round"/>
+  <line x1="256" y1="240" x2="294" y2="260" stroke="white" stroke-width="16" stroke-linecap="round"/>
+  <rect x="178" y="354" width="156" height="20" rx="10" fill="white" opacity="0.7"/>
+  <rect x="208" y="386" width="96" height="20" rx="10" fill="white" opacity="0.45"/>
+</svg>

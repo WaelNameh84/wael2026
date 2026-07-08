@@ -1,0 +1,10 @@
+node_modules/
+server/dist/
+client/dist/
+server/public/
+*.env
+.env
+gemini-config.json
+uploads/
+*.log
+.DS_Store
