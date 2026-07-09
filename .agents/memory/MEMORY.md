@@ -1,0 +1,1 @@
+- [GitHub default branch mismatch](github-default-branch.md) — repo can have work pushed to a non-default branch while GitHub shows an unrelated/stale default branch.
