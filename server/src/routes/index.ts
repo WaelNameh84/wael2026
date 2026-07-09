@@ -1,0 +1,46 @@
+import { Router, type IRouter } from "express";
+import authRouter from "./auth.js";
+import usersRouter from "./users.js";
+import locationsRouter from "./locations.js";
+import attendanceRouter from "./attendance.js";
+import leaveRouter from "./leave.js";
+import reportsRouter from "./reports.js";
+import settingsRouter from "./settings.js";
+import aiRouter from "./ai.js";
+import departmentsRouter from "./departments.js";
+import adminRouter from "./admin.js";
+import notificationsRouter from "./notifications.js";
+import payrollRouter from "./payroll.js";
+import messagesRouter from "./messages.js";
+import bonusesRouter from "./bonuses.js";
+import requestsRouter from "./requests.js";
+import workReportsRouter from "./work-reports.js";
+import pushRouter from "./push.js";
+import salaryAdvancesRouter from "./salary-advances.js";
+import uploadsRouter from "./uploads.js";
+
+const router: IRouter = Router();
+
+router.get("/health", (_req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+
+router.use(uploadsRouter);
+router.use("/auth", authRouter);
+router.use("/users", usersRouter);
+router.use("/locations", locationsRouter);
+router.use("/attendance", attendanceRouter);
+router.use("/leave", leaveRouter);
+router.use("/reports", reportsRouter);
+router.use("/settings", settingsRouter);
+router.use("/ai", aiRouter);
+router.use("/departments", departmentsRouter);
+router.use("/admin", adminRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/payroll", payrollRouter);
+router.use("/messages", messagesRouter);
+router.use("/bonuses", bonusesRouter);
+router.use("/requests", requestsRouter);
+router.use("/work-reports", workReportsRouter);
+router.use("/push", pushRouter);
+router.use("/salary-advances", salaryAdvancesRouter);
+
+export default router;
