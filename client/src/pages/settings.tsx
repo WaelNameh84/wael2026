@@ -668,7 +668,7 @@ export default function SettingsPage() {
                             toast({ title: isArabic ? t("unsupported_format") : "Unsupported file format", variant: "destructive" });
                             return;
                           }
-                          if (file.size > 500_000) { toast({ title: isArabic ? t("size_over_500kb") : "Max 500KB", variant: "destructive" }); return; }
+                          if (file.size > 5_000_000) { toast({ title: isArabic ? "الحد الأقصى 5 ميجابايت" : "Max 5MB", variant: "destructive" }); return; }
                           const reader = new FileReader();
                           reader.onload = ev => {
                             setLogoPreview(ev.target?.result as string);
@@ -687,7 +687,7 @@ export default function SettingsPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP, SVG — {isArabic ? t("max_500kb") : "max 500KB"}</p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP, SVG — {isArabic ? "بحد أقصى 5 ميجابايت" : "max 5MB"}</p>
                   {logoFileInfo && (
                     <p className="text-xs text-muted-foreground/80 flex items-center gap-1.5">
                       <span className="font-mono">{logoFileInfo.name}</span>
@@ -737,7 +737,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoW}px</span>
                     </div>
                     <input
-                      type="range" min={16} max={600} step={1}
+                      type="range" min={16} max={2000} step={1}
                       value={logoW}
                       onChange={e => {
                         const v = Number(e.target.value);
@@ -758,7 +758,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoH}px</span>
                     </div>
                     <input
-                      type="range" min={16} max={600} step={1}
+                      type="range" min={16} max={2000} step={1}
                       value={logoH}
                       onChange={e => {
                         const v = Number(e.target.value);
@@ -774,22 +774,45 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
+
+                {/* Quick size presets */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {[
+                    { label: isArabic ? "صغير" : "Small", v: 48 },
+                    { label: isArabic ? "متوسط" : "Medium", v: 96 },
+                    { label: isArabic ? "كبير" : "Large", v: 200 },
+                    { label: isArabic ? "كبير جداً" : "X-Large", v: 400 },
+                    { label: isArabic ? "ضخم" : "Huge", v: 800 },
+                  ].map(p => (
+                    <button key={p.v} type="button"
+                      onClick={() => {
+                        const ratio = logoW > 0 ? logoH / logoW : 1;
+                        setLogoW(p.v);
+                        setLogoH(logoAspectLocked ? Math.round(p.v * ratio) : p.v);
+                      }}
+                      className="px-2.5 py-1 rounded-md border border-border text-[11px] font-medium hover:bg-muted hover:border-primary/40"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex items-center justify-between gap-3">
                   <Label className="text-xs">{isArabic ? t("scale_label") : "Scale"}</Label>
-                  <div className="flex items-center gap-2 flex-1 max-w-[200px]">
+                  <div className="flex items-center gap-2 flex-1 max-w-[240px]">
                     <input
-                      type="range" min={10} max={300} step={1}
+                      type="range" min={10} max={800} step={1}
                       value={logoScalePct}
                       onChange={e => {
                         const pct = Number(e.target.value);
                         const factor = pct / logoScalePct;
-                        setLogoW(v => Math.max(16, Math.min(600, Math.round(v * factor))));
-                        setLogoH(v => Math.max(16, Math.min(600, Math.round(v * factor))));
+                        setLogoW(v => Math.max(16, Math.min(2000, Math.round(v * factor))));
+                        setLogoH(v => Math.max(16, Math.min(2000, Math.round(v * factor))));
                         setLogoScalePct(pct);
                       }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
                     />
-                    <span className="text-xs font-mono text-primary w-10 text-end">{logoScalePct}%</span>
+                    <span className="text-xs font-mono text-primary w-12 text-end">{logoScalePct}%</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -797,10 +820,10 @@ export default function SettingsPage() {
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">{isArabic ? t("width_px") : "W (px)"}</Label>
                       <Input
-                        type="number" min={16} max={600}
+                        type="number" min={16} max={2000}
                         value={logoW}
                         onChange={e => {
-                          const v = Math.max(16, Math.min(600, Number(e.target.value)));
+                          const v = Math.max(16, Math.min(2000, Number(e.target.value)));
                           if (logoAspectLocked && logoW > 0) {
                             const ratio = logoH / logoW;
                             setLogoW(v);
@@ -815,10 +838,10 @@ export default function SettingsPage() {
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">{isArabic ? t("height_px") : "H (px)"}</Label>
                       <Input
-                        type="number" min={16} max={600}
+                        type="number" min={16} max={2000}
                         value={logoH}
                         onChange={e => {
-                          const v = Math.max(16, Math.min(600, Number(e.target.value)));
+                          const v = Math.max(16, Math.min(2000, Number(e.target.value)));
                           if (logoAspectLocked && logoH > 0) {
                             const ratio = logoW / logoH;
                             setLogoH(v);
@@ -831,12 +854,20 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Big, comfortable live-drag preview canvas */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">{isArabic ? "المعاينة المباشرة — اسحب أو مرّر للتكبير" : "Live preview — drag to move, scroll to zoom"}</Label>
+                    <span className="text-xs font-mono text-primary">{logoW}×{logoH}px</span>
+                  </div>
                   <div
                     className={cn(
-                      "rounded-xl bg-primary/10 overflow-hidden flex items-center justify-center border-2 flex-shrink-0 relative",
+                      "w-full rounded-xl bg-[repeating-conic-gradient(#0000_0_25%,#8882_0_50%)_50%/16px_16px] bg-primary/5 overflow-hidden flex items-center justify-center border-2 relative select-none",
                       logoDragging ? "border-primary cursor-grabbing shadow-lg" : "border-border cursor-grab"
                     )}
-                    style={{ width: Math.min(logoW, 120), height: Math.min(logoH, 120), maxWidth: 120, maxHeight: 120 }}
+                    style={{ height: 260 }}
                     title={t("drag_reposition_logo")}
                     onMouseDown={e => {
                       e.preventDefault();
@@ -848,18 +879,31 @@ export default function SettingsPage() {
                       logoDragRef.current = { active: true, startX: tt.clientX, startY: tt.clientY, ox: logoOX, oy: logoOY };
                       setLogoDragging(true);
                     }}
+                    onWheel={e => {
+                      e.preventDefault();
+                      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                      const factor = Math.max(0.05, 1 + delta);
+                      setLogoW(v => Math.max(16, Math.min(2000, Math.round(v * factor))));
+                      setLogoH(v => Math.max(16, Math.min(2000, Math.round(v * factor))));
+                    }}
                   >
                     <div
-                      className="w-full h-full flex items-center justify-center select-none"
-                      style={{ transform: `translate(${logoOX * 0.4}px, ${logoOY * 0.4}px) rotate(${logoRot}deg)` }}
+                      className="flex items-center justify-center select-none"
+                      style={{
+                        width: Math.min(logoW, 900),
+                        height: Math.min(logoH, 220),
+                        maxWidth: "90%",
+                        maxHeight: "85%",
+                        transform: `translate(${logoOX}px, ${logoOY}px) rotate(${logoRot}deg)`,
+                      }}
                     >
                       {logoPreview
                         ? <img src={logoPreview} alt="logo" className="w-full h-full object-contain pointer-events-none" />
-                        : <span className="text-[10px] text-muted-foreground">{logoW}×{logoH}</span>
+                        : <span className="text-xs text-muted-foreground">{logoW}×{logoH}</span>
                       }
                     </div>
                     {!logoDragging && (
-                      <span className="absolute bottom-0.5 inset-x-0 text-center text-[8px] text-muted-foreground/70 pointer-events-none">
+                      <span className="absolute bottom-1 inset-x-0 text-center text-[10px] text-muted-foreground/70 pointer-events-none">
                         {t("drag_hint")}
                       </span>
                     )}
@@ -889,7 +933,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoOX}px</span>
                     </div>
                     <input
-                      type="range" min={-300} max={300} step={1}
+                      type="range" min={-800} max={800} step={1}
                       value={logoOX}
                       onChange={e => { const v = Number(e.target.value); setLogoOX(v); }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
@@ -901,7 +945,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoOY}px</span>
                     </div>
                     <input
-                      type="range" min={-300} max={300} step={1}
+                      type="range" min={-800} max={800} step={1}
                       value={logoOY}
                       onChange={e => { const v = Number(e.target.value); setLogoOY(v); }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
