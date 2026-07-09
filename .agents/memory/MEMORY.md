@@ -1,1 +1,2 @@
 - [GitHub default branch mismatch](github-default-branch.md) — repo can have work pushed to a non-default branch while GitHub shows an unrelated/stale default branch.
+- [Render deploy broken by Replit npm registry](render-npm-registry.md) — Replit's internal npm registry leaks into package-lock.json and breaks builds on external hosts like Render.
