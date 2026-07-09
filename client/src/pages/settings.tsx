@@ -202,6 +202,8 @@ export default function SettingsPage() {
     setClockFormat, setClockLocale, setClockStyle, setClockSize, setFloatingClockEnabled, setFloatingClockCheckIn,
     sidebarStyle, cardStyle, tableStyle, accentColor,
     setSidebarStyle, setCardStyle, setTableStyle, setAccentColor,
+    glassIntensity, backgroundMode, backgroundImage, backgroundGradient,
+    setGlassIntensity, setBackgroundMode, setBackgroundImage, setBackgroundGradient, resetAppearance,
   } = useSettings();
 
   const AI_PREVIEW_COLORS: Record<string, string> = {
@@ -272,6 +274,31 @@ export default function SettingsPage() {
   const [logoAspectLocked, setLogoAspectLocked] = useState(false);
   const [logoScalePct, setLogoScalePct] = useState(100);
   const [logoFileInfo, setLogoFileInfo] = useState<{ name: string; size: number; isSvg: boolean } | null>(null);
+  const logoDragRef = useRef({ active: false, startX: 0, startY: 0, ox: 0, oy: 0 });
+  const [logoDragging, setLogoDragging] = useState(false);
+
+  useEffect(() => {
+    const onMove = (clientX: number, clientY: number) => {
+      if (!logoDragRef.current.active) return;
+      const dx = clientX - logoDragRef.current.startX;
+      const dy = clientY - logoDragRef.current.startY;
+      setLogoOX(Math.max(-300, Math.min(300, Math.round(logoDragRef.current.ox + dx))));
+      setLogoOY(Math.max(-300, Math.min(300, Math.round(logoDragRef.current.oy + dy))));
+    };
+    const onMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+    const onEnd = () => { logoDragRef.current.active = false; setLogoDragging(false); };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onEnd);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onEnd);
+    };
+  }, []);
 
   /* ── Work Schedule ── */
   const [workStartTime, setWorkStartTime] = useState("09:00");
@@ -805,19 +832,37 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div
-                    className="rounded-xl bg-primary/10 overflow-hidden flex items-center justify-center border border-border flex-shrink-0"
+                    className={cn(
+                      "rounded-xl bg-primary/10 overflow-hidden flex items-center justify-center border-2 flex-shrink-0 relative",
+                      logoDragging ? "border-primary cursor-grabbing shadow-lg" : "border-border cursor-grab"
+                    )}
                     style={{ width: Math.min(logoW, 120), height: Math.min(logoH, 120), maxWidth: 120, maxHeight: 120 }}
-                    title={isArabic ? t("preview_label") : "Preview"}
+                    title={t("drag_reposition_logo")}
+                    onMouseDown={e => {
+                      e.preventDefault();
+                      logoDragRef.current = { active: true, startX: e.clientX, startY: e.clientY, ox: logoOX, oy: logoOY };
+                      setLogoDragging(true);
+                    }}
+                    onTouchStart={e => {
+                      const tt = e.touches[0];
+                      logoDragRef.current = { active: true, startX: tt.clientX, startY: tt.clientY, ox: logoOX, oy: logoOY };
+                      setLogoDragging(true);
+                    }}
                   >
                     <div
-                      className="w-full h-full flex items-center justify-center"
+                      className="w-full h-full flex items-center justify-center select-none"
                       style={{ transform: `translate(${logoOX * 0.4}px, ${logoOY * 0.4}px) rotate(${logoRot}deg)` }}
                     >
                       {logoPreview
-                        ? <img src={logoPreview} alt="logo" className="w-full h-full object-contain" />
+                        ? <img src={logoPreview} alt="logo" className="w-full h-full object-contain pointer-events-none" />
                         : <span className="text-[10px] text-muted-foreground">{logoW}×{logoH}</span>
                       }
                     </div>
+                    {!logoDragging && (
+                      <span className="absolute bottom-0.5 inset-x-0 text-center text-[8px] text-muted-foreground/70 pointer-events-none">
+                        {t("drag_hint")}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -1083,6 +1128,125 @@ export default function SettingsPage() {
               </Select>
             </div>
 
+            <div className="border-t border-border" />
+
+            {/* ── 3D Glass & Background customization ── */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> {t("glass_3d_bg_title")}
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => { resetAppearance(); toast({ title: t("restored_default_toast") }); }}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground underline"
+                >
+                  <RotateCcw className="w-3 h-3" /> {t("restore_original")}
+                </button>
+              </div>
+
+              {/* Glass intensity */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t("glass_intensity_label")}</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {([
+                    { val: "off", key: "glass_off" },
+                    { val: "light", key: "glass_light" },
+                    { val: "medium", key: "glass_medium" },
+                    { val: "strong", key: "glass_strong" },
+                  ] as const).map(({ val, key }) => (
+                    <button key={val} type="button" onClick={() => setGlassIntensity(val)}
+                      className={cn(
+                        "py-2 rounded-lg border text-[11px] font-medium transition-colors",
+                        glassIntensity === val ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"
+                      )}>
+                      {t(key)}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {t("glass_intensity_desc")}
+                </p>
+              </div>
+
+              {/* Background mode */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t("app_background_label")}</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { val: "default", key: "bg_default" },
+                    { val: "gradient", key: "bg_gradient" },
+                    { val: "image", key: "bg_image" },
+                  ] as const).map(({ val, key }) => (
+                    <button key={val} type="button" onClick={() => setBackgroundMode(val)}
+                      className={cn(
+                        "py-2 rounded-lg border text-[11px] font-medium transition-colors",
+                        backgroundMode === val ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"
+                      )}>
+                      {t(key)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {backgroundMode === "gradient" && (
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { val: "aurora", label: "Aurora", css: "linear-gradient(135deg,#1a1f3a,#312e81,#0891b2)" },
+                    { val: "sunset", label: "Sunset", css: "linear-gradient(135deg,#2a1230,#be185d,#f97316)" },
+                    { val: "ocean", label: "Ocean", css: "linear-gradient(135deg,#0a2540,#0284c7,#22d3ee)" },
+                    { val: "emerald", label: "Emerald", css: "linear-gradient(135deg,#0a2e24,#059669,#14b8a6)" },
+                  ].map(g => (
+                    <button key={g.val} type="button" onClick={() => setBackgroundGradient(g.val)}
+                      className={cn(
+                        "h-12 rounded-lg border-2 relative overflow-hidden",
+                        backgroundGradient === g.val ? "border-primary ring-2 ring-primary/40" : "border-border"
+                      )}
+                      style={{ background: g.css }}
+                      title={g.label}
+                    >
+                      {backgroundGradient === g.val && <CheckCircle2 className="w-4 h-4 text-white absolute top-1 end-1 drop-shadow" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {backgroundMode === "image" && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!file) return;
+                          if (file.size > 2_000_000) { toast({ title: t("max_2mb_error"), variant: "destructive" }); return; }
+                          const reader = new FileReader();
+                          reader.onload = ev => setBackgroundImage(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        }} />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-medium hover:bg-muted cursor-pointer">
+                        <Database className="w-3.5 h-3.5" /> {t("choose_image_bg")}
+                      </span>
+                    </label>
+                    {backgroundImage && (
+                      <button type="button" onClick={() => setBackgroundImage("")} className="px-3 py-1.5 rounded-md border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/10">
+                        {isArabic ? t("remove_action") : "Remove"}
+                      </button>
+                    )}
+                  </div>
+                  {backgroundImage && (
+                    <div className="w-full h-20 rounded-lg overflow-hidden border border-border">
+                      <img src={backgroundImage} alt="background" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <p className="text-[11px] text-muted-foreground">PNG/JPG/WebP — {t("max_2mb")}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-border" />
+
             {/* ── Accent Color ── */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -1231,6 +1395,8 @@ export default function SettingsPage() {
                 { val: "pixel",    icon: "👾", labelAr: t("clock_style_pixel"),       labelEn: "Pixel"     },
                 { val: "sunburst", icon: "☀️", labelAr: t("clock_style_sunray"),   labelEn: "Sunburst"  },
                 { val: "holographic", icon: "🔮", labelAr: t("clock_style_hologram"), labelEn: "Holographic" },
+                { val: "glass3d",  icon: "🧊", labelAr: t("clock_style_glass3d"), labelEn: "Glass 3D" },
+                { val: "orbit3d",  icon: "🪐", labelAr: t("clock_style_orbit3d"), labelEn: "Orbit 3D" },
               ] as const).map(({ val, icon, labelAr, labelEn }) => (
                 <button key={val} onClick={() => setClockStyle(val)}
                   className={cn(

@@ -336,6 +336,107 @@ html.theme-slate {
   --accent-foreground: 215 25% 15% !important;
 }
 
+/* ── Custom background (image / gradient) ───────────────────────────── */
+body.app-bg-custom {
+  background-blend-mode: normal;
+}
+body.app-bg-custom #root {
+  background: transparent;
+}
+
+/* ── Glassmorphism 3D — realistic frosted-glass surfaces ─────────────── */
+html[data-glass="light"] .bg-card,
+html[data-glass="light"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.72) !important;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+html[data-glass="medium"] .bg-card,
+html[data-glass="medium"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.55) !important;
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+html[data-glass="strong"] .bg-card,
+html[data-glass="strong"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.38) !important;
+  backdrop-filter: blur(22px) saturate(190%);
+  -webkit-backdrop-filter: blur(22px) saturate(190%);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
+html[data-glass="light"] .bg-sidebar,
+html[data-glass="medium"] .bg-sidebar,
+html[data-glass="strong"] .bg-sidebar {
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: hsl(var(--sidebar) / 0.85) !important;
+  border-inline-end: 1px solid rgba(255,255,255,0.10);
+}
+
+html[data-glass="light"] [data-slot="dropdown-menu-content"],
+html[data-glass="medium"] [data-slot="dropdown-menu-content"],
+html[data-glass="strong"] [data-slot="dropdown-menu-content"],
+html[data-glass="light"] .bg-popover,
+html[data-glass="medium"] .bg-popover,
+html[data-glass="strong"] .bg-popover {
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  background: hsl(var(--popover) / 0.7) !important;
+}
+
+/* Subtle 3D hover lift for glass cards */
+html[data-glass="light"] .bg-card:hover,
+html[data-glass="medium"] .bg-card:hover,
+html[data-glass="strong"] .bg-card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ── 3D Glass clock face ─────────────────────────────────────────────── */
+.clock-glass3d {
+  position: relative;
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.08) 100%),
+              linear-gradient(135deg, hsl(var(--primary) / 0.25), rgba(30,30,50,0.35));
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.25),
+    inset 0 2px 1px rgba(255,255,255,0.4),
+    inset 0 -12px 24px rgba(0,0,0,0.15);
+  transform: perspective(600px) rotateX(4deg);
+  transform-style: preserve-3d;
+}
+.clock-glass3d::before {
+  content: "";
+  position: absolute;
+  inset: 6% 10% auto 10%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), transparent);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* ── 3D Orbit clock ring ──────────────────────────────────────────────── */
+.clock-orbit3d-ring {
+  animation: orbit3dSpin 14s linear infinite;
+  transform-style: preserve-3d;
+}
+@keyframes orbit3dSpin {
+  from { transform: perspective(400px) rotateX(62deg) rotateZ(0deg); }
+  to   { transform: perspective(400px) rotateX(62deg) rotateZ(360deg); }
+}
+
 .animate-scan {
   animation: scan 1.5s ease-in-out infinite alternate;
 }

@@ -531,6 +531,61 @@ function HolographicClock({ time, date, size }: { time: string; date: string; si
   );
 }
 
+/* ── 19. Glass3D — realistic frosted glass panel ──────────────── */
+function Glass3DClock({ time, date, size }: { time: string; date: string; size: ClockSize }) {
+  const s = sizeMap[size];
+  return (
+    <div className={`clock-glass3d flex flex-col items-center gap-1.5 ${s.pad}`}>
+      <div className={`font-mono font-bold tabular-nums tracking-widest text-white relative z-10 ${s.time}`}
+        style={{ textShadow: "0 2px 10px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.25)" }}>
+        {time}
+      </div>
+      <div className="relative z-10 text-white/70" style={{ fontSize: size === "large" ? 11 : 9, letterSpacing: "0.1em" }}>
+        {date}
+      </div>
+    </div>
+  );
+}
+
+/* ── 20. Orbit3D — analog face with a tilted rotating glass ring ─ */
+function Orbit3DClock({ now, date, size }: { now: Date; date: string; size: ClockSize }) {
+  const dim = sizeMap[size].face;
+  const cx = dim / 2;
+  const r = cx - 10;
+  const s = now.getSeconds();
+  const m = now.getMinutes() + s / 60;
+  const h = (now.getHours() % 12) + m / 60;
+  const ang = (v: number, max: number) => ((v / max) * 360 - 90) * (Math.PI / 180);
+  const pt = (a: number, len: number) => ({ x: cx + len * Math.cos(a), y: cx + len * Math.sin(a) });
+  const minA = ang(m, 60), hrA = ang(h, 12);
+  return (
+    <div className="flex flex-col items-center gap-1.5" style={{ width: dim, height: dim + 24, perspective: 500 }}>
+      <div className="relative flex items-center justify-center" style={{ width: dim, height: dim }}>
+        <div className="clock-orbit3d-ring absolute rounded-full"
+          style={{
+            width: dim, height: dim,
+            border: "3px solid transparent",
+            borderImage: "conic-gradient(from 0deg, #a78bfa, #38bdf8, #34d399, #a78bfa) 1",
+            boxShadow: "0 0 24px rgba(167,139,250,0.5)",
+          }} />
+        <svg width={dim * 0.7} height={dim * 0.7} viewBox={`0 0 ${dim} ${dim}`} className="relative z-10 select-none">
+          <defs>
+            <radialGradient id="orbitFace" cx="40%" cy="35%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
+              <stop offset="100%" stopColor="rgba(200,210,255,0.55)" />
+            </radialGradient>
+          </defs>
+          <circle cx={cx} cy={cx} r={r} fill="url(#orbitFace)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" />
+          <line x1={cx} y1={cx} x2={pt(hrA, r * 0.5).x} y2={pt(hrA, r * 0.5).y} stroke="#312e81" strokeWidth={dim < 130 ? 3 : 4.5} strokeLinecap="round" />
+          <line x1={cx} y1={cx} x2={pt(minA, r * 0.72).x} y2={pt(minA, r * 0.72).y} stroke="#312e81" strokeWidth={dim < 130 ? 2 : 3} strokeLinecap="round" />
+          <circle cx={cx} cy={cx} r={3.5} fill="#7c3aed" />
+        </svg>
+      </div>
+      <span className="text-muted-foreground text-[10px]">{date}</span>
+    </div>
+  );
+}
+
 /* ── Main Export ─────────────────────────────────────────────── */
 export default function ClockWidget({ className = "" }: { className?: string }) {
   const { clockFormat, clockLocale, clockStyle, clockSize } = useSettings();
@@ -567,6 +622,8 @@ export default function ClockWidget({ className = "" }: { className?: string }) 
       {clockStyle === "wave"      && <WaveClock      time={time} date={date} size={clockSize} />}
       {clockStyle === "calendar"  && <CalendarClock  now={now} fmt={clockFormat} loc={clockLocale} size={clockSize} />}
       {clockStyle === "pixel"     && <PixelClock     time={time} date={date} size={clockSize} />}
+      {clockStyle === "glass3d"   && <Glass3DClock   time={time} date={date} size={clockSize} />}
+      {clockStyle === "orbit3d"   && <Orbit3DClock   now={now} date={date} size={clockSize} />}
       {clockStyle === "sunburst"  && <SunburstClock  now={now} date={date} size={clockSize} />}
       {clockStyle === "holographic" && <HolographicClock time={time} date={date} size={clockSize} />}
     </div>

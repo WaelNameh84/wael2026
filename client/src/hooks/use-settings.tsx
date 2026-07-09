@@ -6,7 +6,9 @@ export type Theme = "light" | "dark" | "system" | "ocean" | "forest" | "rose" | 
 type FontSize = "small" | "medium" | "large";
 export type ClockFormat = "12h" | "24h";
 export type ClockLocale = "en" | "ar" | "sv";
-export type ClockStyle = "digital" | "boxed" | "neon" | "retro" | "gradient" | "glass" | "flip" | "analog" | "minimal" | "neontube" | "aurora" | "matrix" | "neonring" | "wave" | "calendar" | "pixel" | "sunburst" | "holographic";
+export type ClockStyle = "digital" | "boxed" | "neon" | "retro" | "gradient" | "glass" | "flip" | "analog" | "minimal" | "neontube" | "aurora" | "matrix" | "neonring" | "wave" | "calendar" | "pixel" | "sunburst" | "holographic" | "glass3d" | "orbit3d";
+export type GlassIntensity = "off" | "light" | "medium" | "strong";
+export type BackgroundMode = "default" | "gradient" | "image";
 export type ClockSize = "small" | "medium" | "large";
 export type AssistantPersonality = "professional" | "friendly" | "concise";
 export type AiButtonIcon = "bot" | "sparkles" | "brain" | "zap" | "star" | "heart" | "message" | "cpu" | "wand" | "rocket";
@@ -38,6 +40,15 @@ interface SettingsContextType {
   sidebarStyle: SidebarStyle;
   tableStyle: TableStyle;
   cardStyle: CardStyle;
+  glassIntensity: GlassIntensity;
+  backgroundMode: BackgroundMode;
+  backgroundImage: string;
+  backgroundGradient: string;
+  setGlassIntensity: (v: GlassIntensity) => void;
+  setBackgroundMode: (v: BackgroundMode) => void;
+  setBackgroundImage: (v: string) => void;
+  setBackgroundGradient: (v: string) => void;
+  resetAppearance: () => void;
   setLanguage: (lang: Language) => void;
   setTheme: (theme: Theme) => void;
   setFontSize: (size: FontSize) => void;
@@ -85,6 +96,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [tableStyle, setTableStyleState] = useState<TableStyle>(() => (localStorage.getItem("setting_table_style") as TableStyle) || "comfortable");
   const [cardStyle, setCardStyleState] = useState<CardStyle>(() => (localStorage.getItem("setting_card_style") as CardStyle) || "rounded");
   const [accentColor, setAccentColorState] = useState<string>(() => localStorage.getItem("setting_accent_color") || "");
+  const [glassIntensity, setGlassIntensityState] = useState<GlassIntensity>(() => (localStorage.getItem("setting_glass_intensity") as GlassIntensity) || "off");
+  const [backgroundMode, setBackgroundModeState] = useState<BackgroundMode>(() => (localStorage.getItem("setting_bg_mode") as BackgroundMode) || "default");
+  const [backgroundImage, setBackgroundImageState] = useState<string>(() => localStorage.getItem("setting_bg_image") || "");
+  const [backgroundGradient, setBackgroundGradientState] = useState<string>(() => localStorage.getItem("setting_bg_gradient") || "aurora");
 
   const COLOR_THEMES: Theme[] = ["ocean", "forest", "rose", "sunset", "purple", "gold", "ruby", "slate"];
 
@@ -133,6 +148,39 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.setAttribute("data-sidebar", sidebar);
     root.setAttribute("data-table", table);
     root.setAttribute("data-card", card);
+  };
+
+  const GRADIENTS: Record<string, string> = {
+    aurora:  "radial-gradient(circle at 15% 20%, rgba(99,102,241,0.35), transparent 55%), radial-gradient(circle at 85% 80%, rgba(6,182,212,0.30), transparent 55%), linear-gradient(160deg, #0b1020, #1a1f3a)",
+    sunset:  "radial-gradient(circle at 20% 20%, rgba(251,146,60,0.35), transparent 55%), radial-gradient(circle at 80% 80%, rgba(236,72,153,0.30), transparent 55%), linear-gradient(160deg, #1a0f1f, #2a1230)",
+    ocean:   "radial-gradient(circle at 20% 10%, rgba(34,211,238,0.30), transparent 55%), radial-gradient(circle at 80% 90%, rgba(59,130,246,0.30), transparent 55%), linear-gradient(160deg, #061627, #0a2540)",
+    emerald: "radial-gradient(circle at 15% 25%, rgba(16,185,129,0.30), transparent 55%), radial-gradient(circle at 85% 75%, rgba(20,184,166,0.28), transparent 55%), linear-gradient(160deg, #06201a, #0a2e24)",
+  };
+
+  const applyBackground = (mode: BackgroundMode, image: string, gradient: string) => {
+    const body = document.body;
+    body.classList.remove("app-bg-custom");
+    body.style.backgroundImage = "";
+    body.style.backgroundSize = "";
+    body.style.backgroundPosition = "";
+    body.style.backgroundAttachment = "";
+    body.style.backgroundRepeat = "";
+    if (mode === "image" && image) {
+      body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url(${image})`;
+      body.style.backgroundSize = "cover";
+      body.style.backgroundPosition = "center";
+      body.style.backgroundAttachment = "fixed";
+      body.style.backgroundRepeat = "no-repeat";
+      body.classList.add("app-bg-custom");
+    } else if (mode === "gradient") {
+      body.style.backgroundImage = GRADIENTS[gradient] || GRADIENTS.aurora;
+      body.style.backgroundAttachment = "fixed";
+      body.classList.add("app-bg-custom");
+    }
+  };
+
+  const applyGlass = (v: GlassIntensity) => {
+    document.documentElement.setAttribute("data-glass", v);
   };
 
   const setLanguage = (lang: Language) => {
@@ -188,6 +236,46 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     applyUiStyles(sidebarStyle, tableStyle, v);
   };
 
+  const setGlassIntensity = (v: GlassIntensity) => {
+    setGlassIntensityState(v);
+    localStorage.setItem("setting_glass_intensity", v);
+    applyGlass(v);
+  };
+
+  const setBackgroundMode = (v: BackgroundMode) => {
+    setBackgroundModeState(v);
+    localStorage.setItem("setting_bg_mode", v);
+    applyBackground(v, backgroundImage, backgroundGradient);
+  };
+
+  const setBackgroundImage = (v: string) => {
+    setBackgroundImageState(v);
+    localStorage.setItem("setting_bg_image", v);
+    applyBackground(backgroundMode, v, backgroundGradient);
+  };
+
+  const setBackgroundGradient = (v: string) => {
+    setBackgroundGradientState(v);
+    localStorage.setItem("setting_bg_gradient", v);
+    applyBackground(backgroundMode, backgroundImage, v);
+  };
+
+  const resetAppearance = () => {
+    setGlassIntensityState("off");
+    localStorage.setItem("setting_glass_intensity", "off");
+    applyGlass("off");
+
+    setBackgroundModeState("default");
+    localStorage.setItem("setting_bg_mode", "default");
+    setBackgroundImageState("");
+    localStorage.setItem("setting_bg_image", "");
+    setBackgroundGradientState("aurora");
+    localStorage.setItem("setting_bg_gradient", "aurora");
+    applyBackground("default", "", "aurora");
+
+    setCardStyle("rounded");
+  };
+
   const applyAccentHex = (hex: string) => {
     if (!hex) return;
     const root = document.documentElement;
@@ -226,6 +314,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.add(`text-font-${fontSize}`);
     applyUiStyles(sidebarStyle, tableStyle, cardStyle);
     if (accentColor) applyAccentHex(accentColor);
+    applyGlass(glassIntensity);
+    applyBackground(backgroundMode, backgroundImage, backgroundGradient);
   }, []);
 
   return (
@@ -234,10 +324,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       aiButtonIcon, aiButtonShape, aiButtonColor, aiButtonCustomColor,
       clockFormat, clockLocale, clockStyle, clockSize, floatingClockEnabled, floatingClockCheckIn,
       sidebarStyle, tableStyle, cardStyle, accentColor,
+      glassIntensity, backgroundMode, backgroundImage, backgroundGradient,
       setLanguage, setTheme, setFontSize, setTtsEnabled, setWakeWord, setAssistantName, setAssistantPersonality,
       setAiButtonIcon, setAiButtonShape, setAiButtonColor, setAiButtonCustomColor,
       setClockFormat, setClockLocale, setClockStyle, setClockSize, setFloatingClockEnabled, setFloatingClockCheckIn,
       setSidebarStyle, setTableStyle, setCardStyle, setAccentColor,
+      setGlassIntensity, setBackgroundMode, setBackgroundImage, setBackgroundGradient, resetAppearance,
     }}>
       {children}
     </SettingsContext.Provider>
