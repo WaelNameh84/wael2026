@@ -657,5 +657,7 @@
   "playing_sound": "🔊 Spelar...",
   "reminders_disabled": "🔕 Påminnelser inaktiverade",
   "clock_hidden": "🔕 Klocka dold",
-  "quick_checkin_disabled": "🔕 Snabb incheckning inaktiverad"
+  "quick_checkin_disabled": "🔕 Snabb incheckning inaktiverad",
+  "lock_aspect_ratio": "Lås bildförhållande",
+  "scale_label": "Skala"
 }

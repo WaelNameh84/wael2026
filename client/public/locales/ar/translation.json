@@ -678,5 +678,7 @@
   "playing_sound": "🔊 جارٍ التشغيل...",
   "reminders_disabled": "🔕 التذكيرات موقوفة",
   "clock_hidden": "🔕 الساعة مخفية",
-  "quick_checkin_disabled": "🔕 تسجيل سريع معطّل"
+  "quick_checkin_disabled": "🔕 تسجيل سريع معطّل",
+  "lock_aspect_ratio": "قفل النسبة",
+  "scale_label": "التكبير"
 }

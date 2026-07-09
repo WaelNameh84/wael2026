@@ -678,5 +678,7 @@
   "playing_sound": "🔊 Playing...",
   "reminders_disabled": "🔕 Reminders disabled",
   "clock_hidden": "🔕 Clock hidden",
-  "quick_checkin_disabled": "🔕 Quick check-in disabled"
+  "quick_checkin_disabled": "🔕 Quick check-in disabled",
+  "lock_aspect_ratio": "Lock aspect ratio",
+  "scale_label": "Scale"
 }

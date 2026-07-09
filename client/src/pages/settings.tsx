@@ -269,6 +269,8 @@ export default function SettingsPage() {
   const [logoRot, setLogoRot] = useState(logoRotation);
   const [logoOX, setLogoOX] = useState(logoOffsetX);
   const [logoOY, setLogoOY] = useState(logoOffsetY);
+  const [logoAspectLocked, setLogoAspectLocked] = useState(false);
+  const [logoScalePct, setLogoScalePct] = useState(100);
 
   /* ── Work Schedule ── */
   const [workStartTime, setWorkStartTime] = useState("09:00");
@@ -667,7 +669,18 @@ export default function SettingsPage() {
 
               {/* Logo Size Controls */}
               <div className="space-y-3 pt-1">
-                <Label className="text-xs font-medium text-muted-foreground">{isArabic ? t("logo_size_login") : "Logo size on login page"}</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium text-muted-foreground">{isArabic ? t("logo_size_login") : "Logo size on login page"}</Label>
+                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={logoAspectLocked}
+                      onChange={e => setLogoAspectLocked(e.target.checked)}
+                      className="accent-primary w-3.5 h-3.5 cursor-pointer"
+                    />
+                    {isArabic ? t("lock_aspect_ratio") : "Lock aspect ratio"}
+                  </label>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
@@ -675,9 +688,18 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoW}px</span>
                     </div>
                     <input
-                      type="range" min={24} max={300} step={4}
+                      type="range" min={16} max={600} step={1}
                       value={logoW}
-                      onChange={e => { const v = Number(e.target.value); setLogoW(v); }}
+                      onChange={e => {
+                        const v = Number(e.target.value);
+                        if (logoAspectLocked && logoW > 0) {
+                          const ratio = logoH / logoW;
+                          setLogoW(v);
+                          setLogoH(Math.round(v * ratio));
+                        } else {
+                          setLogoW(v);
+                        }
+                      }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
                     />
                   </div>
@@ -687,11 +709,38 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoH}px</span>
                     </div>
                     <input
-                      type="range" min={24} max={300} step={4}
+                      type="range" min={16} max={600} step={1}
                       value={logoH}
-                      onChange={e => { const v = Number(e.target.value); setLogoH(v); }}
+                      onChange={e => {
+                        const v = Number(e.target.value);
+                        if (logoAspectLocked && logoH > 0) {
+                          const ratio = logoW / logoH;
+                          setLogoH(v);
+                          setLogoW(Math.round(v * ratio));
+                        } else {
+                          setLogoH(v);
+                        }
+                      }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
                     />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <Label className="text-xs">{isArabic ? t("scale_label") : "Scale"}</Label>
+                  <div className="flex items-center gap-2 flex-1 max-w-[200px]">
+                    <input
+                      type="range" min={10} max={300} step={1}
+                      value={logoScalePct}
+                      onChange={e => {
+                        const pct = Number(e.target.value);
+                        const factor = pct / logoScalePct;
+                        setLogoW(v => Math.max(16, Math.min(600, Math.round(v * factor))));
+                        setLogoH(v => Math.max(16, Math.min(600, Math.round(v * factor))));
+                        setLogoScalePct(pct);
+                      }}
+                      className="w-full accent-primary h-1.5 cursor-pointer"
+                    />
+                    <span className="text-xs font-mono text-primary w-10 text-end">{logoScalePct}%</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -699,18 +748,36 @@ export default function SettingsPage() {
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">{isArabic ? t("width_px") : "W (px)"}</Label>
                       <Input
-                        type="number" min={24} max={300}
+                        type="number" min={16} max={600}
                         value={logoW}
-                        onChange={e => { const v = Math.max(24, Math.min(300, Number(e.target.value))); setLogoW(v); }}
+                        onChange={e => {
+                          const v = Math.max(16, Math.min(600, Number(e.target.value)));
+                          if (logoAspectLocked && logoW > 0) {
+                            const ratio = logoH / logoW;
+                            setLogoW(v);
+                            setLogoH(Math.round(v * ratio));
+                          } else {
+                            setLogoW(v);
+                          }
+                        }}
                         className="w-20 h-7 text-xs font-mono"
                       />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">{isArabic ? t("height_px") : "H (px)"}</Label>
                       <Input
-                        type="number" min={24} max={300}
+                        type="number" min={16} max={600}
                         value={logoH}
-                        onChange={e => { const v = Math.max(24, Math.min(300, Number(e.target.value))); setLogoH(v); }}
+                        onChange={e => {
+                          const v = Math.max(16, Math.min(600, Number(e.target.value)));
+                          if (logoAspectLocked && logoH > 0) {
+                            const ratio = logoW / logoH;
+                            setLogoH(v);
+                            setLogoW(Math.round(v * ratio));
+                          } else {
+                            setLogoH(v);
+                          }
+                        }}
                         className="w-20 h-7 text-xs font-mono"
                       />
                     </div>
@@ -755,7 +822,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoOX}px</span>
                     </div>
                     <input
-                      type="range" min={-100} max={100} step={1}
+                      type="range" min={-300} max={300} step={1}
                       value={logoOX}
                       onChange={e => { const v = Number(e.target.value); setLogoOX(v); }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
@@ -767,7 +834,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-primary">{logoOY}px</span>
                     </div>
                     <input
-                      type="range" min={-100} max={100} step={1}
+                      type="range" min={-300} max={300} step={1}
                       value={logoOY}
                       onChange={e => { const v = Number(e.target.value); setLogoOY(v); }}
                       className="w-full accent-primary h-1.5 cursor-pointer"
@@ -780,6 +847,7 @@ export default function SettingsPage() {
                   onClick={() => {
                     setLogoW(64); setLogoH(64);
                     setLogoRot(0); setLogoOX(0); setLogoOY(0);
+                    setLogoScalePct(100); setLogoAspectLocked(false);
                   }}
                   className="text-xs text-muted-foreground hover:text-foreground underline"
                 >
@@ -1203,7 +1271,7 @@ export default function SettingsPage() {
           <div className="space-y-1.5">
             <Label className="text-sm">{isArabic ? t("assistant_name") : "Assistant Name"}</Label>
             <div className="flex gap-2">
-              <Input value={assistantName} onChange={e => setAssistantName(e.target.value)} placeholder=t("assistant_wake_hint") className="flex-1" maxLength={30} />
+              <Input value={assistantName} onChange={e => setAssistantName(e.target.value)} placeholder={t("assistant_wake_hint")} className="flex-1" maxLength={30} />
               <Button variant="outline" size="sm" onClick={() => { setAssistantName(t("my_assistant")); toast({ title: t("reset_done") }); }}>{isArabic ? t("default_option") : "Reset"}</Button>
             </div>
           </div>
