@@ -271,6 +271,7 @@ export default function SettingsPage() {
   const [logoOY, setLogoOY] = useState(logoOffsetY);
   const [logoAspectLocked, setLogoAspectLocked] = useState(false);
   const [logoScalePct, setLogoScalePct] = useState(100);
+  const [logoFileInfo, setLogoFileInfo] = useState<{ name: string; size: number; isSvg: boolean } | null>(null);
 
   /* ── Work Schedule ── */
   const [workStartTime, setWorkStartTime] = useState("09:00");
@@ -629,13 +630,24 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-1.5 flex-1">
                   <div className="flex gap-2 flex-wrap">
                     <label className="cursor-pointer">
-                      <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="hidden"
+                      <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg" className="hidden"
                         onChange={async e => {
                           const file = e.target.files?.[0];
+                          e.target.value = "";
                           if (!file) return;
+                          const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
+                          const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+                          if (!isSvg && !allowedTypes.includes(file.type)) {
+                            toast({ title: isArabic ? t("unsupported_format") : "Unsupported file format", variant: "destructive" });
+                            return;
+                          }
                           if (file.size > 500_000) { toast({ title: isArabic ? t("size_over_500kb") : "Max 500KB", variant: "destructive" }); return; }
                           const reader = new FileReader();
-                          reader.onload = ev => setLogoPreview(ev.target?.result as string);
+                          reader.onload = ev => {
+                            setLogoPreview(ev.target?.result as string);
+                            setLogoFileInfo({ name: file.name, size: file.size, isSvg });
+                          };
+                          reader.onerror = () => toast({ title: isArabic ? t("failed") : "Failed to read file", variant: "destructive" });
                           reader.readAsDataURL(file);
                         }} />
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-medium hover:bg-muted cursor-pointer">
@@ -643,12 +655,22 @@ export default function SettingsPage() {
                       </span>
                     </label>
                     {logoPreview && (
-                      <button onClick={() => setLogoPreview("")} className="px-3 py-1.5 rounded-md border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/10">
+                      <button onClick={() => { setLogoPreview(""); setLogoFileInfo(null); }} className="px-3 py-1.5 rounded-md border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/10">
                         {isArabic ? t("remove_action") : "Remove"}
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP — {isArabic ? t("max_500kb") : "max 500KB"}</p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP, SVG — {isArabic ? t("max_500kb") : "max 500KB"}</p>
+                  {logoFileInfo && (
+                    <p className="text-xs text-muted-foreground/80 flex items-center gap-1.5">
+                      <span className="font-mono">{logoFileInfo.name}</span>
+                      <span>·</span>
+                      <span>{(logoFileInfo.size / 1024).toFixed(1)} KB</span>
+                      {logoFileInfo.isSvg && (
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">SVG</span>
+                      )}
+                    </p>
+                  )}
                 </div>
               </div>
               {logoPreview !== appLogo && (
