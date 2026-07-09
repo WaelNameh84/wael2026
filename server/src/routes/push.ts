@@ -6,12 +6,20 @@ import { requireAuth } from "./auth.js";
 
 const router = Router();
 
-const PUBLIC_KEY  = process.env.VAPID_PUBLIC_KEY  ?? "";
-const PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY ?? "";
+const PUBLIC_KEY  = (process.env.VAPID_PUBLIC_KEY  ?? "").trim();
+const PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY ?? "").trim();
 const EMAIL       = process.env.VAPID_EMAIL       ?? "mailto:admin@attendx.app";
 
+let vapidConfigured = false;
 if (PUBLIC_KEY && PRIVATE_KEY) {
-  webpush.setVapidDetails(EMAIL, PUBLIC_KEY, PRIVATE_KEY);
+  try {
+    webpush.setVapidDetails(EMAIL, PUBLIC_KEY, PRIVATE_KEY);
+    vapidConfigured = true;
+  } catch (err: any) {
+    // Do not crash the whole server if VAPID keys are malformed/misconfigured;
+    // push notifications simply stay disabled and /vapid-key reports it.
+    console.error("Invalid VAPID keys — push notifications disabled:", err.message);
+  }
 }
 
 /* ─── Persistent subscription store ────────────────────────── */
@@ -40,7 +48,7 @@ function writeStore(entries: AlarmEntry[]) {
 /* ─── Routes ─────────────────────────────────────────────────── */
 
 router.get("/vapid-key", (_req, res) => {
-  return res.json({ publicKey: PUBLIC_KEY });
+  return res.json({ publicKey: vapidConfigured ? PUBLIC_KEY : "" });
 });
 
 router.post("/subscribe", requireAuth, (req: any, res) => {
