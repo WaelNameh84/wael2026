@@ -12,7 +12,7 @@
     "build:client": "vite build --config client/vite.config.js",
     "build:server": "node server/build.mjs",
     "start": "node server/dist/index.cjs",
-    "dev": "npx tsx watch server/src/index.ts",
+    "dev": "npm run build && node server/dist/index.cjs",
     "db:generate": "drizzle-kit generate --config drizzle.config.js",
     "db:migrate": "drizzle-kit migrate --config drizzle.config.js",
     "db:push": "drizzle-kit push --config drizzle.config.js"

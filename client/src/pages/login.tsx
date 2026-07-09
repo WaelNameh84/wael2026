@@ -260,7 +260,7 @@ export default function LoginPage() {
                   onClick={() => setForgotOpen(true)}
                   className="text-xs text-primary hover:underline"
                 >
-                  نسيت كلمة المرور؟
+                  {t("forgot_password")}
                 </button>
               </div>
               <div className="relative">
@@ -284,7 +284,7 @@ export default function LoginPage() {
                   onClick={() => setShowPw(v => !v)}
                   className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   tabIndex={-1}
-                  title={showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                  title={showPw ? t("hide_password") : t("show_password")}
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -292,7 +292,7 @@ export default function LoginPage() {
               {passwordError && (
                 <p className="text-xs text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  كلمة المرور قصيرة جداً
+                  {t("password_too_short")}
                 </p>
               )}
             </div>
@@ -305,7 +305,7 @@ export default function LoginPage() {
                 onCheckedChange={v => setRememberMe(!!v)}
               />
               <Label htmlFor="remember" className="text-sm cursor-pointer font-normal text-muted-foreground">
-                تذكرني
+                {t("remember_me")}
               </Label>
             </div>
 

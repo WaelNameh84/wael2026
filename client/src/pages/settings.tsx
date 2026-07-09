@@ -515,6 +515,15 @@ export default function SettingsPage() {
 
   /* ── Master Save All ── */
   const handleSaveAll = async () => {
+    // Validate BEFORE committing any local/global state so a failed save
+    // never partially applies changes (e.g. logo transform without the
+    // rest of the form).
+    if (isAdmin && !isValidEmail(adminForm.email)) {
+      setEmailError(t("invalid_email"));
+      return;
+    }
+    setEmailError("");
+
     setGlobalSaving(true);
     const tasks: Promise<any>[] = [];
 
@@ -551,8 +560,6 @@ export default function SettingsPage() {
       // Save admin profile if changed
       const nameChanged = adminForm.username.trim() !== (me?.name ?? "");
       const emailChanged = adminForm.email.trim() !== (me?.email ?? "");
-      if (!isValidEmail(adminForm.email)) { setEmailError(t("invalid_email")); setGlobalSaving(false); return; }
-      setEmailError("");
 
       if (adminForm.appName.trim() && adminForm.appName.trim() !== appName) {
         tasks.push(
