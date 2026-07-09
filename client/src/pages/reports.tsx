@@ -86,9 +86,9 @@ export default function ReportsPage() {
       .then(r => r.json().then(j => ({ ok: r.ok, json: j })))
       .then(({ ok, json }) => {
         if (ok) { setPayrollSummary(json); setPayrollErr(null); }
-        else { setPayrollSummary(null); setPayrollErr(json?.error ?? (isArabic ? "لم يتم تحديد راتب لهذا الموظف." : "No salary configured for this employee.")); }
+        else { setPayrollSummary(null); setPayrollErr(json?.error ?? (isArabic ? t("no_salary_set2") : "No salary configured for this employee.")); }
       })
-      .catch(() => { setPayrollSummary(null); setPayrollErr(isArabic ? "تعذّر جلب بيانات الراتب." : "Could not load payroll data."); })
+      .catch(() => { setPayrollSummary(null); setPayrollErr(isArabic ? t("cannot_fetch_salary") : "Could not load payroll data."); })
       .finally(() => setPayrollLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, me?.id, submitted.userId, submitted.from]);
@@ -121,7 +121,7 @@ export default function ReportsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: getGetAttendanceReportQueryKey(queryParams) });
       setConfirmRec(null);
-      toast({ title: isArabic ? "تم حذف السجل" : "Record deleted" });
+      toast({ title: isArabic ? t("record_deleted") : "Record deleted" });
     },
     onError: () => toast({ title: t("failed"), variant: "destructive" }),
   });
@@ -158,7 +158,7 @@ export default function ReportsPage() {
     },
     onSuccess: () => {
       setSalaryDialogOpen(false);
-      toast({ title: isArabic ? "تم حفظ الراتب بنجاح ✓" : "Salary saved ✓" });
+      toast({ title: isArabic ? t("salary_saved_success") : "Salary saved ✓" });
       /* Re-trigger payroll calculation */
       const uid = !isAdmin ? me?.id : (submitted.userId !== "all" ? parseInt(submitted.userId) : null);
       if (!uid) return;
@@ -193,8 +193,8 @@ export default function ReportsPage() {
     if (!uid) return;
     const salary = parseFloat(salaryInput);
     const hours = parseFloat(hoursInput);
-    if (!salary || salary <= 0) { toast({ title: isArabic ? "أدخل راتباً صحيحاً" : "Enter a valid salary", variant: "destructive" }); return; }
-    if (!hours || hours <= 0 || hours > 24) { toast({ title: isArabic ? "أدخل ساعات عمل صحيحة" : "Enter valid work hours", variant: "destructive" }); return; }
+    if (!salary || salary <= 0) { toast({ title: isArabic ? t("enter_valid_salary") : "Enter a valid salary", variant: "destructive" }); return; }
+    if (!hours || hours <= 0 || hours > 24) { toast({ title: isArabic ? t("enter_valid_hours") : "Enter valid work hours", variant: "destructive" }); return; }
     saveSalaryMut.mutate({ uid, salary, hours });
   };
 
@@ -239,24 +239,24 @@ export default function ReportsPage() {
 
   const translateStatus = (s: string) => {
     const map: Record<string, string> = {
-      present: isArabic ? "حاضر" : t("present"),
-      late: isArabic ? "متأخر" : t("late"),
-      absent: isArabic ? "غائب" : t("absent"),
-      on_leave: isArabic ? "إجازة" : t("leave"),
-      early_leave: isArabic ? "خروج مبكر" : "Early Leave",
+      present: isArabic ? t("present_label2") : t("present"),
+      late: isArabic ? t("late_label2") : t("late"),
+      absent: isArabic ? t("absent_label2") : t("absent"),
+      on_leave: isArabic ? t("leave_short") : t("leave"),
+      early_leave: isArabic ? t("early_leave2") : "Early Leave",
     };
     return map[s] ?? s;
   };
 
   const translateLeaveType = (type: string) => {
     const map: Record<string, string> = {
-      annual:    isArabic ? "سنوية"       : "Annual",
-      sick:      isArabic ? "مرضية"       : "Sick",
-      unpaid:    isArabic ? "بدون راتب"   : "Unpaid",
-      emergency: isArabic ? "طارئة"       : "Emergency",
-      maternity: isArabic ? "أمومة"       : "Maternity",
-      paternity: isArabic ? "أبوة"        : "Paternity",
-      casual:    isArabic ? "عارضة"       : "Casual",
+      annual:    isArabic ? t("annual_label")       : "Annual",
+      sick:      isArabic ? t("sick_label2")       : "Sick",
+      unpaid:    isArabic ? t("unpaid_label")   : "Unpaid",
+      emergency: isArabic ? t("emergency_label2")       : "Emergency",
+      maternity: isArabic ? t("maternity_leave")       : "Maternity",
+      paternity: isArabic ? t("paternity_leave")        : "Paternity",
+      casual:    isArabic ? t("style_casual")       : "Casual",
     };
     return map[type?.toLowerCase()] ?? type;
   };
@@ -340,13 +340,13 @@ export default function ReportsPage() {
       const json = await res.json();
       if (!res.ok) {
         const msg = json?.error ?? (isArabic
-          ? "لم يتم احتساب الراتب. تأكد من تحديد الراتب الأساسي للموظف في إعدادات المستخدمين."
+          ? t("salary_not_calculated")
           : "Payroll could not be calculated. Make sure the employee has a base salary set.");
         return { data: null, error: msg };
       }
       return { data: json, error: null };
     } catch {
-      return { data: null, error: isArabic ? "تعذّر الاتصال بالخادم لجلب بيانات الراتب." : "Could not reach the server to fetch payroll data." };
+      return { data: null, error: isArabic ? t("cannot_connect_salary") : "Could not reach the server to fetch payroll data." };
     }
   };
 
@@ -396,7 +396,7 @@ export default function ReportsPage() {
       const opts = await buildPdfOptions();
       exportProfessionalPDF(opts);
     } catch (e) {
-      toast({ title: isArabic ? "فشل التصدير" : "Export failed", variant: "destructive" });
+      toast({ title: isArabic ? t("export_failed") : "Export failed", variant: "destructive" });
     } finally {
       setPdfLoading(false);
     }
@@ -409,7 +409,7 @@ export default function ReportsPage() {
       const opts = await buildPdfOptions();
       shareOrSavePDF(opts);
     } catch (e) {
-      toast({ title: isArabic ? "فشلت المشاركة" : "Share failed", variant: "destructive" });
+      toast({ title: isArabic ? t("share_failed") : "Share failed", variant: "destructive" });
     } finally {
       setShareLoading(false);
     }
@@ -434,7 +434,7 @@ export default function ReportsPage() {
   return (
     <Layout>
       <div className="space-y-6 max-w-6xl">
-        <h1 className="text-2xl font-bold">{isArabic ? "التقارير" : t("reports")}</h1>
+        <h1 className="text-2xl font-bold">{isArabic ? t("reports_label2") : t("reports")}</h1>
 
         {/* ── Filters ── */}
         <div className="bg-card border border-card-border rounded-xl p-5">
@@ -463,7 +463,7 @@ export default function ReportsPage() {
             )}
             <Button onClick={handleFilter} className="gap-2" data-testid="button-apply-filter">
               <BarChart3 className="w-4 h-4" />
-              {isArabic ? "إنشاء التقرير" : t("generate_report")}
+              {isArabic ? t("generate_report2") : t("generate_report")}
             </Button>
             {report && (
               <div className="flex gap-2 ms-auto flex-wrap">
@@ -477,7 +477,7 @@ export default function ReportsPage() {
                   {pdfLoading
                     ? <Loader2 className="w-4 h-4 animate-spin" />
                     : <FileText className="w-4 h-4" />}
-                  {isArabic ? "تصدير PDF احترافي" : "Export PDF"}
+                  {isArabic ? t("export_pdf_pro") : "Export PDF"}
                 </Button>
 
                 {/* ── Share (mobile) ── */}
@@ -491,7 +491,7 @@ export default function ReportsPage() {
                   {shareLoading
                     ? <Loader2 className="w-4 h-4 animate-spin" />
                     : <Share2 className="w-4 h-4" />}
-                  {isArabic ? "مشاركة / حفظ" : "Share / Save"}
+                  {isArabic ? t("share_save") : "Share / Save"}
                 </Button>
 
                 {/* ── Email ── */}
@@ -502,7 +502,7 @@ export default function ReportsPage() {
                   data-testid="button-email-report"
                 >
                   <Mail className="w-4 h-4" />
-                  {isArabic ? "إرسال بالإيميل" : "Send by Email"}
+                  {isArabic ? t("send_by_email") : "Send by Email"}
                 </Button>
 
                 {/* ── Divider ── */}
@@ -516,7 +516,7 @@ export default function ReportsPage() {
                 </Button>
                 <Button variant="outline" onClick={() => window.print()} className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
                   <Printer className="w-4 h-4" />
-                  {isArabic ? "طباعة" : "Print"}
+                  {isArabic ? t("print_action") : "Print"}
                 </Button>
               </div>
             )}
@@ -534,28 +534,28 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard
                 icon={<CalendarCheck className="w-4 h-4 text-green-600" />}
-                label={isArabic ? "أيام الحضور" : t("present_days")}
+                label={isArabic ? t("present_days_label") : t("present_days")}
                 value={String(summary.presentDays ?? 0)}
                 valueClass="text-green-600"
                 bg="bg-green-50 dark:bg-green-900/10"
               />
               <MetricCard
                 icon={<Clock className="w-4 h-4 text-primary" />}
-                label={isArabic ? "صافي ساعات العمل" : "Net Work Hours"}
+                label={isArabic ? t("net_work_hours") : "Net Work Hours"}
                 value={fmtHM(summary.normalHours ?? 0)}
                 valueClass="text-primary"
                 sub={isArabic ? `من ${fmtNum(summary.expectedHours ?? 0, 0)} متوقعة` : `of ${fmtNum(summary.expectedHours ?? 0, 0)} expected`}
               />
               <MetricCard
                 icon={<TrendingUp className="w-4 h-4 text-orange-500" />}
-                label={isArabic ? "ساعات الإضافي" : t("overtime_h")}
+                label={isArabic ? t("overtime_hours_label") : t("overtime_h")}
                 value={fmtHM(summary.overtime ?? 0)}
                 valueClass="text-orange-500"
                 bg="bg-orange-50 dark:bg-orange-900/10"
               />
               <MetricCard
                 icon={<CalendarX className="w-4 h-4 text-destructive" />}
-                label={isArabic ? "أيام الغياب" : t("absent_days")}
+                label={isArabic ? t("absent_days_label") : t("absent_days")}
                 value={String(summary.absentDays ?? 0)}
                 valueClass="text-destructive"
                 bg="bg-red-50 dark:bg-red-900/10"
@@ -566,43 +566,43 @@ export default function ReportsPage() {
             <div className="bg-card border border-card-border rounded-xl overflow-hidden">
               <div className="px-5 py-3 border-b border-border flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                <h2 className="font-semibold text-sm">{isArabic ? "ملخص التقرير" : t("report_summary")}</h2>
+                <h2 className="font-semibold text-sm">{isArabic ? t("report_summary2") : t("report_summary")}</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 divide-x divide-y divide-border rtl:divide-x-reverse">
                 <SummaryCell
                   icon={<Briefcase className="w-4 h-4" />}
-                  label={isArabic ? "أيام العمل المتوقعة" : t("working_days")}
+                  label={isArabic ? t("expected_work_days") : t("working_days")}
                   value={String(summary.workingDays ?? 0)}
                   sub={isArabic ? `${fmtNum(summary.expectedHours ?? 0, 0)} ساعة متوقعة` : `${fmtNum(summary.expectedHours ?? 0, 0)} hrs expected`}
                 />
                 <SummaryCell
                   icon={<Clock className="w-4 h-4 text-primary" />}
-                  label={isArabic ? "صافي ساعات العمل" : "Net Work Hours"}
+                  label={isArabic ? t("net_work_hours") : "Net Work Hours"}
                   value={fmtHM(summary.normalHours ?? 0)}
                   valueClass="text-primary"
                   sub={isArabic ? `من ${fmtNum(summary.expectedHours ?? 0, 0)} متوقعة` : `of ${fmtNum(summary.expectedHours ?? 0, 0)} expected`}
                 />
                 <SummaryCell
                   icon={<TrendingUp className="w-4 h-4 text-orange-500" />}
-                  label={isArabic ? "ساعات الإضافي" : t("overtime_h")}
+                  label={isArabic ? t("overtime_hours_label") : t("overtime_h")}
                   value={fmtHM(summary.overtime ?? 0)}
                   valueClass="text-orange-500"
                 />
                 <SummaryCell
                   icon={<CheckCircle2 className="w-4 h-4 text-green-600" />}
-                  label={isArabic ? "أيام الحضور" : t("present_days")}
+                  label={isArabic ? t("present_days_label") : t("present_days")}
                   value={String(summary.presentDays ?? 0)}
                   valueClass="text-green-600"
                 />
                 <SummaryCell
                   icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
-                  label={isArabic ? "أيام التأخر" : "Late Days"}
+                  label={isArabic ? t("late_days_label") : "Late Days"}
                   value={String(summary.lateDays ?? 0)}
                   valueClass="text-amber-500"
                 />
                 <SummaryCell
                   icon={<Palmtree className="w-4 h-4 text-blue-500" />}
-                  label={isArabic ? "أيام الإجازة" : t("total_leaves")}
+                  label={isArabic ? t("leave_days_label") : t("total_leaves")}
                   value={String(summary.leaveDays ?? 0)}
                   valueClass="text-blue-500"
                 />
@@ -613,7 +613,7 @@ export default function ReportsPage() {
             {isAdmin && submitted.userId === "all" && (
               <div className="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-5 py-3.5 flex items-center gap-3 text-indigo-700 dark:text-indigo-300 text-sm">
                 <Wallet className="w-4 h-4 flex-shrink-0" />
-                <span>{isArabic ? "لعرض ملخص الراتب، اختر موظفاً محدداً من فلتر المستخدم أعلاه." : "To view the salary summary, select a specific employee from the user filter above."}</span>
+                <span>{isArabic ? t("select_employee_for_salary") : "To view the salary summary, select a specific employee from the user filter above."}</span>
               </div>
             )}
 
@@ -628,7 +628,7 @@ export default function ReportsPage() {
                   <div className="flex items-center gap-2">
                     <Wallet className="w-4 h-4 flex-shrink-0" />
                     <span className="font-bold text-sm">
-                      {isArabic ? "ملخص الراتب" : "Salary Summary"}
+                      {isArabic ? t("salary_summary") : "Salary Summary"}
                     </span>
                     {payrollSummary && (
                       <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-mono">
@@ -650,7 +650,7 @@ export default function ReportsPage() {
                     {payrollLoading && (
                       <div className="flex items-center gap-3 py-3 text-muted-foreground">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">{isArabic ? "جاري حساب الراتب…" : "Calculating salary…"}</span>
+                        <span className="text-sm">{isArabic ? t("calculating_salary") : "Calculating salary…"}</span>
                       </div>
                     )}
 
@@ -669,7 +669,7 @@ export default function ReportsPage() {
                           <div className="space-y-3 py-1">
                             <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400 text-sm">
                               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                              <span>{isArabic ? "لم يتم تحديد راتب أساسي لهذا الموظف." : "No base salary set for this employee."}</span>
+                              <span>{isArabic ? t("no_base_salary_set") : "No base salary set for this employee."}</span>
                             </div>
                             {isAdmin && submitted.userId !== "all" && (
                               <button
@@ -677,7 +677,7 @@ export default function ReportsPage() {
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
-                                {isArabic ? "تعيين الراتب الآن" : "Set Salary Now"}
+                                {isArabic ? t("set_salary_now") : "Set Salary Now"}
                               </button>
                             )}
                           </div>
@@ -689,7 +689,7 @@ export default function ReportsPage() {
                           {/* Net salary highlight */}
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-border">
                             <div>
-                              <p className="text-xs text-muted-foreground mb-1">{isArabic ? "صافي الراتب المُقدَّر" : "Estimated Net Salary"}</p>
+                              <p className="text-xs text-muted-foreground mb-1">{isArabic ? t("estimated_net_salary") : "Estimated Net Salary"}</p>
                               <p className={`text-3xl font-black tabular-nums ${isGain ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
                                 {fmt2(p.netSalary)}
                               </p>
@@ -716,7 +716,7 @@ export default function ReportsPage() {
                             {[
                               {
                                 icon: <DollarSign className="w-3.5 h-3.5" />,
-                                label: isArabic ? "الراتب الأساسي" : "Base Salary",
+                                label: isArabic ? t("base_salary_label") : "Base Salary",
                                 value: fmt2(p.baseSalary),
                                 color: "text-indigo-600 dark:text-indigo-400",
                                 bg: "bg-indigo-50 dark:bg-indigo-900/20",
@@ -737,14 +737,14 @@ export default function ReportsPage() {
                               },
                               {
                                 icon: <Palmtree className="w-3.5 h-3.5" />,
-                                label: isArabic ? "خصم إجازة" : "Leave Deduction",
+                                label: isArabic ? t("leave_deduction") : "Leave Deduction",
                                 value: `−${fmt2(p.unpaidLeaveDeduction)}`,
                                 color: "text-orange-600 dark:text-orange-400",
                                 bg: "bg-orange-50 dark:bg-orange-900/20",
                               },
                               {
                                 icon: <CalendarX className="w-3.5 h-3.5" />,
-                                label: isArabic ? "خصم غياب" : "Absence Deduction",
+                                label: isArabic ? t("absence_deduction2") : "Absence Deduction",
                                 value: `−${fmt2(p.absentDeduction ?? 0)}`,
                                 color: "text-rose-600 dark:text-rose-400",
                                 bg: "bg-rose-50 dark:bg-rose-900/20",
@@ -783,10 +783,10 @@ export default function ReportsPage() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary" />
                 <h2 className="font-semibold text-sm">
-                  {isArabic ? "سجل الحضور الكامل" : "Full Attendance Log"}
+                  {isArabic ? t("full_attendance_record") : "Full Attendance Log"}
                 </h2>
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                  {report.records.length} {isArabic ? "سجل" : "records"}
+                  {report.records.length} {isArabic ? t("record_label") : "records"}
                 </span>
               </div>
 
@@ -822,19 +822,19 @@ export default function ReportsPage() {
                       <th className="px-3 py-3.5 w-10">
                         <input type="checkbox" checked={allSelected} onChange={toggleAll}
                           className="w-4 h-4 accent-primary cursor-pointer"
-                          title={isArabic ? "تحديد الكل" : "Select all"} />
+                          title={isArabic ? t("select_all2") : "Select all"} />
                       </th>
                     )}
-                    <TH>{isArabic ? "التاريخ" : t("date")}</TH>
-                    <TH>{isArabic ? "الموظف" : t("employee")}</TH>
-                    <TH>{isArabic ? "تسجيل الدخول" : t("check_in")}</TH>
-                    <TH>{isArabic ? "تسجيل الخروج" : t("check_out")}</TH>
-                    <TH>{isArabic ? "التأخر" : "Late"}</TH>
-                    <TH>{isArabic ? "الإضافي" : "Overtime"}</TH>
-                    <TH>{isArabic ? "الإجازة" : "Leave"}</TH>
-                    <TH>{isArabic ? "ساعات العمل" : "Work Hours"}</TH>
-                    <TH className="text-primary">{isArabic ? "مجموع تراكمي" : "Running Total"}</TH>
-                    {isAdmin && <TH center>{isArabic ? "حذف" : t("delete")}</TH>}
+                    <TH>{isArabic ? t("date_label2") : t("date")}</TH>
+                    <TH>{isArabic ? t("employee_label2") : t("employee")}</TH>
+                    <TH>{isArabic ? t("check_in3") : t("check_in")}</TH>
+                    <TH>{isArabic ? t("check_out2") : t("check_out")}</TH>
+                    <TH>{isArabic ? t("lateness_label") : "Late"}</TH>
+                    <TH>{isArabic ? t("overtime_label2") : "Overtime"}</TH>
+                    <TH>{isArabic ? t("leave_label2") : "Leave"}</TH>
+                    <TH>{isArabic ? t("work_hours_label") : "Work Hours"}</TH>
+                    <TH className="text-primary">{isArabic ? t("running_total") : "Running Total"}</TH>
+                    {isAdmin && <TH center>{isArabic ? t("delete_action2") : t("delete")}</TH>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
@@ -900,7 +900,7 @@ export default function ReportsPage() {
                                 <span className="inline-flex items-center gap-1 text-blue-700 dark:text-blue-300 font-semibold text-xs bg-blue-100 dark:bg-blue-800/40 px-2 py-0.5 rounded-full w-fit">
                                   <Palmtree className="w-3 h-3 flex-shrink-0" />
                                   {translateLeaveType(rec.leaveType)}
-                                  {rec.leaveTotalDays > 0 && ` · ${rec.leaveTotalDays}${isArabic ? "ي" : "d"}`}
+                                  {rec.leaveTotalDays > 0 && ` · ${rec.leaveTotalDays}${isArabic ? t("letter_y_placeholder") : "d"}`}
                                 </span>
                                 {rec.leaveReason && (
                                   <span className="text-xs text-muted-foreground truncate max-w-[140px]" title={rec.leaveReason}>
@@ -1016,7 +1016,7 @@ export default function ReportsPage() {
                               <button
                                 onClick={() => setConfirmRec({ id: rec.id, date: rec.date, userName: rec.userName })}
                                 disabled={deleteMut.isPending || bulkDeleteMut.isPending}
-                                title={isArabic ? "حذف السجل" : "Delete record"}
+                                title={isArabic ? t("delete_record") : "Delete record"}
                                 className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1040,14 +1040,14 @@ export default function ReportsPage() {
                         {isAdmin && <td />}
                         <td className="px-4 py-3.5" colSpan={2}>
                           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                            {isArabic ? "الإجمالي الكلي" : "Grand Total"}
+                            {isArabic ? t("grand_total") : "Grand Total"}
                           </span>
                         </td>
                         <td colSpan={2} />
                         {/* Late total */}
                         <td className="px-4 py-3.5">
                           <span className="text-xs font-semibold text-amber-600 tabular-nums">
-                            {summary?.lateDays ? `${summary.lateDays} ${isArabic ? "أيام" : "days"}` : "—"}
+                            {summary?.lateDays ? `${summary.lateDays} ${isArabic ? t("days_label") : "days"}` : "—"}
                           </span>
                         </td>
                         {/* Overtime total */}
@@ -1088,11 +1088,11 @@ export default function ReportsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="w-5 h-5 flex-shrink-0" />
-              {isArabic ? "حذف السجل" : t("delete_record")}
+              {isArabic ? t("delete_record") : t("delete_record")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-1">
-            <p className="text-sm text-center">{isArabic ? "هل أنت متأكد من حذف هذا السجل؟" : "Are you sure you want to delete this record?"}</p>
+            <p className="text-sm text-center">{isArabic ? t("confirm_delete_record") : "Are you sure you want to delete this record?"}</p>
             {confirmRec && (
               <div className="bg-muted/50 rounded-lg px-4 py-2.5 text-center space-y-0.5">
                 {confirmRec.userName && <p className="text-sm font-semibold">{confirmRec.userName}</p>}
@@ -1100,7 +1100,7 @@ export default function ReportsPage() {
               </div>
             )}
             <p className="text-xs text-muted-foreground text-center">
-              {isArabic ? "لا يمكن التراجع عن هذا الإجراء." : (t("action_cannot_be_undone") ?? "This action cannot be undone.")}
+              {isArabic ? t("action_cannot_be_undone") : (t("action_cannot_be_undone") ?? "This action cannot be undone.")}
             </p>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
@@ -1120,8 +1120,8 @@ export default function ReportsPage() {
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="w-5 h-5 flex-shrink-0" />
               {confirmBulk === "all"
-                ? (isArabic ? "حذف جميع السجلات" : "Delete All Records")
-                : (isArabic ? "حذف السجلات المحددة" : "Delete Selected")}
+                ? (isArabic ? t("delete_all_records") : "Delete All Records")
+                : (isArabic ? t("delete_selected_records") : "Delete Selected")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-1">
@@ -1132,7 +1132,7 @@ export default function ReportsPage() {
             </p>
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-2.5 text-center">
               <p className="text-xs font-semibold text-destructive">
-                ⚠️ {isArabic ? "لا يمكن التراجع عن هذا الإجراء." : (t("action_cannot_be_undone") ?? "This action cannot be undone.")}
+                ⚠️ {isArabic ? t("action_cannot_be_undone") : (t("action_cannot_be_undone") ?? "This action cannot be undone.")}
               </p>
             </div>
           </div>
@@ -1140,7 +1140,7 @@ export default function ReportsPage() {
             <Button variant="outline" onClick={() => setConfirmBulk(null)} disabled={bulkDeleteMut.isPending}>{t("cancel")}</Button>
             <Button variant="destructive" onClick={handleBulkConfirm} disabled={bulkDeleteMut.isPending} className="gap-2">
               {bulkDeleteMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              {isArabic ? "نعم، احذف" : "Delete"}
+              {isArabic ? t("yes_delete") : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1159,16 +1159,16 @@ export default function ReportsPage() {
               }
               <div>
                 <div className="print-app-name">{appName || "AttendX"}</div>
-                <div className="print-app-sub">{isArabic ? "نظام إدارة الحضور" : "Attendance Management System"}</div>
+                <div className="print-app-sub">{isArabic ? t("attendance_management_system") : "Attendance Management System"}</div>
               </div>
             </div>
             <div className="print-header-right">
-              <div className="print-title">{isArabic ? "تقرير الحضور والانصراف" : "Attendance Report"}</div>
+              <div className="print-title">{isArabic ? t("attendance_checkinout_report") : "Attendance Report"}</div>
               <div className="print-date">
-                {isArabic ? "الفترة:" : "Period:"} {submitted.from} → {submitted.to}
+                {isArabic ? t("period_colon") : "Period:"} {submitted.from} → {submitted.to}
               </div>
               <div className="print-date">
-                {isArabic ? "تاريخ الإصدار:" : "Generated:"} {new Date().toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
+                {isArabic ? t("issue_date_colon") : "Generated:"} {new Date().toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
               </div>
             </div>
           </div>
@@ -1177,29 +1177,29 @@ export default function ReportsPage() {
           {summary && (
             <div className="print-summary-grid">
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "أيام الحضور" : "Present Days"}</div>
+                <div className="print-summary-label">{isArabic ? t("present_days_label") : "Present Days"}</div>
                 <div className="print-summary-value green">{summary.presentDays ?? 0}</div>
                 <div className="print-summary-sub">{isArabic ? `من أصل ${summary.workingDays ?? 0} يوم` : `of ${summary.workingDays ?? 0} working days`}</div>
               </div>
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "صافي ساعات العمل" : "Net Work Hours"}</div>
+                <div className="print-summary-label">{isArabic ? t("net_work_hours") : "Net Work Hours"}</div>
                 <div className="print-summary-value blue">{fmtHM(summary.totalHours ?? 0)}</div>
                 <div className="print-summary-sub">{isArabic ? `متوقع: ${fmtHM(summary.expectedHours ?? 0)}` : `Expected: ${fmtHM(summary.expectedHours ?? 0)}`}</div>
               </div>
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "ساعات الإضافي" : "Overtime Hours"}</div>
+                <div className="print-summary-label">{isArabic ? t("overtime_hours_label") : "Overtime Hours"}</div>
                 <div className="print-summary-value orange">{fmtHM(summary.overtime ?? 0)}</div>
               </div>
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "أيام الغياب" : "Absent Days"}</div>
+                <div className="print-summary-label">{isArabic ? t("absent_days_label") : "Absent Days"}</div>
                 <div className="print-summary-value red">{summary.absentDays ?? 0}</div>
               </div>
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "أيام التأخر" : "Late Days"}</div>
+                <div className="print-summary-label">{isArabic ? t("late_days_label") : "Late Days"}</div>
                 <div className="print-summary-value amber">{summary.lateDays ?? 0}</div>
               </div>
               <div className="print-summary-card">
-                <div className="print-summary-label">{isArabic ? "أيام الإجازة" : "Leave Days"}</div>
+                <div className="print-summary-label">{isArabic ? t("leave_days_label") : "Leave Days"}</div>
                 <div className="print-summary-value default">{summary.leaveDays ?? 0}</div>
               </div>
             </div>
@@ -1208,21 +1208,21 @@ export default function ReportsPage() {
           {/* Records Table */}
           <div className="print-table-wrap">
             <div className="print-table-title">
-              {isArabic ? "سجل الحضور الكامل" : "Full Attendance Log"} ({report.records.length} {isArabic ? "سجل" : "records"})
+              {isArabic ? t("full_attendance_record") : "Full Attendance Log"} ({report.records.length} {isArabic ? t("record_label") : "records"})
             </div>
             <table className="print-table">
               <thead>
                 <tr>
-                  <th>{isArabic ? "التاريخ" : "Date"}</th>
-                  {isAdmin && <th>{isArabic ? "الموظف" : "Employee"}</th>}
-                  <th>{isArabic ? "الحالة" : "Status"}</th>
-                  <th>{isArabic ? "تسجيل الدخول" : "Check-in"}</th>
-                  <th>{isArabic ? "تسجيل الخروج" : "Check-out"}</th>
-                  <th>{isArabic ? "التأخر" : "Late"}</th>
-                  <th>{isArabic ? "الإضافي" : "Overtime"}</th>
-                  <th>{isArabic ? "الإجازة" : "Leave"}</th>
-                  <th>{isArabic ? "ساعات العمل" : "Work Hours"}</th>
-                  <th>{isArabic ? "المجموع التراكمي" : "Running Total"}</th>
+                  <th>{isArabic ? t("date_label2") : "Date"}</th>
+                  {isAdmin && <th>{isArabic ? t("employee_label2") : "Employee"}</th>}
+                  <th>{isArabic ? t("status_label2") : "Status"}</th>
+                  <th>{isArabic ? t("check_in3") : "Check-in"}</th>
+                  <th>{isArabic ? t("check_out2") : "Check-out"}</th>
+                  <th>{isArabic ? t("lateness_label") : "Late"}</th>
+                  <th>{isArabic ? t("overtime_label2") : "Overtime"}</th>
+                  <th>{isArabic ? t("leave_label2") : "Leave"}</th>
+                  <th>{isArabic ? t("work_hours_label") : "Work Hours"}</th>
+                  <th>{isArabic ? t("cumulative_total") : "Running Total"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1240,13 +1240,13 @@ export default function ReportsPage() {
                         {isAdmin && <td>{rec.userName ?? "—"}</td>}
                         <td>
                           {rec.isLeave
-                            ? <span className="print-badge badge-on_leave">{isArabic ? "إجازة" : "Leave"}</span>
+                            ? <span className="print-badge badge-on_leave">{isArabic ? t("leave_short") : "Leave"}</span>
                             : rec.status === "present"
-                              ? <span className="print-badge badge-present">{isArabic ? "حاضر" : "Present"}</span>
+                              ? <span className="print-badge badge-present">{isArabic ? t("present_label2") : "Present"}</span>
                               : rec.status === "absent"
-                                ? <span className="print-badge badge-absent">{isArabic ? "غائب" : "Absent"}</span>
+                                ? <span className="print-badge badge-absent">{isArabic ? t("absent_label2") : "Absent"}</span>
                                 : rec.status === "late"
-                                  ? <span className="print-badge badge-status-late">{isArabic ? "متأخر" : "Late"}</span>
+                                  ? <span className="print-badge badge-status-late">{isArabic ? t("late_label2") : "Late"}</span>
                                   : <span>{rec.status}</span>
                           }
                         </td>
@@ -1286,7 +1286,7 @@ export default function ReportsPage() {
                 <tfoot>
                   <tr>
                     <td colSpan={isAdmin ? 8 : 7} style={{ textAlign: "end" }}>
-                      {isArabic ? "الإجمالي الكلي" : "Grand Total"}
+                      {isArabic ? t("grand_total") : "Grand Total"}
                     </td>
                     <td>{fmtHM(summary.totalHours ?? 0)}</td>
                     <td style={{ color: "#2563eb" }}>{fmtHM(summary.totalHours ?? 0)}</td>
@@ -1298,8 +1298,8 @@ export default function ReportsPage() {
 
           {/* Footer */}
           <div className="print-footer">
-            <span>{appName || "AttendX"} — {isArabic ? "نظام إدارة الحضور" : "Attendance Management System"}</span>
-            <span>{isArabic ? "سري وخاص بالشركة" : "Confidential — Internal Use Only"}</span>
+            <span>{appName || "AttendX"} — {isArabic ? t("attendance_management_system") : "Attendance Management System"}</span>
+            <span>{isArabic ? t("confidential_company") : "Confidential — Internal Use Only"}</span>
           </div>
         </div>
       )}
@@ -1309,7 +1309,7 @@ export default function ReportsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-indigo-600" />
-              {isArabic ? "تعيين راتب الموظف" : "Set Employee Salary"}
+              {isArabic ? t("set_employee_salary") : "Set Employee Salary"}
             </DialogTitle>
           </DialogHeader>
 
@@ -1317,7 +1317,7 @@ export default function ReportsPage() {
             {/* Employee name */}
             {payrollSummary?.employeeName && (
               <div className="flex items-center gap-2 px-3 py-2 bg-muted/60 rounded-lg text-sm font-medium">
-                <span className="text-muted-foreground">{isArabic ? "الموظف:" : "Employee:"}</span>
+                <span className="text-muted-foreground">{isArabic ? t("employee_colon") : "Employee:"}</span>
                 <span>{payrollSummary.employeeName}</span>
               </div>
             )}
@@ -1325,7 +1325,7 @@ export default function ReportsPage() {
             {/* Salary field */}
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">
-                {isArabic ? "الراتب الأساسي الشهري" : "Monthly Base Salary"}
+                {isArabic ? t("monthly_base_salary") : "Monthly Base Salary"}
               </Label>
               <div className="relative">
                 <DollarSign className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1335,7 +1335,7 @@ export default function ReportsPage() {
                   step="0.01"
                   value={salaryInput}
                   onChange={e => setSalaryInput(e.target.value)}
-                  placeholder={isArabic ? "مثال: 5000" : "e.g. 5000"}
+                  placeholder={isArabic ? t("example_5000") : "e.g. 5000"}
                   className="ps-9"
                   autoFocus
                   onKeyDown={e => e.key === "Enter" && handleSalaryConfirm()}
@@ -1346,7 +1346,7 @@ export default function ReportsPage() {
             {/* Hours per day */}
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">
-                {isArabic ? "ساعات العمل اليومية" : "Work Hours Per Day"}
+                {isArabic ? t("daily_working_hours") : "Work Hours Per Day"}
               </Label>
               <div className="relative">
                 <Clock className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1363,7 +1363,7 @@ export default function ReportsPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                {isArabic ? "يُستخدم لحساب الراتب الساعي وخصم التأخر" : "Used to calculate hourly rate and late deductions"}
+                {isArabic ? t("used_hourly_salary_calc") : "Used to calculate hourly rate and late deductions"}
               </p>
             </div>
 
@@ -1371,7 +1371,7 @@ export default function ReportsPage() {
             {salaryInput && parseFloat(salaryInput) > 0 && (
               <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg px-4 py-3 text-sm space-y-1">
                 <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1.5">
-                  {isArabic ? "معاينة سريعة (22 يوم عمل)" : "Quick preview (22 working days)"}
+                  {isArabic ? t("quick_preview_22days") : "Quick preview (22 working days)"}
                 </p>
                 {(() => {
                   const s = parseFloat(salaryInput) || 0;
@@ -1381,8 +1381,8 @@ export default function ReportsPage() {
                   const fmtP = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                   return (
                     <div className="grid grid-cols-2 gap-1 text-xs text-indigo-800 dark:text-indigo-300">
-                      <span>{isArabic ? "يومي:" : "Daily:"}</span><span className="font-semibold">{fmtP(daily)}</span>
-                      <span>{isArabic ? "ساعي:" : "Hourly:"}</span><span className="font-semibold">{fmtP(hourly)}</span>
+                      <span>{isArabic ? t("daily_colon") : "Daily:"}</span><span className="font-semibold">{fmtP(daily)}</span>
+                      <span>{isArabic ? t("hourly_colon") : "Hourly:"}</span><span className="font-semibold">{fmtP(hourly)}</span>
                     </div>
                   );
                 })()}
@@ -1392,13 +1392,13 @@ export default function ReportsPage() {
 
           <DialogFooter className="gap-2 flex-row">
             <Button variant="outline" className="flex-1" onClick={() => setSalaryDialogOpen(false)} disabled={saveSalaryMut.isPending}>
-              {isArabic ? "إلغاء" : "Cancel"}
+              {isArabic ? t("cancel_action2") : "Cancel"}
             </Button>
             <Button className="flex-1 gap-2" onClick={handleSalaryConfirm} disabled={saveSalaryMut.isPending}>
               {saveSalaryMut.isPending
                 ? <Loader2 className="w-4 h-4 animate-spin" />
                 : <Check className="w-4 h-4" />}
-              {isArabic ? "حفظ الراتب" : "Save Salary"}
+              {isArabic ? t("save_salary") : "Save Salary"}
             </Button>
           </DialogFooter>
         </DialogContent>

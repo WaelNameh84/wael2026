@@ -598,7 +598,7 @@ function WeeklyAttendanceChart({ isArabic }: { isArabic: boolean }) {
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-4 h-4 text-primary" />
         <h2 className="font-semibold text-sm">
-          {isArabic ? "الحضور (آخر 7 أيام)" : "Attendance Last 7 Days"}
+          {isArabic ? t("attendance_last_7_days") : "Attendance Last 7 Days"}
         </h2>
       </div>
       <ResponsiveContainer width="100%" height={220}>
@@ -608,9 +608,9 @@ function WeeklyAttendanceChart({ isArabic }: { isArabic: boolean }) {
           <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
           <RechartTooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Bar dataKey="present" name={isArabic ? "حاضر" : "Present"} fill="#22c55e" radius={[3,3,0,0]} />
-          <Bar dataKey="late"    name={isArabic ? "متأخر" : "Late"}    fill="#f97316" radius={[3,3,0,0]} />
-          <Bar dataKey="absent"  name={isArabic ? "غائب" : "Absent"}   fill="#ef4444" radius={[3,3,0,0]} />
+          <Bar dataKey="present" name={isArabic ? t("present_label2") : "Present"} fill="#22c55e" radius={[3,3,0,0]} />
+          <Bar dataKey="late"    name={isArabic ? t("late_label2") : "Late"}    fill="#f97316" radius={[3,3,0,0]} />
+          <Bar dataKey="absent"  name={isArabic ? t("absent_label2") : "Absent"}   fill="#ef4444" radius={[3,3,0,0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -702,7 +702,7 @@ export default function DashboardPage() {
       await fetch(apiUrl(`/api/work-reports/${wrDeleteId}`), {
         method: "DELETE", headers: authHeaders(),
       });
-      toast({ title: isArabic ? "تم حذف التقرير" : "Report deleted" });
+      toast({ title: isArabic ? t("report_deleted2") : "Report deleted" });
       setWrDeleteId(null);
       refetchWr();
     } catch {
@@ -1345,17 +1345,17 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 mb-4">
                 <BarChart2 className="w-4 h-4 text-primary" />
                 <h2 className="font-semibold text-sm">
-                  {isArabic ? "توزيع الحضور اليوم" : "Today's Attendance Breakdown"}
+                  {isArabic ? t("today_attendance_distribution") : "Today's Attendance Breakdown"}
                 </h2>
               </div>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie
                     data={[
-                      { name: isArabic ? "حاضر" : "Present",  value: stats.presentToday ?? 0 },
-                      { name: isArabic ? "غائب" : "Absent",   value: stats.absentToday ?? 0 },
-                      { name: isArabic ? "متأخر" : "Late",    value: stats.lateToday ?? 0 },
-                      { name: isArabic ? "إجازة" : "On Leave", value: stats.onLeaveToday ?? 0 },
+                      { name: isArabic ? t("present_label2") : "Present",  value: stats.presentToday ?? 0 },
+                      { name: isArabic ? t("absent_label2") : "Absent",   value: stats.absentToday ?? 0 },
+                      { name: isArabic ? t("late_label2") : "Late",    value: stats.lateToday ?? 0 },
+                      { name: isArabic ? t("leave_short") : "On Leave", value: stats.onLeaveToday ?? 0 },
                     ].filter(d => d.value > 0)}
                     cx="50%"
                     cy="50%"
@@ -1379,10 +1379,10 @@ export default function DashboardPage() {
               {/* Legend */}
               <div className="flex flex-wrap gap-3 justify-center mt-1">
                 {[
-                  { label: isArabic ? "حاضر" : "Present",   color: "#22c55e", val: stats.presentToday ?? 0 },
-                  { label: isArabic ? "غائب" : "Absent",    color: "#ef4444", val: stats.absentToday ?? 0 },
-                  { label: isArabic ? "متأخر" : "Late",     color: "#f97316", val: stats.lateToday ?? 0 },
-                  { label: isArabic ? "إجازة" : "On Leave", color: "#3b82f6", val: stats.onLeaveToday ?? 0 },
+                  { label: isArabic ? t("present_label2") : "Present",   color: "#22c55e", val: stats.presentToday ?? 0 },
+                  { label: isArabic ? t("absent_label2") : "Absent",    color: "#ef4444", val: stats.absentToday ?? 0 },
+                  { label: isArabic ? t("late_label2") : "Late",     color: "#f97316", val: stats.lateToday ?? 0 },
+                  { label: isArabic ? t("leave_short") : "On Leave", color: "#3b82f6", val: stats.onLeaveToday ?? 0 },
                 ].map(item => (
                   <div key={item.label} className="flex items-center gap-1.5 text-xs">
                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: item.color }} />
@@ -1490,17 +1490,17 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-border flex items-center gap-2">
             <Camera className="w-4 h-4 text-primary" />
             <h2 className="font-semibold text-sm">
-              {isArabic ? "توثيق العمل — جميع الموظفين" : t("all_employees_reports")}
+              {isArabic ? t("work_docs_all_employees") : t("all_employees_reports")}
             </h2>
             <span className="ms-auto text-xs text-muted-foreground tabular-nums">
-              {workReports.length} {isArabic ? "تقرير" : "reports"}
+              {workReports.length} {isArabic ? t("report_label") : "reports"}
             </span>
           </div>
 
           {workReports.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Camera className="w-10 h-10 mx-auto mb-2 opacity-20" />
-              <p className="text-sm">{isArabic ? "لا توجد تقارير بعد" : t("no_reports_yet")}</p>
+              <p className="text-sm">{isArabic ? t("no_reports_yet2") : t("no_reports_yet")}</p>
             </div>
           ) : (
             <div className="p-5">
@@ -1524,14 +1524,14 @@ export default function DashboardPage() {
                       <button
                         onClick={() => setWrViewImg(r.imageUrl)}
                         className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white shadow"
-                        title={isArabic ? "عرض" : "View"}
+                        title={isArabic ? t("view_action2") : "View"}
                       >
                         <Eye className="w-4 h-4 text-gray-700" />
                       </button>
                       <button
                         onClick={() => setWrDeleteId(r.id)}
                         className="w-8 h-8 bg-red-500/90 rounded-full flex items-center justify-center hover:bg-red-600 shadow"
-                        title={isArabic ? "حذف" : "Delete"}
+                        title={isArabic ? t("delete_action2") : "Delete"}
                       >
                         <Trash2 className="w-4 h-4 text-white" />
                       </button>
@@ -1554,7 +1554,7 @@ export default function DashboardPage() {
                   onClick={() => setWrShowAll(v => !v)}
                 >
                   {wrShowAll
-                    ? (isArabic ? "عرض أقل ↑" : "Show less ↑")
+                    ? (isArabic ? t("show_less") : "Show less ↑")
                     : (isArabic ? `عرض ${workReports.length - 8} أخرى ↓` : `Show ${workReports.length - 8} more ↓`)}
                 </button>
               )}
@@ -1584,19 +1584,19 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="w-4 h-4" />
-              {isArabic ? "تأكيد الحذف" : "Confirm Delete"}
+              {isArabic ? t("confirm_delete2") : "Confirm Delete"}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground py-2">
-            {isArabic ? "هل أنت متأكد من حذف هذا التقرير؟ لا يمكن التراجع." : "Delete this work report? This cannot be undone."}
+            {isArabic ? t("confirm_delete_report2") : "Delete this work report? This cannot be undone."}
           </p>
           <div className={`flex gap-2 ${isArabic ? "flex-row-reverse" : ""}`}>
             <Button variant="outline" size="sm" className="flex-1" onClick={() => setWrDeleteId(null)} disabled={wrDeleting}>
-              {isArabic ? "إلغاء" : "Cancel"}
+              {isArabic ? t("cancel_action2") : "Cancel"}
             </Button>
             <Button variant="destructive" size="sm" className="flex-1" onClick={handleDeleteWr} disabled={wrDeleting}>
               {wrDeleting ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block me-1" /> : null}
-              {isArabic ? "حذف" : "Delete"}
+              {isArabic ? t("delete_action2") : "Delete"}
             </Button>
           </div>
         </DialogContent>
@@ -1608,7 +1608,7 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-violet-600" />
-              {isArabic ? "ساعات هذا الشهر" : "Hours This Month"}
+              {isArabic ? t("hours_this_month2") : "Hours This Month"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -1618,12 +1618,12 @@ export default function DashboardPage() {
                 {stats?.totalHoursThisMonth?.toFixed(1) ?? "—"}
                 <span className="text-2xl ms-1 font-normal text-muted-foreground">h</span>
               </p>
-              <p className="text-sm text-muted-foreground mt-1">{isArabic ? "إجمالي الساعات المسجلة" : "Total hours logged"}</p>
+              <p className="text-sm text-muted-foreground mt-1">{isArabic ? t("total_logged_hours2") : "Total hours logged"}</p>
             </div>
             {/* Per-day breakdown from recent activity */}
             {stats?.recentActivity && stats.recentActivity.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? "النشاط الأخير" : "Recent Activity"}</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? t("recent_activity2") : "Recent Activity"}</p>
                 <div className="space-y-1.5 max-h-52 overflow-y-auto">
                   {(stats.recentActivity as any[]).slice(0, 10).map((a: any, i: number) => (
                     <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/50 text-sm">
@@ -1637,7 +1637,7 @@ export default function DashboardPage() {
               </div>
             )}
             <Button variant="outline" className="w-full" onClick={() => { setHoursDialogOpen(false); window.location.href = "/reports"; }}>
-              {isArabic ? "عرض تقرير الحضور الكامل →" : "View Full Attendance Report →"}
+              {isArabic ? t("view_full_attendance_report") : "View Full Attendance Report →"}
             </Button>
           </div>
         </DialogContent>
@@ -1649,7 +1649,7 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
-              {isArabic ? "نسبة الحضور" : "Attendance Rate"}
+              {isArabic ? t("attendance_rate2") : "Attendance Rate"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -1662,15 +1662,15 @@ export default function DashboardPage() {
                 <div className="h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all"
                   style={{ width: `${stats?.avgAttendanceRate ?? 0}%` }} />
               </div>
-              <p className="text-sm text-muted-foreground mt-2">{isArabic ? "متوسط الحضور هذا الشهر" : "Average attendance this month"}</p>
+              <p className="text-sm text-muted-foreground mt-2">{isArabic ? t("avg_attendance_month") : "Average attendance this month"}</p>
             </div>
             {/* Today's stats */}
             {isAdmin && (
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: isArabic ? "حاضر اليوم" : "Present Today", value: categoryEmployees.present.length, color: "text-green-600" },
-                  { label: isArabic ? "متأخر" : "Late", value: categoryEmployees.late.length, color: "text-yellow-600" },
-                  { label: isArabic ? "غائب" : "Absent", value: categoryEmployees.absent.length, color: "text-red-600" },
+                  { label: isArabic ? t("present_today2") : "Present Today", value: categoryEmployees.present.length, color: "text-green-600" },
+                  { label: isArabic ? t("late_label2") : "Late", value: categoryEmployees.late.length, color: "text-yellow-600" },
+                  { label: isArabic ? t("absent_label2") : "Absent", value: categoryEmployees.absent.length, color: "text-red-600" },
                 ].map(item => (
                   <div key={item.label} className="rounded-xl border border-border bg-muted/30 p-3 text-center">
                     <p className={`text-2xl font-bold tabular-nums ${item.color}`}>{item.value}</p>
@@ -1680,7 +1680,7 @@ export default function DashboardPage() {
               </div>
             )}
             <Button variant="outline" className="w-full" onClick={() => { setRateDialogOpen(false); window.location.href = "/reports"; }}>
-              {isArabic ? "عرض تقرير الحضور الكامل →" : "View Full Attendance Report →"}
+              {isArabic ? t("view_full_attendance_report") : "View Full Attendance Report →"}
             </Button>
           </div>
         </DialogContent>
@@ -1692,7 +1692,7 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-amber-600" />
-              {isArabic ? "طلبات الإجازة المعلقة" : "Pending Leave Requests"}
+              {isArabic ? t("pending_leave_requests2") : "Pending Leave Requests"}
               {pendingLeaveRequests && pendingLeaveRequests.length > 0 && (
                 <span className="ms-1 inline-flex items-center justify-center rounded-full bg-amber-500 text-white text-xs w-5 h-5 font-bold">{pendingLeaveRequests.length}</span>
               )}
@@ -1702,7 +1702,7 @@ export default function DashboardPage() {
             {(!pendingLeaveRequests || pendingLeaveRequests.length === 0) ? (
               <div className="text-center py-10 text-muted-foreground">
                 <Calendar className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">{isArabic ? "لا توجد إجازات معلقة" : "No pending leaves"}</p>
+                <p className="text-sm">{isArabic ? t("no_pending_leaves") : "No pending leaves"}</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-[50vh] overflow-y-auto">

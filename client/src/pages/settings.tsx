@@ -116,10 +116,10 @@ function GpsLocationSearch({ isArabic }: { isArabic: boolean }) {
       if (data.length > 0) {
         setResult({ lat: data[0].lat, lon: data[0].lon, display_name: data[0].display_name });
       } else {
-        setError(isArabic ? "لم يُعثر على الموقع" : "Location not found");
+        setError(isArabic ? t("location_not_found") : "Location not found");
       }
     } catch {
-      setError(isArabic ? "فشل الاتصال" : "Connection failed");
+      setError(isArabic ? t("connection_failed") : "Connection failed");
     } finally {
       setSearching(false);
     }
@@ -140,13 +140,13 @@ function GpsLocationSearch({ isArabic }: { isArabic: boolean }) {
       <div>
         <Label className="flex items-center gap-1.5 mb-1.5">
           <Search className="w-3.5 h-3.5" />
-          {isArabic ? "ابحث عن موقع جغرافي" : "Search for a location"}
+          {isArabic ? t("search_geo_location") : "Search for a location"}
         </Label>
         <div className="relative">
           <Input
             value={query}
             onChange={e => handleChange(e.target.value)}
-            placeholder={isArabic ? "مثال: الرياض، برج خليفة، مطار الملك..." : "e.g. Dubai, Eiffel Tower, London..."}
+            placeholder={isArabic ? t("example_location") : "e.g. Dubai, Eiffel Tower, London..."}
           />
           {searching && (
             <Loader2 className="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
@@ -240,16 +240,16 @@ export default function SettingsPage() {
       const perm = await requestNotificationPermission();
       setNotifPermission(perm);
       if (perm !== "granted") {
-        toast({ title: isArabic ? "لم يتم منح إذن الإشعارات" : "Notification permission denied", variant: "destructive" });
+        toast({ title: isArabic ? t("notif_permission_not_granted") : "Notification permission denied", variant: "destructive" });
         return;
       }
       setDailyRemindersEnabled(true); setRemindersEnabledState(true);
       scheduleDailyReminders((localStorage.getItem("settings_lang") as "en"|"ar"|"sv") || "en");
-      toast({ title: isArabic ? "✅ التذكيرات مفعّلة" : "✅ Reminders enabled" });
+      toast({ title: isArabic ? t("reminders_enabled") : "✅ Reminders enabled" });
     } else {
       setDailyRemindersEnabled(false); setRemindersEnabledState(false);
       cancelDailyReminders();
-      toast({ title: isArabic ? "🔕 التذكيرات موقوفة" : "🔕 Reminders disabled" });
+      toast({ title: isArabic ? t("reminders_disabled") : "🔕 Reminders disabled" });
     }
   };
 
@@ -288,7 +288,7 @@ export default function SettingsPage() {
   const subscribeToPush = useCallback(async (settings: ShiftAlarmSettings) => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setPushStatus("error");
-      setPushErrorMsg(isArabic ? "المتصفح لا يدعم الإشعارات في الخلفية" : "This browser does not support background push notifications");
+      setPushErrorMsg(isArabic ? t("browser_no_bg_notif") : "This browser does not support background push notifications");
       return;
     }
     setPushStatus("subscribing");
@@ -304,7 +304,7 @@ export default function SettingsPage() {
       if (permission !== "granted") {
         setPushStatus("error");
         setPushErrorMsg(isArabic
-          ? "تم رفض إذن الإشعارات. فعّله من إعدادات المتصفح للموقع ثم أعد المحاولة."
+          ? t("notif_permission_denied_retry")
           : "Notification permission was denied. Enable it in the browser's site settings and try again.");
         return;
       }
@@ -315,7 +315,7 @@ export default function SettingsPage() {
       if (!publicKey) {
         setPushStatus("error");
         setPushErrorMsg(isArabic
-          ? "الخادم غير مهيأ لإرسال إشعارات (مفتاح VAPID مفقود). تواصل مع المسؤول."
+          ? t("server_not_configured_notif")
           : "The server is not configured for push notifications (missing VAPID key). Contact your administrator.");
         return;
       }
@@ -339,8 +339,8 @@ export default function SettingsPage() {
       setPushStatus("error");
       setPushErrorMsg(
         err?.name === "NotAllowedError"
-          ? (isArabic ? "تم رفض إذن الإشعارات من المتصفح." : "Notification permission was denied by the browser.")
-          : (isArabic ? "فشل الاشتراك. تأكد من السماح بالإشعارات." : "Subscription failed. Please allow notifications.")
+          ? (isArabic ? t("notif_permission_denied_browser") : "Notification permission was denied by the browser.")
+          : (isArabic ? t("subscription_failed_check_perm") : "Subscription failed. Please allow notifications.")
       );
     }
   }, [isArabic]);
@@ -426,19 +426,19 @@ export default function SettingsPage() {
       if (res.ok && data?.valid) {
         setKeyStatus("valid");
         localStorage.setItem("gemini_api_key", key);
-        toast({ title: isArabic ? "✅ تم التحقق وحفظ المفتاح" : "✅ Key verified and saved" });
+        toast({ title: isArabic ? t("key_verified_saved2") : "✅ Key verified and saved" });
       } else {
         const REASON_MAP: Record<string, string> = {
-          unauthorized: isArabic ? "المفتاح غير مصرح به أو منتهي الصلاحية" : "Key is unauthorized or expired",
-          invalid_key:  isArabic ? "المفتاح غير صحيح" : "Invalid API key",
-          bad_request:  isArabic ? "طلب غير صحيح" : "Bad request",
+          unauthorized: isArabic ? t("key_unauthorized_expired") : "Key is unauthorized or expired",
+          invalid_key:  isArabic ? t("key_incorrect") : "Invalid API key",
+          bad_request:  isArabic ? t("invalid_request") : "Bad request",
         };
         const reason = data?.reason ?? "";
-        const friendly = REASON_MAP[reason] || reason || (isArabic ? "غير صالح" : "Invalid key");
+        const friendly = REASON_MAP[reason] || reason || (isArabic ? t("invalid_label") : "Invalid key");
         setKeyStatus("invalid"); setKeyError(friendly);
       }
     } catch {
-      setKeyStatus("invalid"); setKeyError(isArabic ? "فشل الاتصال" : "Could not reach server");
+      setKeyStatus("invalid"); setKeyError(isArabic ? t("connection_failed") : "Could not reach server");
     }
   };
 
@@ -454,26 +454,26 @@ export default function SettingsPage() {
         authFetch("/api/settings/my-ai-key", { method: "POST", body: JSON.stringify({ key }) }).catch(() => {});
         setCurrentKeyInfo({ hasKey: true, source: "local", maskedKey: key.slice(0, 8) + "••••••••" + key.slice(-4) });
         setApiKey(""); setKeyStatus("valid");
-        toast({ title: isArabic ? "✅ تم التحقق وحفظ المفتاح بنجاح" : "✅ Key verified and saved successfully" });
+        toast({ title: isArabic ? t("key_verified_saved_success") : "✅ Key verified and saved successfully" });
       } else {
         const REASON_MAP: Record<string, string> = {
-          unauthorized:       isArabic ? "المفتاح غير مصرح به أو منتهي الصلاحية" : "Key unauthorized or expired",
-          invalid_key:        isArabic ? "المفتاح غير صحيح" : "Invalid API key",
-          bad_request:        isArabic ? "طلب غير صحيح" : "Bad request",
-          INVALID_ARGUMENT:   isArabic ? "المفتاح غير صالح أو التنسيق خاطئ" : "Invalid key or format",
-          API_KEY_INVALID:    isArabic ? "مفتاح API غير صالح" : "API key is invalid",
-          PERMISSION_DENIED:  isArabic ? "الوصول مرفوض – تحقق من صلاحيات المفتاح" : "Permission denied – check key permissions",
-          RESOURCE_EXHAUSTED: isArabic ? "تم استنفاد الحصة – المفتاح صالح لكن الحصة منتهية" : "Quota exhausted – key is valid but quota exceeded",
+          unauthorized:       isArabic ? t("key_unauthorized_expired") : "Key unauthorized or expired",
+          invalid_key:        isArabic ? t("key_incorrect") : "Invalid API key",
+          bad_request:        isArabic ? t("invalid_request") : "Bad request",
+          INVALID_ARGUMENT:   isArabic ? t("key_invalid_format") : "Invalid key or format",
+          API_KEY_INVALID:    isArabic ? t("api_key_invalid") : "API key is invalid",
+          PERMISSION_DENIED:  isArabic ? t("access_denied_check_key") : "Permission denied – check key permissions",
+          RESOURCE_EXHAUSTED: isArabic ? t("quota_exhausted") : "Quota exhausted – key is valid but quota exceeded",
         };
         const rawReason = data?.reason ?? "";
         const reason = rawReason.length > 80 ? rawReason.slice(0, 80) + "..." : rawReason;
-        const friendly = REASON_MAP[reason] || REASON_MAP[rawReason] || reason || (isArabic ? "فشل التحقق من المفتاح" : "Key verification failed");
+        const friendly = REASON_MAP[reason] || REASON_MAP[rawReason] || reason || (isArabic ? t("key_verification_failed") : "Key verification failed");
         setKeyStatus("invalid"); setKeyError(friendly);
         toast({ title: isArabic ? `❌ ${friendly}` : `❌ ${friendly}`, variant: "destructive" });
       }
     } catch {
-      setKeyStatus("invalid"); setKeyError(isArabic ? "فشل الاتصال بالخادم" : "Could not reach server");
-      toast({ title: isArabic ? "❌ فشل الاتصال بالخادم" : "❌ Could not reach server", variant: "destructive" });
+      setKeyStatus("invalid"); setKeyError(isArabic ? t("server_connection_failed") : "Could not reach server");
+      toast({ title: isArabic ? t("server_conn_failed2") : "❌ Could not reach server", variant: "destructive" });
     } finally {
       setIsSavingKey(false);
     }
@@ -506,10 +506,10 @@ export default function SettingsPage() {
     try {
       const res = await authFetch("/api/attendance/daily-summary", { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "فشل");
+      if (!res.ok) throw new Error(data.error ?? t("failed_label"));
       toast({ title: `✅ تم الإرسال لـ ${data.sent} موظف` });
     } catch (err: any) {
-      toast({ title: "فشل الإرسال", description: err.message, variant: "destructive" });
+      toast({ title: t("send_failed"), description: err.message, variant: "destructive" });
     } finally { setDailySummarySending(false); }
   };
 
@@ -582,7 +582,7 @@ export default function SettingsPage() {
     try {
       await Promise.all(tasks);
       await refetchMe();
-      toast({ title: isArabic ? "✅ تم حفظ جميع الإعدادات" : "✅ All settings saved" });
+      toast({ title: isArabic ? t("all_settings_saved") : "✅ All settings saved" });
     } catch {
       toast({ title: t("failed"), variant: "destructive" });
     } finally {
@@ -600,7 +600,7 @@ export default function SettingsPage() {
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-2xl font-bold">{t("settings")}</h1>
-          <p className="text-sm text-muted-foreground">{isArabic ? "انقر على أي قسم للتوسيع" : "Tap a section to expand"}</p>
+          <p className="text-sm text-muted-foreground">{isArabic ? t("click_section_expand") : "Tap a section to expand"}</p>
         </div>
 
         {/* ── 1. Admin & App Settings ── */}
@@ -619,7 +619,7 @@ export default function SettingsPage() {
 
             {/* Logo */}
             <div className="space-y-2">
-              <Label>{isArabic ? "شعار التطبيق" : "App Logo"}</Label>
+              <Label>{isArabic ? t("app_logo") : "App Logo"}</Label>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl border-2 border-border bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                   {logoPreview ? <img src={logoPreview} alt="logo" className="w-full h-full object-contain" /> : <AppWindow className="w-6 h-6 text-muted-foreground" />}
@@ -631,22 +631,22 @@ export default function SettingsPage() {
                         onChange={async e => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          if (file.size > 500_000) { toast({ title: isArabic ? "الحجم > 500KB" : "Max 500KB", variant: "destructive" }); return; }
+                          if (file.size > 500_000) { toast({ title: isArabic ? t("size_over_500kb") : "Max 500KB", variant: "destructive" }); return; }
                           const reader = new FileReader();
                           reader.onload = ev => setLogoPreview(ev.target?.result as string);
                           reader.readAsDataURL(file);
                         }} />
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-medium hover:bg-muted cursor-pointer">
-                        <Database className="w-3.5 h-3.5" /> {isArabic ? "اختر صورة" : "Choose Image"}
+                        <Database className="w-3.5 h-3.5" /> {isArabic ? t("choose_image") : "Choose Image"}
                       </span>
                     </label>
                     {logoPreview && (
                       <button onClick={() => setLogoPreview("")} className="px-3 py-1.5 rounded-md border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/10">
-                        {isArabic ? "إزالة" : "Remove"}
+                        {isArabic ? t("remove_action") : "Remove"}
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP — {isArabic ? "أقصى 500KB" : "max 500KB"}</p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP — {isArabic ? t("max_500kb") : "max 500KB"}</p>
                 </div>
               </div>
               {logoPreview !== appLogo && (
@@ -656,22 +656,22 @@ export default function SettingsPage() {
                     const r = await authFetch("/api/settings/app", { method: "PATCH", body: JSON.stringify({ appLogo: logoPreview }) });
                     const d = await r.json();
                     setAppLogo(d.appLogo ?? ""); setLogoPreview(d.appLogo ?? "");
-                    toast({ title: isArabic ? "تم حفظ الشعار" : "Logo saved" });
+                    toast({ title: isArabic ? t("logo_saved") : "Logo saved" });
                   } catch { toast({ title: t("failed"), variant: "destructive" }); }
                   finally { setLogoSaving(false); }
                 }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-60">
                   {logoSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
-                  {isArabic ? "حفظ الشعار" : "Save Logo"}
+                  {isArabic ? t("save_logo") : "Save Logo"}
                 </button>
               )}
 
               {/* Logo Size Controls */}
               <div className="space-y-3 pt-1">
-                <Label className="text-xs font-medium text-muted-foreground">{isArabic ? "حجم الشعار في صفحة الدخول" : "Logo size on login page"}</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{isArabic ? t("logo_size_login") : "Logo size on login page"}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">{isArabic ? "العرض" : "Width"}</Label>
+                      <Label className="text-xs">{isArabic ? t("width_label") : "Width"}</Label>
                       <span className="text-xs font-mono text-primary">{logoW}px</span>
                     </div>
                     <input
@@ -683,7 +683,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">{isArabic ? "الارتفاع" : "Height"}</Label>
+                      <Label className="text-xs">{isArabic ? t("height_label") : "Height"}</Label>
                       <span className="text-xs font-mono text-primary">{logoH}px</span>
                     </div>
                     <input
@@ -697,7 +697,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-3">
                   <div className="flex gap-2">
                     <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{isArabic ? "عرض (px)" : "W (px)"}</Label>
+                      <Label className="text-xs text-muted-foreground">{isArabic ? t("width_px") : "W (px)"}</Label>
                       <Input
                         type="number" min={24} max={300}
                         value={logoW}
@@ -706,7 +706,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{isArabic ? "ارتفاع (px)" : "H (px)"}</Label>
+                      <Label className="text-xs text-muted-foreground">{isArabic ? t("height_px") : "H (px)"}</Label>
                       <Input
                         type="number" min={24} max={300}
                         value={logoH}
@@ -718,7 +718,7 @@ export default function SettingsPage() {
                   <div
                     className="rounded-xl bg-primary/10 overflow-hidden flex items-center justify-center border border-border flex-shrink-0"
                     style={{ width: Math.min(logoW, 120), height: Math.min(logoH, 120), maxWidth: 120, maxHeight: 120 }}
-                    title={isArabic ? "معاينة" : "Preview"}
+                    title={isArabic ? t("preview_label") : "Preview"}
                   >
                     <div
                       className="w-full h-full flex items-center justify-center"
@@ -734,11 +734,11 @@ export default function SettingsPage() {
 
                 {/* Free rotation + position controls */}
                 <Label className="text-xs font-medium text-muted-foreground pt-2 block">
-                  {isArabic ? "التحكم الحر بالاتجاه والموضع" : "Free rotation & position control"}
+                  {isArabic ? t("free_position_control") : "Free rotation & position control"}
                 </Label>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs">{isArabic ? "الدوران" : "Rotation"}</Label>
+                    <Label className="text-xs">{isArabic ? t("rotation_label") : "Rotation"}</Label>
                     <span className="text-xs font-mono text-primary">{logoRot}°</span>
                   </div>
                   <input
@@ -751,7 +751,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">{isArabic ? "أفقي" : "Horizontal"}</Label>
+                      <Label className="text-xs">{isArabic ? t("orientation_horizontal") : "Horizontal"}</Label>
                       <span className="text-xs font-mono text-primary">{logoOX}px</span>
                     </div>
                     <input
@@ -763,7 +763,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">{isArabic ? "عمودي" : "Vertical"}</Label>
+                      <Label className="text-xs">{isArabic ? t("orientation_vertical") : "Vertical"}</Label>
                       <span className="text-xs font-mono text-primary">{logoOY}px</span>
                     </div>
                     <input
@@ -783,7 +783,7 @@ export default function SettingsPage() {
                   }}
                   className="text-xs text-muted-foreground hover:text-foreground underline"
                 >
-                  {isArabic ? "إعادة تعيين الكل" : "Reset all"}
+                  {isArabic ? t("reset_all") : "Reset all"}
                 </button>
               </div>
             </div>
@@ -792,14 +792,14 @@ export default function SettingsPage() {
 
             {/* Work Schedule */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-1.5 text-sm font-medium"><Clock className="w-3.5 h-3.5" /> {isArabic ? "جدول الدوام" : "Work Schedule"}</Label>
+              <Label className="flex items-center gap-1.5 text-sm font-medium"><Clock className="w-3.5 h-3.5" /> {isArabic ? t("shift_schedule") : "Work Schedule"}</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isArabic ? "وقت البداية (UTC)" : "Start Time (UTC)"}</Label>
+                  <Label className="text-xs text-muted-foreground">{isArabic ? t("start_time_utc") : "Start Time (UTC)"}</Label>
                   <Input type="time" value={workStartTime} onChange={e => setWorkStartTime(e.target.value)} className="font-mono" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isArabic ? "فترة السماح (دقيقة)" : "Grace Period (min)"}</Label>
+                  <Label className="text-xs text-muted-foreground">{isArabic ? t("grace_period_min") : "Grace Period (min)"}</Label>
                   <Input type="number" min={0} max={120} value={lateGraceMinutes} onChange={e => setLateGraceMinutes(Math.max(0, Math.min(120, parseInt(e.target.value) || 0)))} className="font-mono" />
                 </div>
               </div>
@@ -835,20 +835,20 @@ export default function SettingsPage() {
         >
           {/* Theme Grid */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-1.5"><Sun className="w-3.5 h-3.5" /> {isArabic ? "المظهر" : "Theme"}</Label>
+            <Label className="flex items-center gap-1.5"><Sun className="w-3.5 h-3.5" /> {isArabic ? t("appearance_label2") : "Theme"}</Label>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { value: "light",  label: isArabic ? "فاتح"   : "Light",  icon: <Sun className="w-4 h-4 text-yellow-500" />,  bg: "bg-white border-gray-200" },
-                { value: "dark",   label: isArabic ? "داكن"   : "Dark",   icon: <Moon className="w-4 h-4 text-slate-400" />,  bg: "bg-gray-900 border-gray-700" },
-                { value: "system", label: isArabic ? "تلقائي" : "Auto",   icon: <Monitor className="w-4 h-4 text-blue-400" />,bg: "bg-gradient-to-br from-white to-gray-700 border-gray-400" },
-                { value: "ocean",  label: isArabic ? "المحيط" : "Ocean",  dot: "bg-teal-500",   bg: "bg-teal-50 border-teal-200" },
-                { value: "forest", label: isArabic ? "الغابة" : "Forest", dot: "bg-green-600",  bg: "bg-green-50 border-green-200" },
-                { value: "rose",   label: isArabic ? "وردي"   : "Rose",   dot: "bg-rose-500",   bg: "bg-rose-50 border-rose-200" },
-                { value: "sunset", label: isArabic ? "غروب"   : "Sunset", dot: "bg-orange-500", bg: "bg-orange-50 border-orange-200" },
-                { value: "purple", label: isArabic ? "بنفسجي" : "Purple", dot: "bg-purple-600", bg: "bg-purple-50 border-purple-200" },
-                { value: "gold",   label: isArabic ? "ذهبي"   : "Gold",   dot: "bg-yellow-500", bg: "bg-yellow-50 border-yellow-200" },
-                { value: "ruby",   label: isArabic ? "ياقوت"  : "Ruby",   dot: "bg-red-600",    bg: "bg-red-50 border-red-200" },
-                { value: "slate",  label: isArabic ? "رمادي"  : "Slate",  dot: "bg-slate-500",  bg: "bg-slate-100 border-slate-300" },
+                { value: "light",  label: isArabic ? t("light_label2")   : "Light",  icon: <Sun className="w-4 h-4 text-yellow-500" />,  bg: "bg-white border-gray-200" },
+                { value: "dark",   label: isArabic ? t("dark_label2")   : "Dark",   icon: <Moon className="w-4 h-4 text-slate-400" />,  bg: "bg-gray-900 border-gray-700" },
+                { value: "system", label: isArabic ? t("automatic_label") : "Auto",   icon: <Monitor className="w-4 h-4 text-blue-400" />,bg: "bg-gradient-to-br from-white to-gray-700 border-gray-400" },
+                { value: "ocean",  label: isArabic ? t("theme_ocean") : "Ocean",  dot: "bg-teal-500",   bg: "bg-teal-50 border-teal-200" },
+                { value: "forest", label: isArabic ? t("theme_forest") : "Forest", dot: "bg-green-600",  bg: "bg-green-50 border-green-200" },
+                { value: "rose",   label: isArabic ? t("theme_pink")   : "Rose",   dot: "bg-rose-500",   bg: "bg-rose-50 border-rose-200" },
+                { value: "sunset", label: isArabic ? t("theme_sunset")   : "Sunset", dot: "bg-orange-500", bg: "bg-orange-50 border-orange-200" },
+                { value: "purple", label: isArabic ? t("theme_purple") : "Purple", dot: "bg-purple-600", bg: "bg-purple-50 border-purple-200" },
+                { value: "gold",   label: isArabic ? t("theme_gold")   : "Gold",   dot: "bg-yellow-500", bg: "bg-yellow-50 border-yellow-200" },
+                { value: "ruby",   label: isArabic ? t("theme_ruby")  : "Ruby",   dot: "bg-red-600",    bg: "bg-red-50 border-red-200" },
+                { value: "slate",  label: isArabic ? t("color_gray")  : "Slate",  dot: "bg-slate-500",  bg: "bg-slate-100 border-slate-300" },
               ].map(opt => (
                 <button key={opt.value} onClick={() => handleSettings("theme", opt.value)}
                   className={cn(
@@ -880,12 +880,12 @@ export default function SettingsPage() {
           {/* ── Interface Layout ── */}
           <div className="border-t border-border pt-3 space-y-4">
             <Label className="flex items-center gap-1.5 text-xs font-semibold">
-              <Paintbrush className="w-3.5 h-3.5" /> {isArabic ? "تخصيص الواجهة" : "Interface Customization"}
+              <Paintbrush className="w-3.5 h-3.5" /> {isArabic ? t("customize_interface") : "Interface Customization"}
             </Label>
 
             {/* ── Live Preview ── */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{isArabic ? "معاينة مباشرة" : "Live Preview"}</Label>
+              <Label className="text-xs text-muted-foreground">{isArabic ? t("live_preview") : "Live Preview"}</Label>
               <div className="relative w-full h-36 rounded-2xl border-2 border-border overflow-hidden bg-background shadow-inner select-none">
                 {/* Sidebar */}
                 <div className={cn(
@@ -955,40 +955,40 @@ export default function SettingsPage() {
 
             {/* Sidebar Style Dropdown */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{isArabic ? "شكل القائمة الجانبية" : "Sidebar Style"}</Label>
+              <Label className="text-xs text-muted-foreground">{isArabic ? t("sidebar_shape") : "Sidebar Style"}</Label>
               <Select value={sidebarStyle} onValueChange={v => setSidebarStyle(v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">{isArabic ? "عادي — عرض متوازن" : "Default — Balanced width"}</SelectItem>
-                  <SelectItem value="compact">{isArabic ? "مضغوط — أقل مساحة" : "Compact — Less space"}</SelectItem>
-                  <SelectItem value="icon-only">{isArabic ? "أيقونات فقط — أقصى مساحة" : "Icons only — Max space"}</SelectItem>
-                  <SelectItem value="wide">{isArabic ? "واسع — مع التسميات" : "Wide — With full labels"}</SelectItem>
+                  <SelectItem value="default">{isArabic ? t("sidebar_normal_desc") : "Default — Balanced width"}</SelectItem>
+                  <SelectItem value="compact">{isArabic ? t("sidebar_compact_desc") : "Compact — Less space"}</SelectItem>
+                  <SelectItem value="icon-only">{isArabic ? t("sidebar_icon_only_desc") : "Icons only — Max space"}</SelectItem>
+                  <SelectItem value="wide">{isArabic ? t("sidebar_wide_desc") : "Wide — With full labels"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Card Style Dropdown */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{isArabic ? "شكل البطاقات" : "Card Style"}</Label>
+              <Label className="text-xs text-muted-foreground">{isArabic ? t("card_shape") : "Card Style"}</Label>
               <Select value={cardStyle} onValueChange={v => setCardStyle(v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rounded">{isArabic ? "منحنية — زوايا ناعمة" : "Rounded — Soft corners"}</SelectItem>
-                  <SelectItem value="sharp">{isArabic ? "حادة — خطوط مستقيمة" : "Sharp — Straight edges"}</SelectItem>
-                  <SelectItem value="glass">{isArabic ? "زجاجية — شفافية وضبابية" : "Glass — Frosted effect"}</SelectItem>
+                  <SelectItem value="rounded">{isArabic ? t("card_shape_curved_desc") : "Rounded — Soft corners"}</SelectItem>
+                  <SelectItem value="sharp">{isArabic ? t("card_shape_sharp_desc") : "Sharp — Straight edges"}</SelectItem>
+                  <SelectItem value="glass">{isArabic ? t("card_shape_glass_desc") : "Glass — Frosted effect"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Table Style Dropdown */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{isArabic ? "شكل الجداول" : "Table Style"}</Label>
+              <Label className="text-xs text-muted-foreground">{isArabic ? t("table_shape") : "Table Style"}</Label>
               <Select value={tableStyle} onValueChange={v => setTableStyle(v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="comfortable">{isArabic ? "مريح — صفوف عالية" : "Comfortable — Tall rows"}</SelectItem>
-                  <SelectItem value="cozy">{isArabic ? "دافئ — صفوف متوسطة" : "Cozy — Medium rows"}</SelectItem>
-                  <SelectItem value="compact">{isArabic ? "مضغوط — صفوف قصيرة" : "Compact — Dense rows"}</SelectItem>
+                  <SelectItem value="comfortable">{isArabic ? t("table_comfortable_desc") : "Comfortable — Tall rows"}</SelectItem>
+                  <SelectItem value="cozy">{isArabic ? t("table_warm_desc") : "Cozy — Medium rows"}</SelectItem>
+                  <SelectItem value="compact">{isArabic ? t("table_compact_desc") : "Compact — Dense rows"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -996,13 +996,13 @@ export default function SettingsPage() {
             {/* ── Accent Color ── */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-xs text-muted-foreground">{isArabic ? "لون التمييز" : "Accent Color"}</Label>
+                <Label className="text-xs text-muted-foreground">{isArabic ? t("accent_color") : "Accent Color"}</Label>
                 {accentColor && (
                   <button
                     onClick={() => { setAccentColor(""); document.documentElement.style.removeProperty("--primary"); document.documentElement.style.removeProperty("--ring"); document.documentElement.style.removeProperty("--sidebar-primary"); }}
                     className="text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1"
                   >
-                    <RotateCcw className="w-2.5 h-2.5" /> {isArabic ? "إعادة" : "Reset"}
+                    <RotateCcw className="w-2.5 h-2.5" /> {isArabic ? t("reset_action") : "Reset"}
                   </button>
                 )}
               </div>
@@ -1025,7 +1025,7 @@ export default function SettingsPage() {
                   />
                 ))}
                 {/* Custom color picker */}
-                <label className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-dashed border-muted-foreground/50 hover:border-primary cursor-pointer flex-shrink-0 hover:scale-110 transition-all" title={isArabic ? "لون مخصص" : "Custom color"}>
+                <label className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-dashed border-muted-foreground/50 hover:border-primary cursor-pointer flex-shrink-0 hover:scale-110 transition-all" title={isArabic ? t("custom_color") : "Custom color"}>
                   <input
                     type="color"
                     value={accentColor || "#6366f1"}
@@ -1048,14 +1048,14 @@ export default function SettingsPage() {
         >
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {([
-              { code: "ar", flag: "🇸🇦", label: "العربية",  native: "Arabic" },
+              { code: "ar", flag: "🇸🇦", label: t("lang_arabic_native"),  native: "Arabic" },
               { code: "en", flag: "🇬🇧", label: "English",  native: "English" },
               { code: "sv", flag: "🇸🇪", label: "Svenska",  native: "Swedish" },
               { code: "fr", flag: "🇫🇷", label: "Français", native: "French" },
               { code: "de", flag: "🇩🇪", label: "Deutsch",  native: "German" },
               { code: "es", flag: "🇪🇸", label: "Español",  native: "Spanish" },
               { code: "tr", flag: "🇹🇷", label: "Türkçe",   native: "Turkish" },
-              { code: "ur", flag: "🇵🇰", label: "اردو",     native: "Urdu" },
+              { code: "ur", flag: "🇵🇰", label: t("lang_urdu_native"),     native: "Urdu" },
             ] as { code: string; flag: string; label: string; native: string }[]).map(l => (
               <button
                 key={l.code}
@@ -1084,7 +1084,7 @@ export default function SettingsPage() {
         <Section
           id="clock" open={isOpen("clock")} onToggle={() => toggleSection("clock")}
           icon={<Clock className="w-4 h-4" />}
-          title={isArabic ? "إعدادات الساعة" : "Clock Settings"}
+          title={isArabic ? t("clock_settings") : "Clock Settings"}
           accent="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
         >
           {/* Live preview */}
@@ -1094,12 +1094,12 @@ export default function SettingsPage() {
 
           {/* Format */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">{isArabic ? "نمط الساعة" : "Format"}</Label>
+            <Label className="text-xs text-muted-foreground">{isArabic ? t("clock_pattern") : "Format"}</Label>
             <div className="grid grid-cols-2 gap-2">
               {(["12h", "24h"] as const).map(fmt => (
                 <button key={fmt} onClick={() => setClockFormat(fmt)}
                   className={`py-2 rounded-lg border text-sm font-medium transition-colors ${clockFormat === fmt ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}>
-                  {fmt === "12h" ? (isArabic ? "12 ساعة" : "12h AM/PM") : (isArabic ? "24 ساعة" : "24h")}
+                  {fmt === "12h" ? (isArabic ? t("clock_12h") : "12h AM/PM") : (isArabic ? t("clock_24h") : "24h")}
                 </button>
               ))}
             </div>
@@ -1107,7 +1107,7 @@ export default function SettingsPage() {
 
           {/* Locale */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">{isArabic ? "لغة الوقت" : "Time Locale"}</Label>
+            <Label className="text-xs text-muted-foreground">{isArabic ? t("time_language") : "Time Locale"}</Label>
             <div className="grid grid-cols-3 gap-2">
               {[{ val: "en", label: "🇬🇧 EN" }, { val: "ar", label: "🇸🇦 AR" }, { val: "sv", label: "🇸🇪 SV" }].map(({ val, label }) => (
                 <button key={val} onClick={() => setClockLocale(val as any)}
@@ -1120,27 +1120,27 @@ export default function SettingsPage() {
 
           {/* Style Grid */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">{isArabic ? "شكل الساعة" : "Clock Style"}</Label>
+            <Label className="text-xs text-muted-foreground">{isArabic ? t("clock_shape") : "Clock Style"}</Label>
             <div className="grid grid-cols-3 gap-2">
               {([
-                { val: "digital",  icon: "🔢", labelAr: "رقمي",       labelEn: "Digital"   },
-                { val: "boxed",    icon: "⬛", labelAr: "مربعات",     labelEn: "Boxed"     },
-                { val: "neon",     icon: "🌈", labelAr: "نيون",       labelEn: "Neon"      },
-                { val: "neontube", icon: "💡", labelAr: "أنبوب نيون", labelEn: "Tube"      },
-                { val: "retro",    icon: "🖥️", labelAr: "ريترو",      labelEn: "Retro"     },
-                { val: "gradient", icon: "✨", labelAr: "تدرج",       labelEn: "Gradient"  },
-                { val: "glass",    icon: "🪟", labelAr: "زجاجي",      labelEn: "Glass"     },
-                { val: "flip",     icon: "🃏", labelAr: "قلّاب",      labelEn: "Flip"      },
-                { val: "analog",   icon: "🕐", labelAr: "تناظري",     labelEn: "Analog"    },
-                { val: "minimal",  icon: "✦",  labelAr: "بسيط",       labelEn: "Minimal"   },
-                { val: "aurora",   icon: "🌌", labelAr: "أورورا",     labelEn: "Aurora"    },
-                { val: "matrix",   icon: "🟩", labelAr: "ماتريكس",    labelEn: "Matrix"    },
-                { val: "neonring", icon: "🔵", labelAr: "حلقة نيون",  labelEn: "Neon Ring" },
-                { val: "wave",     icon: "🌊", labelAr: "موجي",       labelEn: "Wave"      },
-                { val: "calendar", icon: "📅", labelAr: "تقويم",      labelEn: "Calendar"  },
-                { val: "pixel",    icon: "👾", labelAr: "بكسل",       labelEn: "Pixel"     },
-                { val: "sunburst", icon: "☀️", labelAr: "أشعة شمس",   labelEn: "Sunburst"  },
-                { val: "holographic", icon: "🔮", labelAr: "هولوغرام", labelEn: "Holographic" },
+                { val: "digital",  icon: "🔢", labelAr: t("clock_style_digital"),       labelEn: "Digital"   },
+                { val: "boxed",    icon: "⬛", labelAr: t("clock_style_squares"),     labelEn: "Boxed"     },
+                { val: "neon",     icon: "🌈", labelAr: t("clock_style_neon2"),       labelEn: "Neon"      },
+                { val: "neontube", icon: "💡", labelAr: t("clock_style_neon_tube"), labelEn: "Tube"      },
+                { val: "retro",    icon: "🖥️", labelAr: t("clock_style_retro"),      labelEn: "Retro"     },
+                { val: "gradient", icon: "✨", labelAr: t("clock_style_gradient"),       labelEn: "Gradient"  },
+                { val: "glass",    icon: "🪟", labelAr: t("clock_style_glass"),      labelEn: "Glass"     },
+                { val: "flip",     icon: "🃏", labelAr: t("clock_style_flip"),      labelEn: "Flip"      },
+                { val: "analog",   icon: "🕐", labelAr: t("clock_style_analog"),     labelEn: "Analog"    },
+                { val: "minimal",  icon: "✦",  labelAr: t("style_simple"),       labelEn: "Minimal"   },
+                { val: "aurora",   icon: "🌌", labelAr: t("clock_style_aurora"),     labelEn: "Aurora"    },
+                { val: "matrix",   icon: "🟩", labelAr: t("clock_style_matrix"),    labelEn: "Matrix"    },
+                { val: "neonring", icon: "🔵", labelAr: t("clock_style_neon_ring"),  labelEn: "Neon Ring" },
+                { val: "wave",     icon: "🌊", labelAr: t("clock_style_wave"),       labelEn: "Wave"      },
+                { val: "calendar", icon: "📅", labelAr: t("calendar_label2"),      labelEn: "Calendar"  },
+                { val: "pixel",    icon: "👾", labelAr: t("clock_style_pixel"),       labelEn: "Pixel"     },
+                { val: "sunburst", icon: "☀️", labelAr: t("clock_style_sunray"),   labelEn: "Sunburst"  },
+                { val: "holographic", icon: "🔮", labelAr: t("clock_style_hologram"), labelEn: "Holographic" },
               ] as const).map(({ val, icon, labelAr, labelEn }) => (
                 <button key={val} onClick={() => setClockStyle(val)}
                   className={cn(
@@ -1156,12 +1156,12 @@ export default function SettingsPage() {
 
           {/* Size */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">{isArabic ? "حجم الساعة" : "Clock Size"}</Label>
+            <Label className="text-xs text-muted-foreground">{isArabic ? t("clock_size") : "Clock Size"}</Label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { val: "small", labelAr: "صغير", labelEn: "Small", icon: <Minimize2 className="w-3 h-3" /> },
-                { val: "medium", labelAr: "متوسط", labelEn: "Medium", icon: <AlignCenter className="w-3.5 h-3.5" /> },
-                { val: "large", labelAr: "كبير", labelEn: "Large", icon: <Maximize2 className="w-4 h-4" /> },
+                { val: "small", labelAr: t("small_label2"), labelEn: "Small", icon: <Minimize2 className="w-3 h-3" /> },
+                { val: "medium", labelAr: t("medium_label2"), labelEn: "Medium", icon: <AlignCenter className="w-3.5 h-3.5" /> },
+                { val: "large", labelAr: t("large_label2"), labelEn: "Large", icon: <Maximize2 className="w-4 h-4" /> },
               ].map(({ val, labelAr, labelEn, icon }) => (
                 <button key={val} onClick={() => setClockSize(val as any)}
                   className={`flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-colors ${clockSize === val ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}>
@@ -1175,18 +1175,18 @@ export default function SettingsPage() {
           <div className="border-t border-border pt-3 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium">{isArabic ? "الساعة العائمة" : "Floating Clock"}</p>
-                <p className="text-xs text-muted-foreground">{isArabic ? "ساعة قابلة للسحب على كل الصفحات" : "Draggable clock on all pages"}</p>
+                <p className="text-sm font-medium">{isArabic ? t("floating_clock") : "Floating Clock"}</p>
+                <p className="text-xs text-muted-foreground">{isArabic ? t("draggable_clock_all_pages") : "Draggable clock on all pages"}</p>
               </div>
-              <Toggle enabled={floatingClockEnabled} onChange={v => { setFloatingClockEnabled(v); toast({ title: v ? "✅ الساعة مفعّلة" : "🔕 الساعة مخفية" }); }} />
+              <Toggle enabled={floatingClockEnabled} onChange={v => { setFloatingClockEnabled(v); toast({ title: v ? t("clock_enabled") : t("clock_hidden") }); }} />
             </div>
             {floatingClockEnabled && (
               <div className="flex items-center justify-between gap-4 ps-4 border-s-2 border-primary/20">
                 <div>
-                  <p className="text-sm font-medium flex items-center gap-1"><LogIn className="w-3.5 h-3.5 text-green-500" /> {isArabic ? "تسجيل سريع" : "Quick Check-in"}</p>
-                  <p className="text-xs text-muted-foreground">{isArabic ? "زر تسجيل داخل الساعة" : "Check-in button in the clock"}</p>
+                  <p className="text-sm font-medium flex items-center gap-1"><LogIn className="w-3.5 h-3.5 text-green-500" /> {isArabic ? t("quick_checkin") : "Quick Check-in"}</p>
+                  <p className="text-xs text-muted-foreground">{isArabic ? t("checkin_button_in_clock") : "Check-in button in the clock"}</p>
                 </div>
-                <Toggle enabled={floatingClockCheckIn} onChange={v => { setFloatingClockCheckIn(v); toast({ title: v ? "✅ تسجيل سريع مفعّل" : "🔕 تسجيل سريع معطّل" }); }} />
+                <Toggle enabled={floatingClockCheckIn} onChange={v => { setFloatingClockCheckIn(v); toast({ title: v ? t("quick_checkin_enabled") : t("quick_checkin_disabled") }); }} />
               </div>
             )}
           </div>
@@ -1196,26 +1196,26 @@ export default function SettingsPage() {
         <Section
           id="ai" open={isOpen("ai")} onToggle={() => toggleSection("ai")}
           icon={<Bot className="w-4 h-4" />}
-          title={isArabic ? "تخصيص المساعد الذكي" : "AI Assistant"}
+          title={isArabic ? t("customize_ai_assistant") : "AI Assistant"}
           accent="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
         >
           {/* Assistant Name */}
           <div className="space-y-1.5">
-            <Label className="text-sm">{isArabic ? "اسم المساعد" : "Assistant Name"}</Label>
+            <Label className="text-sm">{isArabic ? t("assistant_name") : "Assistant Name"}</Label>
             <div className="flex gap-2">
-              <Input value={assistantName} onChange={e => setAssistantName(e.target.value)} placeholder="مساعدي، أتندي..." className="flex-1" maxLength={30} />
-              <Button variant="outline" size="sm" onClick={() => { setAssistantName("مساعدي"); toast({ title: "تم إعادة الضبط" }); }}>{isArabic ? "افتراضي" : "Reset"}</Button>
+              <Input value={assistantName} onChange={e => setAssistantName(e.target.value)} placeholder=t("assistant_wake_hint") className="flex-1" maxLength={30} />
+              <Button variant="outline" size="sm" onClick={() => { setAssistantName(t("my_assistant")); toast({ title: t("reset_done") }); }}>{isArabic ? t("default_option") : "Reset"}</Button>
             </div>
           </div>
 
           {/* Personality */}
           <div className="space-y-1.5">
-            <Label className="text-sm">{isArabic ? "شخصية المساعد" : "Personality"}</Label>
+            <Label className="text-sm">{isArabic ? t("assistant_persona") : "Personality"}</Label>
             <div className="grid grid-cols-3 gap-2">
               {([
-                { value: "friendly", label: "ودود", icon: "😊" },
-                { value: "professional", label: "احترافي", icon: "💼" },
-                { value: "concise", label: "مختصر", icon: "⚡" },
+                { value: "friendly", label: t("style_friendly"), icon: "😊" },
+                { value: "professional", label: t("professional_style"), icon: "💼" },
+                { value: "concise", label: t("style_brief"), icon: "⚡" },
               ] as { value: AssistantPersonality; label: string; icon: string }[]).map(p => (
                 <button key={p.value} onClick={() => setAssistantPersonality(p.value)}
                   className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center ${assistantPersonality === p.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40"}`}>
@@ -1228,10 +1228,10 @@ export default function SettingsPage() {
 
           {/* Wake Word */}
           <div className="space-y-1.5">
-            <Label className="text-sm">{isArabic ? "كلمة التنشيط" : "Wake Word"}</Label>
+            <Label className="text-sm">{isArabic ? t("wake_word") : "Wake Word"}</Label>
             <div className="flex gap-2">
               <Input value={wakeWord} onChange={e => setWakeWord(e.target.value)} placeholder='مثال: مساعد، أتندكس...' className="flex-1" maxLength={30} />
-              <Button variant="outline" size="sm" onClick={() => { setWakeWord("مساعد"); toast({ title: 'تمت إعادة الضبط' }); }}>{isArabic ? "افتراضي" : "Reset"}</Button>
+              <Button variant="outline" size="sm" onClick={() => { setWakeWord(t("assistant_label")); toast({ title: 'تمت إعادة الضبط' }); }}>{isArabic ? t("default_option") : "Reset"}</Button>
             </div>
           </div>
 
@@ -1240,10 +1240,10 @@ export default function SettingsPage() {
           {/* Button Appearance */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">{isArabic ? "شكل الزر العائم" : "Floating Button"}</Label>
-              <button onClick={() => { setAiButtonIcon("bot"); setAiButtonShape("circle"); setAiButtonColor("primary"); setAiButtonCustomColor("#6366f1"); toast({ title: "تم إعادة الضبط" }); }}
+              <Label className="text-sm font-medium">{isArabic ? t("floating_button_shape") : "Floating Button"}</Label>
+              <button onClick={() => { setAiButtonIcon("bot"); setAiButtonShape("circle"); setAiButtonColor("primary"); setAiButtonCustomColor("#6366f1"); toast({ title: t("reset_done") }); }}
                 className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-                <RotateCcw className="w-3 h-3" /> {isArabic ? "إعادة" : "Reset"}
+                <RotateCcw className="w-3 h-3" /> {isArabic ? t("reset_action") : "Reset"}
               </button>
             </div>
 
@@ -1285,26 +1285,26 @@ export default function SettingsPage() {
                 {aiButtonIcon === "rocket" && <Rocket className="w-6 h-6" />}
               </div>
               <div>
-                <p className="text-sm font-medium">{isArabic ? "معاينة مباشرة" : "Live Preview"}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{isArabic ? "يظهر هكذا في كل الصفحات" : "Appears like this on all pages"}</p>
+                <p className="text-sm font-medium">{isArabic ? t("live_preview") : "Live Preview"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{isArabic ? t("appears_all_pages") : "Appears like this on all pages"}</p>
               </div>
             </div>
 
             {/* Icon Picker */}
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? "الأيقونة" : "Icon"}</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? t("icon_label") : "Icon"}</p>
               <div className="grid grid-cols-5 gap-2">
                 {([
-                  { val: "bot",      icon: <Bot className="w-5 h-5" />,           labelAr: "روبوت",   labelEn: "Bot" },
-                  { val: "sparkles", icon: <Sparkles className="w-5 h-5" />,      labelAr: "بريق",    labelEn: "Sparkles" },
-                  { val: "brain",    icon: <Brain className="w-5 h-5" />,          labelAr: "دماغ",    labelEn: "Brain" },
-                  { val: "zap",      icon: <Zap className="w-5 h-5" />,            labelAr: "برق",     labelEn: "Zap" },
-                  { val: "star",     icon: <Star className="w-5 h-5" />,            labelAr: "نجمة",    labelEn: "Star" },
-                  { val: "heart",    icon: <Heart className="w-5 h-5" />,           labelAr: "قلب",     labelEn: "Heart" },
-                  { val: "message",  icon: <MessageCircle className="w-5 h-5" />,  labelAr: "رسالة",   labelEn: "Msg" },
-                  { val: "cpu",      icon: <Cpu className="w-5 h-5" />,             labelAr: "معالج",   labelEn: "CPU" },
-                  { val: "wand",     icon: <Wand2 className="w-5 h-5" />,           labelAr: "عصا",     labelEn: "Wand" },
-                  { val: "rocket",   icon: <Rocket className="w-5 h-5" />,          labelAr: "صاروخ",   labelEn: "Rocket" },
+                  { val: "bot",      icon: <Bot className="w-5 h-5" />,           labelAr: t("icon_robot"),   labelEn: "Bot" },
+                  { val: "sparkles", icon: <Sparkles className="w-5 h-5" />,      labelAr: t("clock_style_sparkle"),    labelEn: "Sparkles" },
+                  { val: "brain",    icon: <Brain className="w-5 h-5" />,          labelAr: t("icon_brain"),    labelEn: "Brain" },
+                  { val: "zap",      icon: <Zap className="w-5 h-5" />,            labelAr: t("clock_style_lightning"),     labelEn: "Zap" },
+                  { val: "star",     icon: <Star className="w-5 h-5" />,            labelAr: t("icon_star"),    labelEn: "Star" },
+                  { val: "heart",    icon: <Heart className="w-5 h-5" />,           labelAr: t("icon_heart"),     labelEn: "Heart" },
+                  { val: "message",  icon: <MessageCircle className="w-5 h-5" />,  labelAr: t("message_label"),   labelEn: "Msg" },
+                  { val: "cpu",      icon: <Cpu className="w-5 h-5" />,             labelAr: t("icon_wizard"),   labelEn: "CPU" },
+                  { val: "wand",     icon: <Wand2 className="w-5 h-5" />,           labelAr: t("icon_wand"),     labelEn: "Wand" },
+                  { val: "rocket",   icon: <Rocket className="w-5 h-5" />,          labelAr: t("icon_rocket"),   labelEn: "Rocket" },
                 ] as { val: AiButtonIcon; icon: React.ReactNode; labelAr: string; labelEn: string }[]).map(opt => (
                   <button key={opt.val} onClick={() => { setAiButtonIcon(opt.val); toast({ title: isArabic ? `أيقونة: ${opt.labelAr}` : `Icon: ${opt.labelEn}` }); }}
                     className={cn("flex flex-col items-center gap-1 py-2.5 rounded-xl border-2 text-xs transition-all",
@@ -1319,16 +1319,16 @@ export default function SettingsPage() {
 
             {/* Shape Picker — 7 shapes */}
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? "شكل الزر" : "Button Shape"}</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? t("button_shape") : "Button Shape"}</p>
               <div className="grid grid-cols-4 gap-2">
                 {([
-                  { val: "circle",   labelAr: "دائري",     labelEn: "Circle",   preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full bg-primary/40" /> },
-                  { val: "rounded",  labelAr: "مدوّر",     labelEn: "Rounded",  preview: "rounded-2xl",   demo: <div className="w-6 h-6 rounded-2xl bg-primary/40" /> },
-                  { val: "square",   labelAr: "مربع",      labelEn: "Square",   preview: "rounded-lg",    demo: <div className="w-6 h-6 rounded-lg bg-primary/40" /> },
-                  { val: "gradient", labelAr: "تدرج",      labelEn: "Gradient", preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full" style={{ background: "linear-gradient(135deg,hsl(var(--primary)),#7c3aed)" }} /> },
-                  { val: "neon",     labelAr: "نيون",      labelEn: "Neon",     preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full border-2 border-primary" style={{ boxShadow: "0 0 8px hsl(var(--primary))" }} /> },
-                  { val: "glass",    labelAr: "زجاجي",     labelEn: "Glass",    preview: "rounded-2xl",   demo: <div className="w-6 h-6 rounded-2xl bg-primary/20 border border-primary/40" /> },
-                  { val: "ring",     labelAr: "حلقة",      labelEn: "Ring",     preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full border-3 border-primary" style={{ border: "3px solid hsl(var(--primary))" }} /> },
+                  { val: "circle",   labelAr: t("shape_round"),     labelEn: "Circle",   preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full bg-primary/40" /> },
+                  { val: "rounded",  labelAr: t("shape_rounded2"),     labelEn: "Rounded",  preview: "rounded-2xl",   demo: <div className="w-6 h-6 rounded-2xl bg-primary/40" /> },
+                  { val: "square",   labelAr: t("shape_square"),      labelEn: "Square",   preview: "rounded-lg",    demo: <div className="w-6 h-6 rounded-lg bg-primary/40" /> },
+                  { val: "gradient", labelAr: t("clock_style_gradient"),      labelEn: "Gradient", preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full" style={{ background: "linear-gradient(135deg,hsl(var(--primary)),#7c3aed)" }} /> },
+                  { val: "neon",     labelAr: t("clock_style_neon2"),      labelEn: "Neon",     preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full border-2 border-primary" style={{ boxShadow: "0 0 8px hsl(var(--primary))" }} /> },
+                  { val: "glass",    labelAr: t("clock_style_glass"),     labelEn: "Glass",    preview: "rounded-2xl",   demo: <div className="w-6 h-6 rounded-2xl bg-primary/20 border border-primary/40" /> },
+                  { val: "ring",     labelAr: t("clock_style_ring"),      labelEn: "Ring",     preview: "rounded-full",  demo: <div className="w-6 h-6 rounded-full border-3 border-primary" style={{ border: "3px solid hsl(var(--primary))" }} /> },
                 ] as { val: AiButtonShape; labelAr: string; labelEn: string; preview: string; demo: React.ReactNode }[]).map(opt => (
                   <button key={opt.val} onClick={() => { setAiButtonShape(opt.val); toast({ title: isArabic ? opt.labelAr : opt.labelEn }); }}
                     className={cn(
@@ -1344,19 +1344,19 @@ export default function SettingsPage() {
 
             {/* Color Picker */}
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? "لون الزر" : "Button Color"}</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">{isArabic ? t("button_color") : "Button Color"}</p>
               <div className="grid grid-cols-5 gap-2">
                 {([
-                  { val: "primary", labelAr: "الرئيسي", labelEn: "Primary", swatch: "hsl(var(--primary))" },
-                  { val: "violet",  labelAr: "بنفسجي",  labelEn: "Violet",  swatch: "#7c3aed" },
-                  { val: "rose",    labelAr: "وردي",     labelEn: "Rose",    swatch: "#e11d48" },
-                  { val: "amber",   labelAr: "كهرماني",  labelEn: "Amber",   swatch: "#d97706" },
-                  { val: "emerald", labelAr: "زمردي",    labelEn: "Emerald", swatch: "#059669" },
-                  { val: "sky",     labelAr: "سماوي",    labelEn: "Sky",     swatch: "#0284c7" },
-                  { val: "slate",   labelAr: "رمادي",    labelEn: "Slate",   swatch: "#475569" },
-                  { val: "black",   labelAr: "أسود",     labelEn: "Black",   swatch: "#18181b" },
-                  { val: "white",   labelAr: "أبيض",     labelEn: "White",   swatch: "#f8fafc" },
-                  { val: "custom",  labelAr: "مخصص",     labelEn: "Custom",  swatch: aiButtonCustomColor },
+                  { val: "primary", labelAr: t("primary_label"), labelEn: "Primary", swatch: "hsl(var(--primary))" },
+                  { val: "violet",  labelAr: t("theme_purple"),  labelEn: "Violet",  swatch: "#7c3aed" },
+                  { val: "rose",    labelAr: t("theme_pink"),     labelEn: "Rose",    swatch: "#e11d48" },
+                  { val: "amber",   labelAr: t("color_amber"),  labelEn: "Amber",   swatch: "#d97706" },
+                  { val: "emerald", labelAr: t("color_emerald"),    labelEn: "Emerald", swatch: "#059669" },
+                  { val: "sky",     labelAr: t("color_sky"),    labelEn: "Sky",     swatch: "#0284c7" },
+                  { val: "slate",   labelAr: t("color_gray"),    labelEn: "Slate",   swatch: "#475569" },
+                  { val: "black",   labelAr: t("color_black"),     labelEn: "Black",   swatch: "#18181b" },
+                  { val: "white",   labelAr: t("color_white"),     labelEn: "White",   swatch: "#f8fafc" },
+                  { val: "custom",  labelAr: t("custom_label"),     labelEn: "Custom",  swatch: aiButtonCustomColor },
                 ] as { val: AiButtonColor; labelAr: string; labelEn: string; swatch: string }[]).map(opt => (
                   <button key={opt.val} onClick={() => { setAiButtonColor(opt.val); toast({ title: isArabic ? opt.labelAr : opt.labelEn }); }}
                     className={cn("flex flex-col items-center gap-1.5 py-2 rounded-xl border-2 text-xs transition-all",
@@ -1371,7 +1371,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg mt-2">
                   <input type="color" value={aiButtonCustomColor} onChange={e => setAiButtonCustomColor(e.target.value)} className="w-10 h-10 rounded-lg border border-border cursor-pointer" />
                   <div>
-                    <p className="text-xs font-medium">{isArabic ? "لون مخصص" : "Custom Color"}</p>
+                    <p className="text-xs font-medium">{isArabic ? t("custom_color") : "Custom Color"}</p>
                     <p className="text-xs text-muted-foreground font-mono">{aiButtonCustomColor}</p>
                   </div>
                 </div>
@@ -1384,26 +1384,26 @@ export default function SettingsPage() {
         <Section
           id="voice" open={isOpen("voice")} onToggle={() => toggleSection("voice")}
           icon={ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          title={t("voice_narrator") ?? "الناطق الصوتي"}
+          title={t("voice_narrator") ?? t("voice_narrator")}
           accent="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
         >
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium">{t("tts_enabled") ?? "الناطق الصوتي"}</p>
-              <p className="text-xs text-muted-foreground">{t("tts_desc") ?? "يقرأ ردود المساعد والإشعارات"}</p>
+              <p className="text-sm font-medium">{t("tts_enabled") ?? t("voice_narrator")}</p>
+              <p className="text-xs text-muted-foreground">{t("tts_desc") ?? t("reads_assistant_replies")}</p>
             </div>
-            <Toggle enabled={ttsEnabled} onChange={v => { setTtsEnabled(v); toast({ title: v ? "✅ الصوت مفعّل" : "🔇 الصوت معطّل" }); }} />
+            <Toggle enabled={ttsEnabled} onChange={v => { setTtsEnabled(v); toast({ title: v ? t("sound_enabled") : t("sound_disabled") }); }} />
           </div>
           {ttsEnabled && (
             <button onClick={() => {
-              if (!("speechSynthesis" in window)) { toast({ title: "❌ غير مدعوم", variant: "destructive" }); return; }
+              if (!("speechSynthesis" in window)) { toast({ title: t("not_supported"), variant: "destructive" }); return; }
               window.speechSynthesis.cancel();
-              const u = new SpeechSynthesisUtterance(isArabic ? "الناطق الصوتي يعمل" : "Voice narrator is working");
+              const u = new SpeechSynthesisUtterance(isArabic ? t("voice_narrator_active") : "Voice narrator is working");
               u.lang = isArabic ? "ar-SA" : "en-US"; u.rate = 0.95;
               window.speechSynthesis.speak(u);
-              toast({ title: isArabic ? "🔊 جارٍ التشغيل..." : "🔊 Playing..." });
+              toast({ title: isArabic ? t("playing_sound") : "🔊 Playing..." });
             }} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 w-full justify-center">
-              <Play className="w-3.5 h-3.5" /> {isArabic ? "تجربة الصوت" : "Test Voice"}
+              <Play className="w-3.5 h-3.5" /> {isArabic ? t("try_sound") : "Test Voice"}
             </button>
           )}
         </Section>
@@ -1412,28 +1412,28 @@ export default function SettingsPage() {
         <Section
           id="notif" open={isOpen("notif")} onToggle={() => toggleSection("notif")}
           icon={<BellRing className="w-4 h-4" />}
-          title={isArabic ? "تفضيلات الإشعارات" : "Notifications"}
+          title={isArabic ? t("notification_preferences") : "Notifications"}
           accent="bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
         >
           {notifPermission === "denied" && (
             <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-xs text-destructive">
               <BellOff className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <p>{isArabic ? "الإشعارات محظورة — افتح إعدادات المتصفح وأذن لهذا الموقع" : "Notifications blocked — allow in browser settings"}</p>
+              <p>{isArabic ? t("notif_blocked_msg") : "Notifications blocked — allow in browser settings"}</p>
             </div>
           )}
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium">{isArabic ? "تذكيرات الحضور اليومية" : "Daily Reminders"}</p>
-              <p className="text-xs text-muted-foreground">{isArabic ? "7:00 صباحاً و 4:00 مساءً" : "At 07:00 (check-in) and 16:00 (check-out)"}</p>
+              <p className="text-sm font-medium">{isArabic ? t("daily_attendance_reminders") : "Daily Reminders"}</p>
+              <p className="text-xs text-muted-foreground">{isArabic ? t("time_example_7_4") : "At 07:00 (check-in) and 16:00 (check-out)"}</p>
             </div>
             <Toggle enabled={remindersEnabled} onChange={handleToggleReminders} />
           </div>
           {remindersEnabled && notifPermission === "granted" && (
             <Button variant="outline" size="sm" className="gap-2 w-full" onClick={async () => {
               await sendTestNotification((localStorage.getItem("settings_lang") as "en"|"ar"|"sv") || "en");
-              toast({ title: isArabic ? "✅ إشعار تجريبي أُرسل" : "✅ Test notification sent" });
+              toast({ title: isArabic ? t("test_notif_sent") : "✅ Test notification sent" });
             }}>
-              <Bell className="w-4 h-4" /> {isArabic ? "إشعار تجريبي" : "Test notification"}
+              <Bell className="w-4 h-4" /> {isArabic ? t("test_notification") : "Test notification"}
             </Button>
           )}
         </Section>
@@ -1442,13 +1442,13 @@ export default function SettingsPage() {
         <Section
           id="alarm" open={isOpen("alarm")} onToggle={() => toggleSection("alarm")}
           icon={<Bell className="w-4 h-4" />}
-          title={isArabic ? "منبّه بدء وانتهاء الدوام" : "Shift Alarm"}
+          title={isArabic ? t("shift_start_end_alarm") : "Shift Alarm"}
           accent="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
         >
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium">{isArabic ? "تفعيل المنبّه" : "Enable Alarm"}</p>
-              <p className="text-xs text-muted-foreground">{isArabic ? "صوت عند بدء وانتهاء الدوام" : "Sound at shift start and end"}</p>
+              <p className="text-sm font-medium">{isArabic ? t("enable_alarm") : "Enable Alarm"}</p>
+              <p className="text-xs text-muted-foreground">{isArabic ? t("sound_shift_start_end") : "Sound at shift start and end"}</p>
             </div>
             <Switch checked={alarmSettings.enabled} onCheckedChange={async v => {
               setAlarmSettingsState(s => ({ ...s, enabled: v }));
@@ -1460,59 +1460,59 @@ export default function SettingsPage() {
           {alarmSettings.enabled && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">{isArabic ? "بدء الدوام" : "Start"}</Label>
+                <div className="space-y-1"><Label className="text-xs">{isArabic ? t("shift_start") : "Start"}</Label>
                   <Input type="time" value={alarmSettings.startTime} onChange={e => setAlarmSettingsState(s => ({ ...s, startTime: e.target.value }))} />
                 </div>
-                <div className="space-y-1"><Label className="text-xs">{isArabic ? "انتهاء الدوام" : "End"}</Label>
+                <div className="space-y-1"><Label className="text-xs">{isArabic ? t("shift_end") : "End"}</Label>
                   <Input type="time" value={alarmSettings.endTime} onChange={e => setAlarmSettingsState(s => ({ ...s, endTime: e.target.value }))} />
                 </div>
               </div>
               <div>
-                <Label className="text-xs">{isArabic ? "نوع الصوت" : "Sound"}</Label>
+                <Label className="text-xs">{isArabic ? t("sound_type") : "Sound"}</Label>
                 <Select value={alarmSettings.soundType} onValueChange={v => setAlarmSettingsState(s => ({ ...s, soundType: v as any }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="bell">{isArabic ? "جرس 🔔" : "Bell 🔔"}</SelectItem>
-                    <SelectItem value="beep">{isArabic ? "صفارة 📟" : "Beep 📟"}</SelectItem>
-                    <SelectItem value="chime">{isArabic ? "نغمة 🎵" : "Chime 🎵"}</SelectItem>
-                    <SelectItem value="horn">{isArabic ? "بوق 📯" : "Horn 📯"}</SelectItem>
+                    <SelectItem value="bell">{isArabic ? t("sound_bell") : "Bell 🔔"}</SelectItem>
+                    <SelectItem value="beep">{isArabic ? t("sound_whistle") : "Beep 📟"}</SelectItem>
+                    <SelectItem value="chime">{isArabic ? t("sound_tone") : "Chime 🎵"}</SelectItem>
+                    <SelectItem value="horn">{isArabic ? t("sound_horn") : "Horn 📯"}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">{isArabic ? "مستوى الصوت" : "Volume"} ({Math.round(alarmSettings.volume * 100)}%)</Label>
+                <Label className="text-xs">{isArabic ? t("volume_level") : "Volume"} ({Math.round(alarmSettings.volume * 100)}%)</Label>
                 <input type="range" min="0.1" max="1" step="0.1" value={alarmSettings.volume}
                   onChange={e => setAlarmSettingsState(s => ({ ...s, volume: parseFloat(e.target.value) }))} className="w-full accent-primary mt-1" />
               </div>
               <Button variant="outline" size="sm" className="gap-1.5" onClick={async () => {
                 try {
                   await playAlarmSound(alarmSettings.soundType, alarmSettings.volume);
-                  toast({ title: isArabic ? "✅ تم تشغيل الصوت" : "✅ Sound played successfully" });
+                  toast({ title: isArabic ? t("sound_played") : "✅ Sound played successfully" });
                 } catch {
-                  toast({ title: isArabic ? "❌ فشل تشغيل الصوت - تأكد من عدم كتم الصوت" : "❌ Sound failed - check volume", variant: "destructive" });
+                  toast({ title: isArabic ? t("sound_play_failed") : "❌ Sound failed - check volume", variant: "destructive" });
                 }
               }}>
-                <Volume2 className="w-3.5 h-3.5" /> {isArabic ? "اختبار الصوت" : "Test Sound"}
+                <Volume2 className="w-3.5 h-3.5" /> {isArabic ? t("test_sound") : "Test Sound"}
               </Button>
 
               {/* Push notification subscription for locked-screen alarm */}
               <div className="border-t border-border pt-3">
                 <p className="text-xs font-medium mb-1.5 flex items-center gap-1.5">
                   <Smartphone className="w-3.5 h-3.5" />
-                  {isArabic ? "المنبه عند قفل الشاشة" : "Alarm while screen is locked"}
+                  {isArabic ? t("alarm_on_lock") : "Alarm while screen is locked"}
                 </p>
                 <p className="text-xs text-muted-foreground mb-2">
                   {isArabic
-                    ? "اشترك لتلقي إشعار من الخادم حتى عند إقفال الشاشة"
+                    ? t("subscribe_bg_notif_desc")
                     : "Subscribe to receive a server push notification even when the screen is locked"}
                 </p>
                 {pushStatus === "subscribed" ? (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> {isArabic ? "الجهاز مشترك في إشعارات المنبه" : "Device subscribed to alarm push"}
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {isArabic ? t("device_subscribed_alarm") : "Device subscribed to alarm push"}
                     </span>
                     <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" onClick={unsubscribeFromPush}>
-                      {isArabic ? "إلغاء" : "Unsubscribe"}
+                      {isArabic ? t("cancel_action2") : "Unsubscribe"}
                     </Button>
                   </div>
                 ) : (
@@ -1524,15 +1524,15 @@ export default function SettingsPage() {
                     onClick={() => subscribeToPush(alarmSettings)}
                   >
                     {pushStatus === "subscribing" ? (
-                      <><Loader2 className="w-3.5 h-3.5 animate-spin" />{isArabic ? "جارٍ الاشتراك..." : "Subscribing..."}</>
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" />{isArabic ? t("subscribing") : "Subscribing..."}</>
                     ) : (
-                      <><Bell className="w-3.5 h-3.5" />{isArabic ? "تفعيل المنبه عند قفل الشاشة" : "Enable locked-screen alarm"}</>
+                      <><Bell className="w-3.5 h-3.5" />{isArabic ? t("enable_alarm_lock") : "Enable locked-screen alarm"}</>
                     )}
                   </Button>
                 )}
                 {pushStatus === "error" && (
                   <p className="text-xs text-destructive mt-1">
-                    {pushErrorMsg || (isArabic ? "فشل الاشتراك. تأكد من السماح بالإشعارات." : "Subscription failed. Please allow notifications.")}
+                    {pushErrorMsg || (isArabic ? t("subscription_failed_check_perm") : "Subscription failed. Please allow notifications.")}
                   </p>
                 )}
               </div>
@@ -1565,7 +1565,7 @@ export default function SettingsPage() {
         <Section
           id="gps" open={isOpen("gps")} onToggle={() => toggleSection("gps")}
           icon={<Navigation className="w-4 h-4" />}
-          title={isArabic ? "إعدادات GPS والمواقع" : "GPS & Location"}
+          title={isArabic ? t("gps_locations_settings") : "GPS & Location"}
           accent="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
         >
           <div className="flex items-center justify-between gap-4">
@@ -1590,17 +1590,17 @@ export default function SettingsPage() {
         <Section
           id="photo" open={isOpen("photo")} onToggle={() => toggleSection("photo")}
           icon={<Camera className="w-4 h-4" />}
-          title={isArabic ? "توثيق العمل بالصور" : "Photo Documentation"}
+          title={isArabic ? t("work_photo_documentation") : "Photo Documentation"}
           accent="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
         >
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium">
-                {isArabic ? "تفعيل توثيق الصور" : "Enable Photo Documentation"}
+                {isArabic ? t("enable_photo_documentation") : "Enable Photo Documentation"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {isArabic
-                  ? "عند التفعيل، يُطلب منك التقاط صورة إجبارية قبل كل تسجيل حضور"
+                  ? t("enabled_mandatory_photo")
                   : "When enabled, a photo is required before each check-in"}
               </p>
             </div>
@@ -1617,11 +1617,11 @@ export default function SettingsPage() {
               <Camera className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">
-                  {isArabic ? "التوثيق مفعّل" : "Documentation enabled"}
+                  {isArabic ? t("documentation_enabled") : "Documentation enabled"}
                 </p>
                 <p className="opacity-75 mt-0.5">
                   {isArabic
-                    ? "ستظهر نافذة الكاميرا تلقائياً عند الضغط على زر تسجيل الحضور"
+                    ? t("camera_auto_open_desc")
                     : "Camera will open automatically when you tap the check-in button"}
                 </p>
               </div>
@@ -1629,7 +1629,7 @@ export default function SettingsPage() {
           ) : (
             <p className="text-xs text-muted-foreground px-1">
               {isArabic
-                ? "عند الإيقاف، يتم تسجيل الحضور مباشرة بدون صورة"
+                ? t("disabled_direct_checkin")
                 : "When disabled, check-in works directly without a photo"}
             </p>
           )}
@@ -1637,25 +1637,25 @@ export default function SettingsPage() {
           {/* Delete all own work reports */}
           <div className="border-t border-border pt-3">
             <p className="text-xs font-medium mb-1 text-muted-foreground">
-              {isArabic ? "إدارة السجلات" : "Manage Records"}
+              {isArabic ? t("manage_records") : "Manage Records"}
             </p>
             <Button
               variant="outline"
               size="sm"
               className="gap-2 w-full text-destructive border-destructive/30 hover:bg-destructive/10"
               onClick={async () => {
-                if (!confirm(isArabic ? "هل أنت متأكد من حذف جميع سجلات توثيق العمل الخاصة بك؟" : "Delete all your work documentation records?")) return;
+                if (!confirm(isArabic ? t("confirm_delete_all_work_docs") : "Delete all your work documentation records?")) return;
                 try {
                   const res = await authFetch("/api/work-reports/mine", { method: "DELETE" });
-                  if (res.ok) toast({ title: isArabic ? "✅ تم حذف جميع السجلات" : "✅ All records deleted" });
+                  if (res.ok) toast({ title: isArabic ? t("all_records_deleted") : "✅ All records deleted" });
                   else throw new Error();
                 } catch {
-                  toast({ title: isArabic ? "فشل الحذف" : "Delete failed", variant: "destructive" });
+                  toast({ title: isArabic ? t("delete_failed") : "Delete failed", variant: "destructive" });
                 }
               }}
             >
               <Trash2 className="w-3.5 h-3.5" />
-              {isArabic ? "حذف سجل التوثيق اليومي" : "Delete all documentation records"}
+              {isArabic ? t("delete_daily_doc_record") : "Delete all documentation records"}
             </Button>
           </div>
         </Section>
@@ -1696,12 +1696,12 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </div>
-              {keyStatus === "valid" && <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> {isArabic ? "تم التحقق من المفتاح وحفظه" : "Key verified and saved"}</p>}
-              {keyStatus === "verifying" && <p className="text-xs text-blue-600 flex items-center gap-1"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {isArabic ? "جاري التحقق من الاتصال بـ Gemini…" : "Testing Gemini connection…"}</p>}
-              {keyStatus === "invalid" && <p className="text-xs text-destructive flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> {keyError || (isArabic ? "المفتاح غير صالح" : "Invalid key")}</p>}
+              {keyStatus === "valid" && <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> {isArabic ? t("key_verified_saved") : "Key verified and saved"}</p>}
+              {keyStatus === "verifying" && <p className="text-xs text-blue-600 flex items-center gap-1"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {isArabic ? t("checking_gemini_connection") : "Testing Gemini connection…"}</p>}
+              {keyStatus === "invalid" && <p className="text-xs text-destructive flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> {keyError || (isArabic ? t("key_invalid2") : "Invalid key")}</p>}
               <Button onClick={handleSaveKey} disabled={!apiKey.trim() || isSavingKey} className="gap-2 w-full">
                 {isSavingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                {isArabic ? "اختبار الاتصال وحفظ المفتاح" : "Test Connection & Save Key"}
+                {isArabic ? t("test_and_save_key") : "Test Connection & Save Key"}
               </Button>
             </div>
           </Section>
@@ -1725,18 +1725,18 @@ export default function SettingsPage() {
           <Section
             id="login" open={isOpen("login")} onToggle={() => toggleSection("login")}
             icon={<LogIn className="w-4 h-4" />}
-            title={isArabic ? "تخصيص صفحة الدخول" : "Login Page"}
+            title={isArabic ? t("customize_login_page") : "Login Page"}
             accent="bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400"
           >
             <div className="space-y-2">
-              <Label className="text-sm">{isArabic ? "خلفية صفحة الدخول" : "Login Background"}</Label>
+              <Label className="text-sm">{isArabic ? t("login_page_background") : "Login Background"}</Label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { val: "default",         label: isArabic ? "افتراضي" : "Default",  cls: "bg-background border" },
-                  { val: "gradient-blue",   label: isArabic ? "أزرق" : "Blue",        cls: "bg-gradient-to-br from-blue-100 to-indigo-200" },
-                  { val: "gradient-purple", label: isArabic ? "بنفسجي" : "Purple",    cls: "bg-gradient-to-br from-purple-100 to-violet-200" },
-                  { val: "gradient-green",  label: isArabic ? "أخضر" : "Green",       cls: "bg-gradient-to-br from-emerald-100 to-teal-200" },
-                  { val: "gradient-warm",   label: isArabic ? "دافئ" : "Warm",        cls: "bg-gradient-to-br from-orange-100 to-rose-200" },
+                  { val: "default",         label: isArabic ? t("default_option") : "Default",  cls: "bg-background border" },
+                  { val: "gradient-blue",   label: isArabic ? t("color_blue") : "Blue",        cls: "bg-gradient-to-br from-blue-100 to-indigo-200" },
+                  { val: "gradient-purple", label: isArabic ? t("theme_purple") : "Purple",    cls: "bg-gradient-to-br from-purple-100 to-violet-200" },
+                  { val: "gradient-green",  label: isArabic ? t("color_green") : "Green",       cls: "bg-gradient-to-br from-emerald-100 to-teal-200" },
+                  { val: "gradient-warm",   label: isArabic ? t("style_warm") : "Warm",        cls: "bg-gradient-to-br from-orange-100 to-rose-200" },
                 ].map(({ val, label, cls }) => (
                   <button key={val} onClick={() => saveLoginBgStyle(val)}
                     className={cn("h-12 rounded-lg border-2 transition-all text-xs font-medium", cls,
@@ -1749,16 +1749,16 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm">{isArabic ? "نص ثانوي مخصص" : "Custom Subtitle"}</Label>
-              <Input value={loginSubtitle} onChange={e => setLoginSubtitleState(e.target.value)} placeholder={isArabic ? "مثال: نظام الحضور المتكامل..." : "e.g. Attendance Management System..."} />
-              <p className="text-xs text-muted-foreground">{isArabic ? "اتركه فارغاً للافتراضي" : "Leave empty for default"}</p>
+              <Label className="text-sm">{isArabic ? t("custom_secondary_text") : "Custom Subtitle"}</Label>
+              <Input value={loginSubtitle} onChange={e => setLoginSubtitleState(e.target.value)} placeholder={isArabic ? t("example_app_name") : "e.g. Attendance Management System..."} />
+              <p className="text-xs text-muted-foreground">{isArabic ? t("leave_empty_default") : "Leave empty for default"}</p>
             </div>
             <div className="border-t border-border pt-3">
-              <Label className="text-sm flex items-center gap-1.5"><SendHorizonal className="w-3.5 h-3.5" /> {isArabic ? "الملخص اليومي" : "Daily Summary"}</Label>
-              <p className="text-xs text-muted-foreground mt-1 mb-2">{isArabic ? "إرسال تقرير حضور لكل موظف" : "Send attendance report to each employee"}</p>
+              <Label className="text-sm flex items-center gap-1.5"><SendHorizonal className="w-3.5 h-3.5" /> {isArabic ? t("daily_summary") : "Daily Summary"}</Label>
+              <p className="text-xs text-muted-foreground mt-1 mb-2">{isArabic ? t("send_attendance_report_desc") : "Send attendance report to each employee"}</p>
               <Button variant="outline" onClick={sendDailySummary} disabled={dailySummarySending} className="gap-2">
                 {dailySummarySending ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendHorizonal className="w-4 h-4" />}
-                {isArabic ? "إرسال الملخص الآن" : "Send Summary Now"}
+                {isArabic ? t("send_summary_now") : "Send Summary Now"}
               </Button>
             </div>
           </Section>
@@ -1806,9 +1806,9 @@ export default function SettingsPage() {
             )}
           >
             {globalSaving ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> {isArabic ? "جارٍ الحفظ..." : "Saving..."}</>
+              <><Loader2 className="w-5 h-5 animate-spin" /> {isArabic ? t("saving2") : "Saving..."}</>
             ) : (
-              <><Save className="w-5 h-5" /> {isArabic ? "حفظ الإعدادات" : "Save Settings"}</>
+              <><Save className="w-5 h-5" /> {isArabic ? t("save_settings2") : "Save Settings"}</>
             )}
           </button>
         </div>
