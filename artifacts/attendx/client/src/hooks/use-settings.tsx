@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import i18n, { applyDirection } from "@/i18n";
+import { authFetch } from "@/lib/api-url";
 
 type Language = "en" | "ar" | "sv" | "fr" | "de" | "es" | "tr" | "ur";
 export type Theme = "light" | "dark" | "system" | "ocean" | "forest" | "rose" | "sunset" | "purple" | "gold" | "ruby" | "slate" | "indigo" | "lime" | "coral" | "midnight" | "deepPurple" | "violet" | "navy" | "magenta" | "amber" | "copper" | "sakura" | "arctic";
@@ -681,10 +682,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   /** Fire-and-forget: persist a partial UI settings patch to the server so
    *  any other device/browser gets the same config when it next loads.    */
   function saveToServer(patch: Record<string, unknown>) {
-    fetch("/api/settings/app", {
+    authFetch("/api/settings/app", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ uiSettings: patch }),
     }).catch(() => { /* ignore network errors — localStorage is always fresh */ });
   }
