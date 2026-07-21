@@ -2,34 +2,20 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Replaces the __BUILD_TIME__ placeholder in the output sw.js with the
- * actual build timestamp so the browser always detects a content change
- * and installs a fresh Service Worker on every new deploy.
- */
-function swVersionPlugin() {
-  const buildTime = Date.now().toString();
-  return {
-    name: "sw-version",
-    // Runs after Vite has copied public/ files to the output directory.
-    closeBundle() {
-      const swOut = path.resolve(__dirname, "../server/public/sw.js");
-      if (!fs.existsSync(swOut)) return;
-      const original = fs.readFileSync(swOut, "utf-8");
-      const patched = original.replace("__BUILD_TIME__", buildTime);
-      fs.writeFileSync(swOut, patched);
-    },
-  };
-}
+// NOTE: sw.js versioning is now handled entirely at runtime by the Express
+// server (see server/src/app.ts). The server replaces __BUILD_TIME__ with
+// SERVER_START_TIME on every request, so every server restart (= every
+// deploy) produces a new SW cache key and forces all PWA clients to update.
+// Do NOT add a build-time plugin here that pre-replaces __BUILD_TIME__ —
+// it would bake in a fixed timestamp and defeat the runtime replacement.
 
 export default defineConfig({
   base: "/",
-  plugins: [react(), tailwindcss(), swVersionPlugin()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
