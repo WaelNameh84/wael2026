@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import { compressImage } from "@/lib/compress-image";
 import { useTranslation } from "@/lib/i18n";
 import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/utils";
@@ -3668,12 +3669,7 @@ export default function SettingsPage() {
                       if (!file) return;
                       setWelcomeImgUploading(true);
                       try {
-                        const fileData = await new Promise<string>((resolve, reject) => {
-                          const reader = new FileReader();
-                          reader.onload = () => resolve(reader.result as string);
-                          reader.onerror = reject;
-                          reader.readAsDataURL(file);
-                        });
+                        const fileData = await compressImage(file, 800, 0.85);
                         const res = await authFetch("/api/uploads", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },

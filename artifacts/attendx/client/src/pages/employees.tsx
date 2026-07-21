@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Trash2, Loader2, Pencil, BarChart3, Users, Shield, Briefcase, Camera, X, Filter } from "lucide-react";
 import { authFetch, apiUrl } from "@/lib/api-url";
+import { compressImage } from "@/lib/compress-image";
 import EmployeeRecordDialog, { type EmpUser } from "@/pages/employee-record";
 import { NoEmployeesIllustration } from "@/components/ui/empty-illustrations";
 import { motion, AnimatePresence } from "framer-motion";
@@ -303,12 +304,8 @@ function AvatarUploadButton({ onUploaded }: { onUploaded: (url: string) => void 
     if (file.size > 20 * 1024 * 1024) { toast({ title: "الصورة كبيرة جداً (max 20MB)", variant: "destructive" }); return; }
     setUploading(true);
     try {
-      const fileData = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      // Compress & resize to max 400×400 so base64 stays small in DB
+      const fileData = await compressImage(file, 400, 0.82);
       const res = await authFetch("/api/uploads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

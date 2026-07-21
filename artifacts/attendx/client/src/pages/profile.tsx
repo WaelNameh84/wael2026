@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { compressImage } from "@/lib/compress-image";
 import Layout from "@/components/Layout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetMe, getGetMeQueryKey } from "@/lib/api-client/index";
@@ -66,13 +67,8 @@ export default function ProfilePage() {
     }
     setUploading(true);
     try {
-      // Read as data URL
-      const fileData = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      // Compress & resize to max 400×400 before upload so base64 stays small
+      const fileData = await compressImage(file, 400, 0.82);
       // Upload to server storage
       const uploadRes = await authFetch("/api/uploads", {
         method: "POST",
