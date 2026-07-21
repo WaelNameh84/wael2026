@@ -727,6 +727,15 @@ export default function EmployeesPage() {
                       <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => openEdit(user as UserRecord)}>
                         <Pencil className="w-3 h-3 me-1" /> {t("edit")}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive border-destructive/30 hover:bg-destructive hover:text-white flex-shrink-0"
+                        onClick={() => handleDelete(user.id, user.name)}
+                        title={t("delete")}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 </motion.div>

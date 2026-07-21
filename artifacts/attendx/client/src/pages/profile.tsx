@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Layout from "@/components/Layout";
-import { useQuery } from "@tanstack/react-query";
-import { useGetMe } from "@/lib/api-client/index";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useGetMe, getGetMeQueryKey } from "@/lib/api-client/index";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiUrl, authHeaders } from "@/lib/api-url";
+import { apiUrl, authHeaders, authFetch } from "@/lib/api-url";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, Building2, Briefcase, Clock, Calendar, Award,
   Banknote, CheckCircle, XCircle, TrendingUp, TrendingDown,
-  Timer, BarChart3, FileText, AlertTriangle, ArrowLeft
+  Timer, BarChart3, FileText, AlertTriangle, ArrowLeft, Camera, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,57 @@ function fmtDate(s?: string | null) {
 
 export default function ProfilePage() {
   const { data: me, isLoading: meLoading } = useGetMe();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !me) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "الرجاء اختيار صورة", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "الصورة كبيرة جداً (الحد 5MB)", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      // Read as data URL
+      const fileData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      // Upload to server storage
+      const uploadRes = await authFetch("/api/uploads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, contentType: file.type, fileData }),
+      });
+      if (!uploadRes.ok) throw new Error("فشل رفع الصورة");
+      const { path } = await uploadRes.json();
+      // Save avatarUrl to user profile
+      const patchRes = await authFetch(`/api/users/${me.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: path }),
+      });
+      if (!patchRes.ok) throw new Error("فشل حفظ الصورة");
+      // Refresh me query so avatar shows immediately everywhere
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+      toast({ title: "✅ تم تحديث صورتك الشخصية" });
+    } catch (err: any) {
+      toast({ title: "خطأ", description: err?.message ?? "فشل رفع الصورة", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }, [me, queryClient, toast]);
+
   const now = new Date();
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const monthStart = `${thisMonth}-01`;
@@ -191,17 +243,54 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
-            {/* Edit button + Avatar stacked */}
+            {/* Avatar + upload */}
             <div className="flex flex-col items-center gap-3 flex-shrink-0">
               <Link href="/settings">
                 <Button variant="outline" size="sm" className="gap-1.5 w-full">
                   تعديل الملف ←
                 </Button>
               </Link>
-              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg overflow-hidden">
-                {me?.avatarUrl
-                  ? <img src={me.avatarUrl} alt={me.name} className="w-full h-full object-cover" />
-                  : initials}
+              {/* Hidden file input */}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+              {/* Avatar with camera overlay */}
+              <div className="relative group">
+                <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg overflow-hidden">
+                  {me?.avatarUrl
+                    ? <img src={apiUrl(me.avatarUrl)} alt={me.name} className="w-full h-full object-cover" />
+                    : initials}
+                </div>
+                {/* Upload overlay */}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  title="تغيير الصورة الشخصية"
+                >
+                  {uploading
+                    ? <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    : <Camera className="w-5 h-5 text-white" />
+                  }
+                </button>
+                {/* Always-visible small camera badge */}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute -bottom-1.5 -end-1.5 w-7 h-7 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md hover:bg-primary/90 transition-colors"
+                  title="تغيير الصورة"
+                >
+                  {uploading
+                    ? <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
+                    : <Camera className="w-3.5 h-3.5 text-white" />
+                  }
+                </button>
               </div>
             </div>
           </div>
