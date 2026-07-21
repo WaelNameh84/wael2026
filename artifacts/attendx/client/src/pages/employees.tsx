@@ -267,13 +267,15 @@ function getInitials(name: string) {
 function EmpAvatar({ name, avatarUrl, size = "lg" }: { name: string; avatarUrl?: string | null; size?: "sm" | "md" | "lg" | "xl" | "2xl" }) {
   const dim = size === "2xl" ? "w-32 h-32" : size === "xl" ? "w-24 h-24" : size === "lg" ? "w-14 h-14" : size === "md" ? "w-11 h-11" : "w-9 h-9";
   const text = size === "2xl" ? "text-4xl" : size === "xl" ? "text-2xl" : size === "lg" ? "text-lg" : "text-sm";
-  if (avatarUrl) {
+  const [imgError, setImgError] = useState(false);
+  if (avatarUrl && !imgError) {
     // data URLs are used directly; server-relative paths need the API base prepended
     const src = avatarUrl.startsWith("data:") ? avatarUrl : apiUrl(avatarUrl);
     return (
       <img
         src={src}
         alt={name}
+        onError={() => setImgError(true)}
         className={`${dim} rounded-2xl object-cover border-2 border-white/40 shadow-md flex-shrink-0`}
       />
     );
