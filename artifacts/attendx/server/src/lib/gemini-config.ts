@@ -184,6 +184,12 @@ function persist(partial: Partial<GeminiConfig>): void {
   persistNow(cache).catch(err => console.error("[Config] Failed to persist app_config to DB:", err));
 }
 
+/** Apply multiple config changes in one atomic DB write (avoids parallel writes). */
+export function persistBatch(changes: Partial<GeminiConfig>): void {
+  cache = { ...cache, ...changes };
+  persistNow(cache).catch(err => console.error("[Config] Failed to persist app_config to DB:", err));
+}
+
 export function getGeminiApiKey(): string | undefined {
   return cache.apiKey || process.env.GEMINI_API_KEY;
 }

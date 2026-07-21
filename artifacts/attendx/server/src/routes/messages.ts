@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, messagesTable, usersTable } from "../../../db/src/index.js";
-import { eq, and, or, desc, isNull } from "drizzle-orm";
+import { eq, and, or, desc, isNull, count } from "drizzle-orm";
 import { requireAuth } from "./auth.js";
 import { z } from "zod";
 
@@ -22,8 +22,8 @@ const parseId = (s: string): number | null => {
 router.get("/unread-count", requireAuth, async (req: any, res) => {
   try {
     const userId = req.userId;
-    const rows = await db
-      .select()
+    const [{ value }] = await db
+      .select({ value: count() })
       .from(messagesTable)
       .where(
         and(
@@ -35,7 +35,7 @@ router.get("/unread-count", requireAuth, async (req: any, res) => {
           isNull(messagesTable.parentId)
         )
       );
-    return res.json({ count: rows.length });
+    return res.json({ count: value });
   } catch (err: any) {
     return res.status(httpStatus(err)).json({ error: err.message });
   }

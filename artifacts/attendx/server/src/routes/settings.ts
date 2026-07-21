@@ -13,7 +13,7 @@ import {
   getManagerApiAccess, saveManagerApiAccess,
   getGpsEnabled, saveGpsEnabled, getGpsRadius, saveGpsRadius,
   getLogoDisplaySettings, saveLogoDisplaySettings,
-  getUiSettings, saveUiSettings,
+  getUiSettings, saveUiSettings, persistBatch,
 } from "../lib/gemini-config.js";
 import { initVapid } from "./push.js";
 import { getPrimaryAdminEmail } from "../lib/mailer.js";
@@ -70,29 +70,35 @@ router.patch("/app", requireAuth, requireAdmin, async (req, res) => {
       uiSettings: z.record(z.unknown()).optional(),
     }).parse(req.body);
 
-    if (body.appName !== undefined) saveAppName(body.appName.trim());
-    if (body.appLogo !== undefined) saveAppLogo(body.appLogo);
-    if (body.workStartTime !== undefined) saveWorkStartTime(body.workStartTime);
-    if (body.lateGraceMinutes !== undefined) saveLateGraceMinutes(body.lateGraceMinutes);
-    if (body.breakMinutes !== undefined) saveBreakMinutes(body.breakMinutes);
-    if (body.appTimezone !== undefined) saveAppTimezone(body.appTimezone);
-    if (body.gpsEnabled !== undefined) saveGpsEnabled(body.gpsEnabled);
-    if (body.gpsRadius !== undefined) saveGpsRadius(body.gpsRadius);
+    // Collect all changes and write to DB in a single operation
+    const changes: Record<string, unknown> = {};
+    if (body.appName !== undefined) changes.appName = body.appName.trim();
+    if (body.appLogo !== undefined) changes.appLogo = body.appLogo;
+    if (body.workStartTime !== undefined) changes.workStartTime = body.workStartTime;
+    if (body.lateGraceMinutes !== undefined) changes.lateGraceMinutes = body.lateGraceMinutes;
+    if (body.breakMinutes !== undefined) changes.breakMinutes = body.breakMinutes;
+    if (body.appTimezone !== undefined) changes.appTimezone = body.appTimezone;
+    if (body.gpsEnabled !== undefined) changes.gpsEnabled = body.gpsEnabled;
+    if (body.gpsRadius !== undefined) changes.gpsRadius = body.gpsRadius;
+    if (body.logoWidth !== undefined) changes.logoWidth = body.logoWidth;
+    if (body.logoHeight !== undefined) changes.logoHeight = body.logoHeight;
+    if (body.logoRotation !== undefined) changes.logoRotation = body.logoRotation;
+    if (body.logoOffsetX !== undefined) changes.logoOffsetX = body.logoOffsetX;
+    if (body.logoOffsetY !== undefined) changes.logoOffsetY = body.logoOffsetY;
+    if (body.logoBgEnabled !== undefined) changes.logoBgEnabled = body.logoBgEnabled;
+    if (body.logoBgColor !== undefined) changes.logoBgColor = body.logoBgColor;
+    if (body.logoBgOpacity !== undefined) changes.logoBgOpacity = body.logoBgOpacity;
+    if (body.logoBgRadius !== undefined) changes.logoBgRadius = body.logoBgRadius;
 
-    // Save any logo display settings that were sent
-    const logoFields = {
-      logoWidth: body.logoWidth, logoHeight: body.logoHeight,
-      logoRotation: body.logoRotation, logoOffsetX: body.logoOffsetX,
-      logoOffsetY: body.logoOffsetY, logoBgEnabled: body.logoBgEnabled,
-      logoBgColor: body.logoBgColor, logoBgOpacity: body.logoBgOpacity,
-      logoBgRadius: body.logoBgRadius,
-    };
-    const hasLogoFields = Object.values(logoFields).some(v => v !== undefined);
-    if (hasLogoFields) saveLogoDisplaySettings(logoFields as any);
-
-    // Merge partial UI settings patch into the stored blob
+    // Merge partial UI settings into the existing blob
     if (body.uiSettings && Object.keys(body.uiSettings).length > 0) {
-      saveUiSettings(body.uiSettings);
+      const current = getUiSettings();
+      changes.uiSettings = JSON.stringify({ ...current, ...body.uiSettings });
+    }
+
+    // Single DB write for all changes
+    if (Object.keys(changes).length > 0) {
+      persistBatch(changes as any);
     }
 
     const adminEmail = await getPrimaryAdminEmail();

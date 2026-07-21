@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, notificationsTable } from "../../../db/src/index.js";
-import { eq, desc, and, ne, isNull } from "drizzle-orm";
+import { eq, desc, and, ne, isNull, count } from "drizzle-orm";
 import { requireAdmin, requireAuth } from "./auth.js";
 
 const router = Router();
@@ -21,11 +21,11 @@ router.get("/", requireAdmin, async (_req, res) => {
 
 router.get("/count", requireAdmin, async (_req, res) => {
   try {
-    const rows = await db
-      .select()
+    const [{ value }] = await db
+      .select({ value: count() })
       .from(notificationsTable)
       .where(and(eq(notificationsTable.status, "unread"), isNull(notificationsTable.userId)));
-    return res.json({ count: rows.length });
+    return res.json({ count: value });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -49,11 +49,11 @@ router.get("/my", requireAuth, async (req: any, res) => {
 /** GET /my/count — unread count for current employee */
 router.get("/my/count", requireAuth, async (req: any, res) => {
   try {
-    const rows = await db
-      .select()
+    const [{ value }] = await db
+      .select({ value: count() })
       .from(notificationsTable)
       .where(and(eq(notificationsTable.userId, req.userId), eq(notificationsTable.status, "unread")));
-    return res.json({ count: rows.length });
+    return res.json({ count: value });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
