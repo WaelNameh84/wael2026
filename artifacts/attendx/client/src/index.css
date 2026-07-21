@@ -1,0 +1,850 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Tajawal:wght@400;500;700&family=IBM+Plex+Arabic:wght@400;500;600;700&display=swap');
+
+/* Force Western/Latin numerals everywhere regardless of language direction */
+* { font-feature-settings: "lnum" 1; }
+body { font-variant-numeric: normal; font-weight: var(--font-weight-override, 400); }
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 222 24% 93%;
+  --foreground: 222 47% 11%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 220 13% 88%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 220 13% 91%;
+  
+  --primary: 199 89% 48%; /* A sharp, technical cerulean */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 220 16% 92%;
+  --secondary-foreground: 220 47% 11%;
+  
+  --muted: 220 18% 91%;
+  --muted-foreground: 220 8% 42%;
+  
+  --accent: 220 16% 92%;
+  --accent-foreground: 220 47% 11%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 220 13% 88%;
+  --input: 220 15% 82%;
+  --ring: 199 89% 48%;
+  
+  --radius: 0.5rem;
+  
+  --sidebar: 222 47% 11%;
+  --sidebar-foreground: 220 14% 96%;
+  --sidebar-border: 222 47% 15%;
+  --sidebar-primary: 199 89% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 222 47% 18%;
+  --sidebar-accent-foreground: 220 14% 96%;
+  --sidebar-ring: 199 89% 48%;
+
+  --chart-1: 199 89% 48%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+}
+
+.dark {
+  --background: 222 42% 5%;
+  --foreground: 215 30% 95%;
+  
+  --card: 222 36% 12%;
+  --card-foreground: 215 30% 95%;
+  --card-border: 222 34% 22%;
+  
+  --popover: 222 38% 10%;
+  --popover-foreground: 215 30% 95%;
+  --popover-border: 222 38% 18%;
+  
+  --primary: 199 89% 52%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 222 32% 19%;
+  --secondary-foreground: 215 30% 90%;
+  
+  --muted: 222 30% 17%;
+  --muted-foreground: 215 15% 65%;
+  
+  --accent: 222 32% 20%;
+  --accent-foreground: 215 30% 95%;
+  
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 222 34% 22%;
+  --input: 222 30% 24%;
+  --ring: 199 89% 52%;
+
+  --sidebar: 222 40% 6%;
+  --sidebar-foreground: 215 30% 90%;
+  --sidebar-border: 222 38% 14%;
+  --sidebar-primary: 199 89% 52%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 222 38% 14%;
+  --sidebar-accent-foreground: 215 30% 90%;
+  --sidebar-ring: 199 89% 52%;
+
+  --chart-1: 199 89% 52%;
+  --chart-2: 160 84% 42%;
+  --chart-3: 30 82% 58%;
+  --chart-4: 280 65% 65%;
+  --chart-5: 340 75% 60%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground transition-colors duration-300;
+  }
+
+  /* ── RTL global ── */
+  html[dir="rtl"] {
+    text-align: right;
+    font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* Flip flex rows that use gap for icon+label pairs */
+  html[dir="rtl"] .flex.items-center.gap-2,
+  html[dir="rtl"] .flex.items-center.gap-3,
+  html[dir="rtl"] .flex.items-center.gap-1\.5 {
+    flex-direction: row-reverse;
+  }
+
+  /* Keep card icon rows natural (they already use row-reverse via text-start) */
+  html[dir="rtl"] table {
+    direction: rtl;
+  }
+
+  html[dir="rtl"] th,
+  html[dir="rtl"] td {
+    text-align: right;
+  }
+
+  /* Badge inside table cells */
+  html[dir="rtl"] td .capitalize {
+    direction: rtl;
+  }
+
+  /* Input & select alignment */
+  html[dir="rtl"] input,
+  html[dir="rtl"] select,
+  html[dir="rtl"] textarea {
+    text-align: right;
+    direction: rtl;
+  }
+
+  /* Date inputs: keep the native widget LTR (segments overlap otherwise).
+     Use text-align:left so the date string stays left-aligned inside the
+     LTR input — right-aligning it pushes the text to the right edge which
+     causes visible overflow on iOS Safari in RTL pages. */
+  html[dir="rtl"] input[type="date"] {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* Prevent native date picker from overflowing its container on mobile */
+  input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
+  }
+
+  /* Select trigger content */
+  html[dir="rtl"] [data-slot="select-trigger"] {
+    flex-direction: row-reverse;
+  }
+
+  /* Sidebar nav items — already use logical classes (start-0, end-4, border-e) */
+  /* Ensure icon stays on the inner (start) side in RTL */
+  html[dir="rtl"] nav a.flex,
+  html[dir="rtl"] nav button.flex {
+    flex-direction: row-reverse;
+  }
+
+  /* Mobile header buttons spacing */
+  html[dir="rtl"] header.flex.items-center {
+    flex-direction: row-reverse;
+  }
+
+  /* Notifications panel already uses end-4 (direction-aware) */
+
+  /* Wrap gaps for filter bar */
+  html[dir="rtl"] .flex.flex-wrap.gap-4.items-end {
+    flex-direction: row-reverse;
+  }
+
+  /* Button icon + text */
+  html[dir="rtl"] button.gap-2 {
+    flex-direction: row-reverse;
+  }
+}
+
+/* ── Dark custom background: auto-switch text to light ───────────────── */
+/* All gradient/image backgrounds in this app are dark. When one is active
+   (body.app-bg-custom) but the CSS theme is still "light", foreground
+   colors are dark and become invisible on the dark background.
+   Override the core color variables to their dark-mode equivalents so
+   every text element stays readable without requiring the user to also
+   manually switch to a dark theme. */
+/* Only applies to dark gradients/images (the default — see BRIGHT_GRADIENTS
+   in use-settings.tsx). Light/medium backgrounds get the "app-bg-bright"
+   class instead and are excluded here, because default light-theme text
+   already reads fine on top of them and forcing dark-mode-style light text
+   would make it invisible again. */
+body.app-bg-custom:not(.app-bg-bright) {
+  --foreground:          215 30% 95%;
+  --card-foreground:     215 30% 95%;
+  --popover-foreground:  215 30% 95%;
+  --muted-foreground:    215 18% 72%;
+  --accent-foreground:   215 30% 95%;
+  --secondary-foreground:215 30% 90%;
+  --card:                222 24% 27%;
+  --card-border:         220 22% 48%;
+  --muted:               222 30% 18%;
+  --border:              222 34% 22%;
+  --input:               222 30% 26%;
+  /* --secondary and --accent were previously left at their light-theme
+     values here while their paired *-foreground vars above were switched
+     to light text — that mismatch made every bg-secondary element
+     (secondary Badges/Buttons: "Employee" role pill, "total requests"
+     count pill, etc.) and bg-accent element (calendar/command/toggle
+     selected states) render as light text on a light background. */
+  --secondary:           222 30% 20%;
+  --accent:              222 30% 22%;
+}
+
+/* Dialogs/sheets/popovers use bg-background (not --card) which stays light when
+   custom dark background is active. Reset all text variables to light-theme
+   values inside these overlays so text stays dark and readable.
+   The same bg-background / bg-white utility classes are also used directly in
+   normal page content (messages inbox/sent tab pills, floating action
+   buttons, etc.) — those are plain light boxes on the dark custom
+   background too, not just modal/portal overlays, so they need the exact
+   same reset or their inherited light --foreground text becomes invisible
+   against their own light surface. */
+body.app-bg-custom:not(.app-bg-bright) [role="dialog"],
+body.app-bg-custom:not(.app-bg-bright) [role="alertdialog"],
+body.app-bg-custom:not(.app-bg-bright) [role="listbox"],
+body.app-bg-custom:not(.app-bg-bright) [role="menu"],
+body.app-bg-custom:not(.app-bg-bright) [data-radix-popper-content-wrapper],
+body.app-bg-custom:not(.app-bg-bright) [class*="bg-background"],
+body.app-bg-custom:not(.app-bg-bright) [class*="bg-white"] {
+  --foreground:          220 47% 11%;
+  --card-foreground:     220 47% 11%;
+  --popover-foreground:  220 47% 11%;
+  --muted-foreground:    220 8% 42%;
+  --accent:              220 16% 92%;
+  --accent-foreground:   220 47% 11%;
+  --secondary-foreground:220 47% 11%;
+  --muted:               220 18% 91%;
+  --border:              220 13% 88%;
+  --input:               220 15% 82%;
+  color: hsl(220, 47%, 11%);
+}
+
+/* Active color themes (ocean, midnight, navy, etc.) set --accent /
+   --accent-foreground as inline styles directly on <html> (see
+   THEME_VARS/applyTheme). Some of those pairs are only readable on the
+   app's dark custom background, not on the light popover/listbox surface
+   above — e.g. a dark --accent with a light --accent-foreground becomes a
+   light-on-light highlight inside Select/Menu items. The reset above
+   already forces a safe light accent + dark text for that surface; also
+   make sure it wins over any inline theme vars applied further out on the
+   ancestor chain. */
+body.app-bg-custom:not(.app-bg-bright) [role="listbox"] [data-highlighted],
+body.app-bg-custom:not(.app-bg-bright) [role="menu"] [data-highlighted],
+body.app-bg-custom:not(.app-bg-bright) [role="option"][data-highlighted] {
+  background-color: hsl(220 16% 92%) !important;
+  color: hsl(220 47% 11%) !important;
+}
+
+/* Ensure table header and body text always has proper contrast */
+table thead th {
+  color: hsl(var(--foreground));
+}
+table tbody td {
+  color: hsl(var(--foreground));
+}
+
+/* ── Color Themes ────────────────────────────────────────────────────── */
+/* NOTE: the actual per-theme HSL values are applied at runtime as inline
+   CSS custom properties on <html> (see THEME_VARS/applyTheme in
+   client/src/hooks/use-settings.tsx) — that is the single source of truth.
+   These `html.theme-*` class rules were dead code (the class was removed on
+   theme switch but never re-added), which made it look like some color
+   themes silently "didn't work". They've been removed; do not reintroduce
+   a second theme-variable mechanism here — extend THEME_VARS instead. */
+
+/* ── Custom background (image / gradient) ───────────────────────────── */
+body.app-bg-custom {
+  background-blend-mode: normal;
+}
+body.app-bg-custom #root {
+  background: transparent;
+}
+
+/* ── Custom background: always separate cards from the body background ── */
+/* Glass mode (below) is opt-in and defaults to "off", so a flat --card
+   color was the only thing separating a card from a custom gradient/image
+   body background. That works for the theme's own background (very
+   different lightness) but not for user-picked custom gradients — a light
+   gradient (e.g. Ivory) sits at nearly the same lightness as the default
+   white card, and some dark gradients (e.g. Copper) sit close to the dark
+   --card override too, so cards visually merged into the page. Force a
+   translucent-with-blur + bordered + shadowed treatment whenever a custom
+   background is active so the card always reads as its own surface,
+   independent of which exact background color the user picked. Uses plain
+   (non-!important) declarations so an explicit Glass intensity (which uses
+   !important) still layers its own stronger blur/opacity on top. */
+/* Fully opaque (not translucent) on purpose: a translucent card lets the
+   custom gradient bleed through and wash out the lightness difference we
+   just set up above, which is exactly what made cards look "the same
+   color" as the background. Opacity + a clearly lighter border + a strong
+   shadow guarantees the card reads as its own surface no matter which
+   gradient/image is behind it. Glass mode (below) still opts back into
+   translucency via !important when the user explicitly enables it. */
+body.app-bg-custom [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card));
+  border: 1.5px solid hsl(var(--card-border));
+  box-shadow: 0 10px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+body.app-bg-custom.app-bg-bright [class*="bg-card"]:not(input):not(select) {
+  border: 1.5px solid rgba(15,23,42,0.18);
+  box-shadow: 0 10px 28px rgba(15,23,42,0.16), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* ── Glassmorphism 3D — realistic frosted-glass surfaces ─────────────── */
+/* Cards only turn translucent when BOTH the Card Style is explicitly set
+   to "Glass" (data-card="glass") AND a Glass Intensity above "off" is
+   picked. Previously these rules only checked data-glass, so picking
+   "Rounded" or "Sharp" in Card Style did nothing — any leftover Glass
+   Intensity setting silently kept every card see-through and blending
+   into custom backgrounds, with no way to fully opt out from Card Style
+   alone. The sidebar/popover frosted effect intentionally stays tied to
+   Glass Intensity only (not Card Style), since those aren't "cards". */
+html[data-card="glass"][data-glass="light"] .bg-card,
+html[data-card="glass"][data-glass="light"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.72) !important;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+html[data-card="glass"][data-glass="medium"] .bg-card,
+html[data-card="glass"][data-glass="medium"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.55) !important;
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+html[data-card="glass"][data-glass="strong"] .bg-card,
+html[data-card="glass"][data-glass="strong"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card) / 0.38) !important;
+  backdrop-filter: blur(22px) saturate(190%);
+  -webkit-backdrop-filter: blur(22px) saturate(190%);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
+/* Explicitly opaque, solid cards whenever Card Style is Rounded or Sharp —
+   guaranteed to win over any custom background/card-color/glass leftovers
+   so these two styles never turn translucent. */
+html[data-card="rounded"] .bg-card,
+html[data-card="rounded"] [class*="bg-card"]:not(input):not(select),
+html[data-card="sharp"] .bg-card,
+html[data-card="sharp"] [class*="bg-card"]:not(input):not(select) {
+  background: hsl(var(--card)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-glass="light"] .bg-sidebar,
+html[data-glass="medium"] .bg-sidebar,
+html[data-glass="strong"] .bg-sidebar {
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: hsl(var(--sidebar) / 0.85) !important;
+  border-inline-end: 1px solid rgba(255,255,255,0.10);
+}
+
+html[data-glass="light"] [data-slot="dropdown-menu-content"],
+html[data-glass="medium"] [data-slot="dropdown-menu-content"],
+html[data-glass="strong"] [data-slot="dropdown-menu-content"],
+html[data-glass="light"] .bg-popover,
+html[data-glass="medium"] .bg-popover,
+html[data-glass="strong"] .bg-popover {
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  background: hsl(var(--popover) / 0.7) !important;
+}
+
+/* Subtle 3D hover lift for glass cards */
+html[data-card="glass"][data-glass="light"] .bg-card:hover,
+html[data-card="glass"][data-glass="medium"] .bg-card:hover,
+html[data-card="glass"][data-glass="strong"] .bg-card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ── Card hover tilt (dark mode enhanced) ─────────────────────── */
+/* Cards in dark mode get a faint colour-tinted top border for depth */
+.dark .rounded-xl.border {
+  border-color: hsl(var(--card-border));
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.04);
+}
+
+/* stat / metric cards get a very subtle coloured left accent in dark */
+.dark .bg-card {
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(222 42% 11%) 100%);
+}
+
+/* Interactive card hover tilt - applied via Tailwind hover classes in card.tsx */
+/* Extra dark-mode depth on interactive cards */
+.dark [class*="hover\\:-translate-y"]:hover {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35), 0 2px 0 0 hsl(var(--primary)/0.15);
+}
+
+/* Status ring pulse for "present" status */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+.status-pulse {
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+/* ── Dark-mode: tinted coloured cards for metric strips ─────────── */
+.dark .metric-card-green  { background: linear-gradient(135deg, hsl(160 30% 10%) 0%, hsl(var(--card)) 70%); border-color: hsl(160 40% 22%); }
+.dark .metric-card-red    { background: linear-gradient(135deg, hsl(0   30% 10%) 0%, hsl(var(--card)) 70%); border-color: hsl(0   40% 22%); }
+.dark .metric-card-amber  { background: linear-gradient(135deg, hsl(40  30% 10%) 0%, hsl(var(--card)) 70%); border-color: hsl(40  40% 20%); }
+.dark .metric-card-blue   { background: linear-gradient(135deg, hsl(210 30% 11%) 0%, hsl(var(--card)) 70%); border-color: hsl(210 40% 22%); }
+.dark .metric-card-violet { background: linear-gradient(135deg, hsl(265 25% 11%) 0%, hsl(var(--card)) 70%); border-color: hsl(265 40% 22%); }
+
+/* ── 3D Glass clock face ─────────────────────────────────────────────── */
+.clock-glass3d {
+  position: relative;
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.08) 100%),
+              linear-gradient(135deg, hsl(var(--primary) / 0.25), rgba(30,30,50,0.35));
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.25),
+    inset 0 2px 1px rgba(255,255,255,0.4),
+    inset 0 -12px 24px rgba(0,0,0,0.15);
+  transform: perspective(600px) rotateX(4deg);
+  transform-style: preserve-3d;
+}
+.clock-glass3d::before {
+  content: "";
+  position: absolute;
+  inset: 6% 10% auto 10%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), transparent);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* ── 3D Orbit clock ring ──────────────────────────────────────────────── */
+.clock-orbit3d-ring {
+  animation: orbit3dSpin 14s linear infinite;
+  transform-style: preserve-3d;
+}
+@keyframes orbit3dSpin {
+  from { transform: perspective(400px) rotateX(62deg) rotateZ(0deg); }
+  to   { transform: perspective(400px) rotateX(62deg) rotateZ(360deg); }
+}
+
+.animate-scan {
+  animation: scan 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-10px); opacity: 0.2; }
+  50% { transform: translateY(10px); opacity: 1; }
+  100% { transform: translateY(-10px); opacity: 0.2; }
+}
+
+.text-font-large { font-size: 110%; }
+.text-font-small { font-size: 90%; }
+.text-font-medium { font-size: 100%; }
+
+.animate-wave {
+  animation: wave 0.9s ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+@keyframes wave {
+  0%   { transform: scaleY(0.2); opacity: 0.5; }
+  100% { transform: scaleY(1);   opacity: 1;   }
+}
+
+/* ── Skeleton shimmer ─────────────────────────────────────────── */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ── Print Styles ────────────────────────────────────────────────────── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Hide everything except the print area */
+  body > * { display: none !important; }
+  #print-report { display: block !important; }
+
+  #print-report {
+    font-family: 'Cairo', 'Plus Jakarta Sans', Arial, sans-serif;
+    font-size: 11px;
+    color: #111;
+    background: white;
+    padding: 0;
+    margin: 0;
+  }
+
+  .print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px 12px;
+    border-bottom: 2px solid #2563eb;
+    margin-bottom: 16px;
+  }
+
+  .print-header-left { display: flex !important; align-items: center; gap: 12px; }
+  .print-logo {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    object-fit: contain;
+    border: 1px solid #e5e7eb;
+  }
+  .print-logo-placeholder {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    background: #2563eb;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .print-app-name { font-size: 18px; font-weight: 800; color: #1e40af; }
+  .print-app-sub  { font-size: 10px; color: #6b7280; margin-top: 2px; }
+  .print-header-right { text-align: end; }
+  .print-title    { font-size: 14px; font-weight: 700; color: #111; }
+  .print-date     { font-size: 10px; color: #6b7280; margin-top: 3px; }
+
+  .print-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 0 24px 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .print-summary-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .print-summary-label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+  .print-summary-value { font-size: 18px; font-weight: 800; margin-top: 2px; }
+  .print-summary-sub   { font-size: 9px; color: #9ca3af; margin-top: 1px; }
+  .print-summary-value.blue   { color: #2563eb; }
+  .print-summary-value.green  { color: #16a34a; }
+  .print-summary-value.orange { color: #ea580c; }
+  .print-summary-value.red    { color: #dc2626; }
+  .print-summary-value.amber  { color: #d97706; }
+  .print-summary-value.default { color: #111; }
+
+  .print-table-wrap { padding: 0 24px 24px; }
+  .print-table-title {
+    font-size: 11px; font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 8px;
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+  }
+  .print-table-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px; height: 14px;
+    background: #2563eb;
+    border-radius: 2px;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  .print-table thead tr {
+    background: #1e40af !important;
+    color: white !important;
+  }
+  .print-table th {
+    padding: 7px 8px;
+    text-align: start;
+    font-weight: 700;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .print-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+  .print-table tbody tr:nth-child(even) { background: #f8fafc !important; }
+  .print-table tbody tr.leave-row { background: #eff6ff !important; border-inline-start: 3px solid #3b82f6; }
+  .print-table tfoot tr {
+    background: #eff6ff !important;
+    border-top: 2px solid #2563eb;
+  }
+  .print-table tfoot td { font-weight: 700; padding: 7px 8px; }
+
+  .print-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-in    { background: #dcfce7; color: #166534; }
+  .badge-out   { background: #dbeafe; color: #1e40af; }
+  .badge-late  { background: #fef3c7; color: #92400e; }
+  .badge-ot    { background: #fed7aa; color: #9a3412; }
+  .badge-leave { background: #dbeafe; color: #1e40af; }
+  .badge-present  { background: #dcfce7; color: #166534; }
+  .badge-absent   { background: #fee2e2; color: #991b1b; }
+  .badge-status-late { background: #fef3c7; color: #92400e; }
+  .badge-on_leave { background: #dbeafe; color: #1e40af; }
+
+  .print-footer {
+    padding: 10px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex !important;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #9ca3af;
+    margin-top: 8px;
+  }
+
+  @page {
+    margin: 10mm 8mm;
+    size: A4 landscape;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Aurora Background Animations
+   ════════════════════════════════════════════════════════════ */
+
+@keyframes aurora-drift {
+  0%   { transform: translate(0, 0)    scale(1);    }
+  33%  { transform: translate(4%, 6%)  scale(1.08); }
+  66%  { transform: translate(-5%, 3%) scale(0.96); }
+  100% { transform: translate(3%, -4%) scale(1.04); }
+}
+
+@keyframes particle-rise {
+  0%   { transform: translateY(0)    translateX(0)   scale(1);    opacity: 0;   }
+  5%   { opacity: 1; }
+  85%  { opacity: 0.7; }
+  100% { transform: translateY(-100vh) translateX(calc(sin(1rad) * 80px)) scale(0.4); opacity: 0; }
+}
+
+/* 3D horizontal drift for depth-of-field particle feel.
+   Applied to the OUTER wrapper div; inner div handles particle-rise separately. */
+@keyframes particle-drift-x {
+  0%   { transform: translateX(-20px); }
+  100% { transform: translateX(20px); }
+}
+
+/* Shimmer scan-line sweep (used in WelcomeBanner) */
+@keyframes shimmer-scan {
+  0%   { left: -80%; }
+  60%  { left: 120%; }
+  100% { left: 120%; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Reduced Motion — pause all decorative animations for users
+   who prefer it, and for low-end devices via JS class injection
+   ════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:       0.01ms !important;
+  }
+}
+
+/* Class added by JS on low-end devices (< 4 logical CPUs) */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration:        0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration:       0.01ms !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Lateness Alert Pulse
+   ════════════════════════════════════════════════════════════ */
+@keyframes lateness-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0.18); }
+}
+.lateness-alert-card {
+  animation: lateness-pulse 2.5s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Drag & Drop
+   ════════════════════════════════════════════════════════════ */
+.dnd-dragging {
+  opacity: 0.55;
+  cursor: grabbing !important;
+}
+.dnd-handle:hover { cursor: grab; }
+
+/* ════════════════════════════════════════════════════════════
+   Button Ripple Effect — تأثير موجة (keyframe only — applied
+   by the JS useRipple hook; never globally on ::after to avoid
+   horizontal overflow on mobile)
+   ════════════════════════════════════════════════════════════ */
+@keyframes ripple-expand {
+  0%   { transform: scale(0); opacity: 0.18; }
+  80%  { transform: scale(2.5); opacity: 0.04; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* Ripple span injected by useRipple hook */
+span.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  animation: ripple-expand 0.55s ease-out forwards;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Animated gradient text utility
+   ════════════════════════════════════════════════════════════ */
+.gradient-text-animated {
+  background: linear-gradient(90deg, hsl(var(--primary)), #8b5cf6, #38bdf8, hsl(var(--primary)));
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s linear infinite;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Entrance animations for dashboard sections
+   ════════════════════════════════════════════════════════════ */
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.enter-up {
+  animation: slide-up-fade 0.4s ease-out forwards;
+}

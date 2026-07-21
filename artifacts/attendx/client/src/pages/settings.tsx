@@ -814,7 +814,7 @@ export default function SettingsPage() {
         return;
       }
       setDailyRemindersEnabled(true); setRemindersEnabledState(true);
-      scheduleDailyReminders((localStorage.getItem("settings_lang") as "en"|"ar"|"sv") || "en");
+      scheduleDailyReminders((localStorage.getItem("settings_lang") as "en"|"ar"|"sv") || "en", alarmSettings.startTime, alarmSettings.endTime);
       toast({ title: isArabic ? t("reminders_enabled") : "✅ Reminders enabled" });
     } else {
       setDailyRemindersEnabled(false); setRemindersEnabledState(false);
@@ -1358,6 +1358,10 @@ export default function SettingsPage() {
     saveNotifSoundType(notifSoundType);
     const lang = (localStorage.getItem("settings_lang") as "en"|"ar"|"sv") || "ar";
     if (alarmSettings.enabled) scheduleShiftAlarms(alarmSettings, lang); else cancelShiftAlarms();
+    // Re-schedule daily reminders with the updated work times
+    if (getDailyRemindersEnabled()) {
+      scheduleDailyReminders(lang, alarmSettings.startTime, alarmSettings.endTime);
+    }
     // Sync push subscription times whenever alarm settings are saved
     if (alarmSettings.enabled && pushStatus === "subscribed") {
       subscribeToPush(alarmSettings);
@@ -3264,7 +3268,11 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium">{isArabic ? t("daily_attendance_reminders") : "Daily Reminders"}</p>
-              <p className="text-xs text-muted-foreground">{isArabic ? t("time_example_7_4") : "At 07:00 (check-in) and 16:00 (check-out)"}</p>
+              <p className="text-xs text-muted-foreground">
+                {isArabic
+                  ? `${alarmSettings.startTime} صباحاً (حضور) و ${alarmSettings.endTime} (انصراف)`
+                  : `At ${alarmSettings.startTime} (check-in) and ${alarmSettings.endTime} (check-out)`}
+              </p>
             </div>
             <Toggle enabled={remindersEnabled} onChange={handleToggleReminders} />
           </div>

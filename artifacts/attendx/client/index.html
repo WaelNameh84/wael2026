@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>{{APP_NAME}} – نظام الحضور</title>
+    <meta name="description" content="نظام إدارة حضور الموظفين — {{APP_NAME}}" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#FF3C00" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="{{APP_NAME}}" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/app-icon.png" />
+
+    <!-- Windows / Edge tile -->
+    <meta name="msapplication-TileColor" content="#FF3C00" />
+    <meta name="msapplication-TileImage" content="/app-icon.png" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/app-icon.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/app-icon.png" />
+
+    <!-- OG / Twitter -->
+    <meta property="og:title" content="{{APP_NAME}} – نظام الحضور" />
+    <meta property="og:description" content="نظام إدارة حضور الموظفين" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{APP_NAME}} – نظام الحضور" />
+    <meta name="twitter:description" content="نظام إدارة حضور الموظفين" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

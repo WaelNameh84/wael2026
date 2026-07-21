@@ -1,0 +1,17 @@
+kind = "web"
+previewPath = "/"
+title = "AttendX"
+version = "1.0.0"
+id = "artifacts/attendx"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/", "/api" ]
+localPort = 19697
+
+[services.development]
+run = "pnpm --filter @workspace/attendx run dev"
+
+[services.env]
+PORT = "19697"
