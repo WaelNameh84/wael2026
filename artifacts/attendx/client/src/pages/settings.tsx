@@ -916,6 +916,15 @@ export default function SettingsPage() {
   const [pushStatus, setPushStatus] = useState<"idle" | "subscribing" | "subscribed" | "error">("idle");
   const [pushErrorMsg, setPushErrorMsg] = useState("");
 
+  // Auto-sync alarm start/end from work schedule whenever workStartTime or breakMinutes changes
+  useEffect(() => {
+    if (!workStartTime) return;
+    const [hh, mm] = workStartTime.split(":").map(Number);
+    const endMin = hh * 60 + mm + 8 * 60 + breakMinutes;
+    const calcEnd = `${String(Math.floor(endMin / 60) % 24).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}`;
+    setAlarmSettingsState(s => ({ ...s, startTime: workStartTime, endTime: calcEnd }));
+  }, [workStartTime, breakMinutes]);
+
   // On mount: sync subscription with server and update UI state
   useEffect(() => {
     (async () => {
@@ -3239,34 +3248,6 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* ── 6. Voice / TTS ── */}
-        <Section
-          id="voice" open={isOpen("voice")} onToggle={() => toggleSection("voice")}
-          icon={ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          title={t("voice_narrator") ?? t("voice_narrator")}
-          accent="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium">{t("tts_enabled") ?? t("voice_narrator")}</p>
-              <p className="text-xs text-muted-foreground">{t("tts_desc") ?? t("reads_assistant_replies")}</p>
-            </div>
-            <Toggle enabled={ttsEnabled} onChange={v => { setTtsEnabled(v); toast({ title: v ? t("sound_enabled") : t("sound_disabled") }); }} />
-          </div>
-          {ttsEnabled && (
-            <button onClick={() => {
-              if (!("speechSynthesis" in window)) { toast({ title: t("not_supported"), variant: "destructive" }); return; }
-              window.speechSynthesis.cancel();
-              const u = new SpeechSynthesisUtterance(isArabic ? t("voice_narrator_active") : "Voice narrator is working");
-              u.lang = isArabic ? "ar-SA" : "en-US"; u.rate = 0.95;
-              window.speechSynthesis.speak(u);
-              toast({ title: isArabic ? t("playing_sound") : "🔊 Playing..." });
-            }} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary text-sm font-medium hover:bg-primary/10 w-full justify-center">
-              <Play className="w-3.5 h-3.5" /> {isArabic ? t("try_sound") : "Test Voice"}
-            </button>
-          )}
-        </Section>
-
         {/* ── 6. Notifications ── */}
         <Section
           id="notif" open={isOpen("notif")} onToggle={() => toggleSection("notif")}
@@ -3366,6 +3347,10 @@ export default function SettingsPage() {
           </div>
           {alarmSettings.enabled && (
             <div className="space-y-3">
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <span>🔗</span>
+                {isArabic ? "مزامنة تلقائية من جدول الدوام — يمكنك تعديلها هنا" : "Auto-synced from Work Schedule — you can still adjust"}
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1"><Label className="text-xs">{isArabic ? t("shift_start") : "Start"}</Label>
                   <Input type="time" value={alarmSettings.startTime} onChange={e => setAlarmSettingsState(s => ({ ...s, startTime: e.target.value }))} />
@@ -3539,9 +3524,9 @@ export default function SettingsPage() {
                           </>
                         ) : (
                           <>
-                            <li>اضغط على زر <strong>المشاركة</strong> <span className="font-mono bg-orange-100 dark:bg-orange-900/40 px-1 rounded">□↑</span> في متصفح Safari</li>
-                            <li>اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong></li>
-                            <li>افتح التطبيق من الشاشة الرئيسية وفعّل المنبّه مجدداً</li>
+                            <li>Tap the <strong>Share</strong> button <span className="font-mono bg-orange-100 dark:bg-orange-900/40 px-1 rounded">□↑</span> in Safari</li>
+                            <li>Choose <strong>"Add to Home Screen"</strong></li>
+                            <li>Open the app from your Home Screen and enable the alarm again</li>
                           </>
                         )}
                       </ol>
