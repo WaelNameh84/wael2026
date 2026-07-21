@@ -1,7 +1,7 @@
 // BUILD_TIME is replaced at build time by the Vite plugin (swVersionPlugin).
 // Changing this value on every deploy forces the browser to install a new SW,
 // which clears stale caches and delivers the new version to all clients.
-const CACHE_NAME = "attendx-1784541016360";
+const CACHE_NAME = "attendx-1784623213086";
 
 const APP_SHELL = [
   "/",
