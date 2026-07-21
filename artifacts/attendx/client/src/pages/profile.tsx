@@ -260,7 +260,7 @@ export default function ProfilePage() {
               />
               {/* Avatar with camera overlay */}
               <div className="relative group">
-                <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg overflow-hidden">
+                <div className="w-36 h-36 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-5xl font-bold shadow-xl overflow-hidden">
                   {me?.avatarUrl
                     ? <img src={apiUrl(me.avatarUrl)} alt={me.name} className="w-full h-full object-cover" />
                     : initials}
@@ -274,8 +274,8 @@ export default function ProfilePage() {
                   title="تغيير الصورة الشخصية"
                 >
                   {uploading
-                    ? <Loader2 className="w-5 h-5 text-white animate-spin" />
-                    : <Camera className="w-5 h-5 text-white" />
+                    ? <Loader2 className="w-7 h-7 text-white animate-spin" />
+                    : <Camera className="w-7 h-7 text-white" />
                   }
                 </button>
                 {/* Always-visible small camera badge */}
@@ -283,12 +283,12 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading}
-                  className="absolute -bottom-1.5 -end-1.5 w-7 h-7 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md hover:bg-primary/90 transition-colors"
+                  className="absolute -bottom-2 -end-2 w-9 h-9 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md hover:bg-primary/90 transition-colors"
                   title="تغيير الصورة"
                 >
                   {uploading
-                    ? <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
-                    : <Camera className="w-3.5 h-3.5 text-white" />
+                    ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    : <Camera className="w-4 h-4 text-white" />
                   }
                 </button>
               </div>

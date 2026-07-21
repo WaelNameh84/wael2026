@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { db, usersTable, userSettingsTable, attendanceTable, leaveTable } from "../../../db/src/index.js";
+import {
+  db, usersTable, userSettingsTable, attendanceTable, leaveTable,
+  salaryAdvancesTable, bonusesTable, payrollReportsTable, purchasesTable,
+  requestsTable, workReportsTable, lateJustificationsTable,
+  attendanceCorrectionsTable, notificationsTable,
+} from "../../../db/src/index.js";
 import { eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "./auth.js";
@@ -255,9 +260,20 @@ router.delete("/:id", requireAdmin, async (req: any, res) => {
     if (id === req.userId) {
       return res.status(400).json({ error: "Cannot delete your own account" });
     }
+    // Delete all rows that reference this user before removing the user record
+    // (avoids FK-constraint errors from tables without ON DELETE CASCADE).
     await db.delete(attendanceTable).where(eq(attendanceTable.userId, id));
+    await db.delete(attendanceCorrectionsTable).where(eq(attendanceCorrectionsTable.userId, id));
+    await db.delete(lateJustificationsTable).where(eq(lateJustificationsTable.userId, id));
     await db.update(leaveTable).set({ reviewedBy: null }).where(eq(leaveTable.reviewedBy, id));
     await db.delete(leaveTable).where(eq(leaveTable.userId, id));
+    await db.delete(salaryAdvancesTable).where(eq(salaryAdvancesTable.userId, id));
+    await db.delete(bonusesTable).where(eq(bonusesTable.userId, id));
+    await db.delete(payrollReportsTable).where(eq(payrollReportsTable.userId, id));
+    await db.delete(purchasesTable).where(eq(purchasesTable.userId, id));
+    await db.delete(requestsTable).where(eq(requestsTable.userId, id));
+    await db.delete(workReportsTable).where(eq(workReportsTable.userId, id));
+    await db.delete(notificationsTable).where(eq(notificationsTable.userId, id));
     await db.delete(userSettingsTable).where(eq(userSettingsTable.userId, id));
     await db.delete(usersTable).where(eq(usersTable.id, id));
     return res.status(204).send();
