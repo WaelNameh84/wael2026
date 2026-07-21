@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Clock, LogIn, LogOut, Fingerprint, MapPin, CheckCircle2, Timer,
   Radio, Trash2, FileText, CheckCircle, XCircle, Loader2, AlertCircle, Navigation,
-  Camera, Upload, X as XIcon, ExternalLink,
+  Camera, Upload, X as XIcon, ExternalLink, User,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { format } from "date-fns";
@@ -945,6 +945,16 @@ export default function AttendancePage() {
             </DialogHeader>
             {detailRecord && (
               <div className="space-y-3 py-2 text-sm">
+                {/* Employee name — shown for admin/manager views */}
+                {detailRecord.userName && (
+                  <div className="flex items-center justify-between border rounded-lg px-4 py-3 bg-primary/5">
+                    <span className="flex items-center gap-2 text-muted-foreground font-medium">
+                      <User className="w-4 h-4 text-primary" /> اسم الموظف
+                    </span>
+                    <span className="font-semibold">{detailRecord.userName}</span>
+                  </div>
+                )}
+
                 {/* Status */}
                 <div className="flex items-center justify-between border rounded-lg px-4 py-3 bg-muted/30">
                   <span className="text-muted-foreground font-medium">الحالة</span>
@@ -995,28 +1005,28 @@ export default function AttendancePage() {
                   <span className="font-semibold">{detailRecord.locationName ?? "—"}</span>
                 </div>
 
-                {/* GPS */}
-                {(detailRecord.gpsLat != null || detailRecord.gpsAddress) && (
-                  <div className="border rounded-lg px-4 py-3 space-y-1">
-                    <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                      <Navigation className="w-4 h-4 text-teal-500" /> الموقع الجغرافي
-                    </span>
-                    {detailRecord.gpsAddress && !/^[\d\s.,،:]+$/.test(detailRecord.gpsAddress.replace(/^إحداثيات[:\s]*/, '')) ? (
-                      <p className="text-xs text-muted-foreground mt-1">{detailRecord.gpsAddress}</p>
-                    ) : null}
-                    {detailRecord.gpsLat != null && detailRecord.gpsLng != null && (
-                      <a
-                        href={`https://www.google.com/maps?q=${detailRecord.gpsLat},${detailRecord.gpsLng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 underline hover:text-blue-800 mt-0.5"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        عرض الموقع على الخريطة
-                      </a>
-                    )}
-                  </div>
-                )}
+                {/* GPS — always visible */}
+                <div className="border rounded-lg px-4 py-3 space-y-1">
+                  <span className="flex items-center gap-2 text-muted-foreground font-medium">
+                    <Navigation className="w-4 h-4 text-teal-500" /> الموقع الجغرافي
+                  </span>
+                  {detailRecord.gpsAddress && !/^[\d\s.,،:]+$/.test(detailRecord.gpsAddress.replace(/^إحداثيات[:\s]*/, '')) ? (
+                    <p className="text-xs text-muted-foreground mt-1">{detailRecord.gpsAddress}</p>
+                  ) : null}
+                  {detailRecord.gpsLat != null && detailRecord.gpsLng != null ? (
+                    <a
+                      href={`https://www.google.com/maps?q=${detailRecord.gpsLat},${detailRecord.gpsLng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 underline hover:text-blue-800 mt-0.5"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      عرض الموقع على الخريطة
+                    </a>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">—</p>
+                  )}
+                </div>
 
                 {/* Biometric */}
                 {detailRecord.biometricVerified != null && (
