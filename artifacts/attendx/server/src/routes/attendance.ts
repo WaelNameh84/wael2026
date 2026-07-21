@@ -169,6 +169,9 @@ router.get("/", requireAuth, async (req: any, res) => {
       status: attendanceTable.status,
       notes: attendanceTable.notes,
       biometricVerified: attendanceTable.biometricVerified,
+      gpsLat: attendanceTable.gpsLat,
+      gpsLng: attendanceTable.gpsLng,
+      gpsAddress: attendanceTable.gpsAddress,
       createdAt: attendanceTable.createdAt,
     })
       .from(attendanceTable)
