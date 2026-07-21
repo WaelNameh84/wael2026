@@ -49,8 +49,8 @@ export default function SplashScreen1() {
   const offsetX  = splashLogoOffsetX || 0;
   const offsetY  = splashLogoOffsetY || 0;
   const bgPad    = splashLogoBgSize !== undefined ? splashLogoBgSize : 15;
-  const appName = splashAppName  || welcomeTitle || "AttendX";
-  const creator = welcomeMessage || "Designed by Wael";
+  const appName = splashAppName  || welcomeTitle || "Pulse";
+  const creator = welcomeMessage || "W@N";
   const tagline = splashTagline  || "";
   const showLogo = !!logoSrc && !logoError;
 
