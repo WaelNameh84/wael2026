@@ -1,0 +1,41 @@
+2026-07-21T07:15:39.168735065Z ==> Cloning from https://github.com/WaelNameh84/wael2026
+2026-07-21T07:15:45.708242013Z ==> Checking out commit 03b84b47ed3a329f0f888e1d5416b5d4c5ca7bb8 in branch main
+2026-07-21T07:15:47.433675757Z ==> Using Node.js version 24.14.1 (default)
+2026-07-21T07:15:47.433691772Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2026-07-21T07:15:47.470354044Z ==> Running build command 'corepack prepare pnpm@latest --activate && corepack pnpm install && corepack pnpm --filter @workspace/attendx run build'...
+2026-07-21T07:15:47.740632885Z Preparing pnpm@latest for immediate activation...
+2026-07-21T07:15:49.574077776Z artifacts/attendx                        | [WARN] Unsupported engine: wanted: {"node":"20.x"} (current: {"node":"v24.14.1","pnpm":"11.15.1"})
+2026-07-21T07:15:49.593894974Z Scope: all 9 workspace projects
+2026-07-21T07:15:49.689899418Z ? Verifying lockfile against supply-chain policies (608 entries)...
+2026-07-21T07:15:49.700101858Z Lockfile is up to date, resolution step is skipped
+2026-07-21T07:15:49.790649903Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-07-21T07:15:49.846318418Z Packages: +608
+2026-07-21T07:15:49.846339162Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-07-21T07:15:50.798141186Z Progress: resolved 608, reused 0, downloaded 0, added 0
+2026-07-21T07:15:52.145998205Z Progress: resolved 608, reused 0, downloaded 1, added 0
+2026-07-21T07:15:52.95474986Z ✓ Lockfile passes supply-chain policies (608 entries in 3.2s)
+2026-07-21T07:15:53.146663348Z Progress: resolved 608, reused 0, downloaded 96, added 4
+2026-07-21T07:15:54.14664496Z Progress: resolved 608, reused 0, downloaded 313, added 20
+2026-07-21T07:15:55.147076023Z Progress: resolved 608, reused 0, downloaded 330, added 20
+2026-07-21T07:15:56.148039324Z Progress: resolved 608, reused 0, downloaded 372, added 24
+2026-07-21T07:15:57.148716234Z Progress: resolved 608, reused 0, downloaded 510, added 32
+2026-07-21T07:15:58.148918419Z Progress: resolved 608, reused 0, downloaded 606, added 61
+2026-07-21T07:15:59.150068049Z Progress: resolved 608, reused 0, downloaded 606, added 313
+2026-07-21T07:16:00.151026523Z Progress: resolved 608, reused 0, downloaded 606, added 335
+2026-07-21T07:16:01.15172051Z Progress: resolved 608, reused 0, downloaded 606, added 512
+2026-07-21T07:16:01.588934125Z Progress: resolved 608, reused 0, downloaded 606, added 608, done
+2026-07-21T07:16:01.980777902Z 
+2026-07-21T07:16:01.980796811Z dependencies:
+2026-07-21T07:16:01.980799425Z + @replit/connectors-sdk 0.4.1
+2026-07-21T07:16:01.980801102Z 
+2026-07-21T07:16:01.980802673Z devDependencies:
+2026-07-21T07:16:01.980804118Z + prettier 3.9.5
+2026-07-21T07:16:01.980805873Z + typescript 5.9.3
+2026-07-21T07:16:01.980807102Z 
+2026-07-21T07:16:02.002970131Z . preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+2026-07-21T07:16:02.030179925Z . preinstall: Done
+2026-07-21T07:16:02.153027167Z [ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: core-js@3.49.0, esbuild@0.27.3
+2026-07-21T07:16:02.153038031Z 
+2026-07-21T07:16:02.153040335Z Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.
+2026-07-21T07:16:02.275284198Z ==> Build failed 😞
+2026-07-21T07:16:02.275298153Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
