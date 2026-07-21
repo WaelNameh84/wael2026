@@ -1554,7 +1554,7 @@ export default function SettingsPage() {
                             toast({ title: isArabic ? t("unsupported_format") : "Unsupported file format", variant: "destructive" });
                             return;
                           }
-                          if (file.size > 5_000_000) { toast({ title: isArabic ? "الحد الأقصى 5 ميجابايت" : "Max 5MB", variant: "destructive" }); return; }
+                          if (file.size > 20_000_000) { toast({ title: isArabic ? "الحد الأقصى 20 ميجابايت" : "Max 20MB", variant: "destructive" }); return; }
                           const reader = new FileReader();
                           reader.onload = ev => {
                             const src = ev.target?.result as string;
@@ -1594,7 +1594,7 @@ export default function SettingsPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP, SVG — {isArabic ? "بحد أقصى 5 ميجابايت" : "max 5MB"}</p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP, SVG — {isArabic ? "بحد أقصى 20 ميجابايت" : "max 20MB"}</p>
                   {logoFileInfo && (
                     <p className="text-xs text-muted-foreground/80 flex items-center gap-1.5">
                       <span className="font-mono">{logoFileInfo.name}</span>

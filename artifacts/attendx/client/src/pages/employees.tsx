@@ -298,7 +298,7 @@ function AvatarUploadButton({ onUploaded }: { onUploaded: (url: string) => void 
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast({ title: "الرجاء اختيار صورة", variant: "destructive" }); return; }
-    if (file.size > 5 * 1024 * 1024) { toast({ title: "الصورة كبيرة جداً (max 5MB)", variant: "destructive" }); return; }
+    if (file.size > 20 * 1024 * 1024) { toast({ title: "الصورة كبيرة جداً (max 20MB)", variant: "destructive" }); return; }
     setUploading(true);
     try {
       const fileData = await new Promise<string>((resolve, reject) => {

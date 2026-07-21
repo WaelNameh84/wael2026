@@ -45,8 +45,8 @@ app.use((_req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: "5mb" }));
-app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 app.use((req, _res, next) => {
   if (process.env.NODE_ENV !== "production") {

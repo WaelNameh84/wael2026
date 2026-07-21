@@ -262,9 +262,10 @@ router.delete("/:id", requireAdmin, async (req: any, res) => {
     }
     // Delete all rows that reference this user before removing the user record
     // (avoids FK-constraint errors from tables without ON DELETE CASCADE).
-    await db.delete(attendanceTable).where(eq(attendanceTable.userId, id));
-    await db.delete(attendanceCorrectionsTable).where(eq(attendanceCorrectionsTable.userId, id));
+    // lateJustifications has a FK to attendance.id, so it must be deleted first.
     await db.delete(lateJustificationsTable).where(eq(lateJustificationsTable.userId, id));
+    await db.delete(attendanceCorrectionsTable).where(eq(attendanceCorrectionsTable.userId, id));
+    await db.delete(attendanceTable).where(eq(attendanceTable.userId, id));
     await db.update(leaveTable).set({ reviewedBy: null }).where(eq(leaveTable.reviewedBy, id));
     await db.delete(leaveTable).where(eq(leaveTable.userId, id));
     await db.delete(salaryAdvancesTable).where(eq(salaryAdvancesTable.userId, id));

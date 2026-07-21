@@ -60,8 +60,8 @@ export default function ProfilePage() {
       toast({ title: "الرجاء اختيار صورة", variant: "destructive" });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "الصورة كبيرة جداً (الحد 5MB)", variant: "destructive" });
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "الصورة كبيرة جداً (الحد 20MB)", variant: "destructive" });
       return;
     }
     setUploading(true);
