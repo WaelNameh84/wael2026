@@ -371,12 +371,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} data-testid="button-menu">
+        <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-primary to-violet-600 text-white shadow-md">
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} data-testid="button-menu" className="text-white hover:bg-white/20 hover:text-white">
             <Menu className="w-5 h-5" />
           </Button>
-          <span className="font-bold text-sm flex-1">{appName}</span>
-          <BellButton />
+          <span className="font-bold text-sm flex-1 text-white">{appName}</span>
+          <BellButton className="text-white hover:bg-white/20 hover:text-white" />
         </header>
 
         {/* Desktop top bar */}
