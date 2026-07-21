@@ -50,6 +50,9 @@ export const appConfigTable = pgTable("app_config", {
   logoBgColor:    varchar("logo_bg_color", { length: 20 }).default("#3b82f6"),
   logoBgOpacity:  integer("logo_bg_opacity").default(10),
   logoBgRadius:   integer("logo_bg_radius").default(16),
+  // Global UI settings blob — all client-side appearance/behaviour settings
+  // stored as JSON so any device that opens the app gets the admin's config.
+  uiSettings:     text("ui_settings"),
 });
 
 export type AppConfig = typeof appConfigTable.$inferSelect;

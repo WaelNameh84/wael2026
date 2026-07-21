@@ -498,12 +498,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("settings_lang", lang);
     i18n.changeLanguage(lang);
     applyDirection(lang);
+    saveToServer({ language: lang });
   };
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
     localStorage.setItem("settings_theme", t);
     applyTheme(t);
+    saveToServer({ theme: t });
   };
 
   const setFontSize = (size: FontSize) => {
@@ -511,68 +513,80 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("settings_size", size);
     document.documentElement.classList.remove("text-font-small", "text-font-medium", "text-font-large");
     document.documentElement.classList.add(`text-font-${size}`);
+    saveToServer({ fontSize: size });
   };
 
-  const setTtsEnabled       = (v: boolean) => { setTtsEnabledState(v); localStorage.setItem("setting_tts", String(v)); };
-  const setWakeWord         = (v: string)  => { setWakeWordState(v); localStorage.setItem("setting_wake_word", v); };
-  const setAssistantName    = (v: string)  => { setAssistantNameState(v); localStorage.setItem("setting_assistant_name", v); };
-  const setAssistantPersonality = (v: AssistantPersonality) => { setAssistantPersonalityState(v); localStorage.setItem("setting_assistant_personality", v); };
-  const setClockFormat      = (v: ClockFormat)  => { setClockFormatState(v); localStorage.setItem("setting_clock_format", v); };
-  const setClockLocale      = (v: ClockLocale)  => { setClockLocaleState(v); localStorage.setItem("setting_clock_locale", v); };
-  const setClockStyle       = (v: ClockStyle)   => { setClockStyleState(v); localStorage.setItem("setting_clock_style", v); };
-  const setClockSize        = (v: ClockSize)    => { setClockSizeState(v); localStorage.setItem("setting_clock_size", v); };
-  const setFloatingClockEnabled = (v: boolean)  => { setFloatingClockEnabledState(v); localStorage.setItem("setting_floating_clock", String(v)); };
-  const setFloatingClockCheckIn = (v: boolean)  => { setFloatingClockCheckInState(v); localStorage.setItem("setting_floating_checkin", String(v)); };
-  const setAiButtonIcon     = (v: AiButtonIcon) => { setAiButtonIconState(v); localStorage.setItem("setting_ai_icon", v); };
-  const setAiButtonShape    = (v: AiButtonShape)=> { setAiButtonShapeState(v); localStorage.setItem("setting_ai_shape", v); };
-  const setAiButtonColor    = (v: AiButtonColor)=> { setAiButtonColorState(v); localStorage.setItem("setting_ai_color", v); };
-  const setAiEnabled        = (v: boolean)      => { setAiEnabledState(v); localStorage.setItem("setting_ai_enabled", String(v)); };
-  const setAiAvatarStyle    = (v: AvatarStyle)  => { setAiAvatarStyleState(v); localStorage.setItem("setting_ai_avatar", v); };
-  const setAiButtonSize     = (v: AiButtonSize) => { setAiButtonSizeState(v); localStorage.setItem("setting_ai_size", v); };
-  const setAiButtonCustomColor = (v: string)    => { setAiButtonCustomColorState(v); localStorage.setItem("setting_ai_custom_color", v); };
+  const setTtsEnabled       = (v: boolean) => { setTtsEnabledState(v); localStorage.setItem("setting_tts", String(v)); saveToServer({ ttsEnabled: v }); };
+  const setWakeWord         = (v: string)  => { setWakeWordState(v); localStorage.setItem("setting_wake_word", v); saveToServer({ wakeWord: v }); };
+  const setAssistantName    = (v: string)  => { setAssistantNameState(v); localStorage.setItem("setting_assistant_name", v); saveToServer({ assistantName: v }); };
+  const setAssistantPersonality = (v: AssistantPersonality) => { setAssistantPersonalityState(v); localStorage.setItem("setting_assistant_personality", v); saveToServer({ assistantPersonality: v }); };
+  const setClockFormat      = (v: ClockFormat)  => { setClockFormatState(v); localStorage.setItem("setting_clock_format", v); saveToServer({ clockFormat: v }); };
+  const setClockLocale      = (v: ClockLocale)  => { setClockLocaleState(v); localStorage.setItem("setting_clock_locale", v); saveToServer({ clockLocale: v }); };
+  const setClockStyle       = (v: ClockStyle)   => { setClockStyleState(v); localStorage.setItem("setting_clock_style", v); saveToServer({ clockStyle: v }); };
+  const setClockSize        = (v: ClockSize)    => { setClockSizeState(v); localStorage.setItem("setting_clock_size", v); saveToServer({ clockSize: v }); };
+  const setFloatingClockEnabled = (v: boolean)  => { setFloatingClockEnabledState(v); localStorage.setItem("setting_floating_clock", String(v)); saveToServer({ floatingClockEnabled: v }); };
+  const setFloatingClockCheckIn = (v: boolean)  => { setFloatingClockCheckInState(v); localStorage.setItem("setting_floating_checkin", String(v)); saveToServer({ floatingClockCheckIn: v }); };
+  const setAiButtonIcon     = (v: AiButtonIcon) => { setAiButtonIconState(v); localStorage.setItem("setting_ai_icon", v); saveToServer({ aiButtonIcon: v }); };
+  const setAiButtonShape    = (v: AiButtonShape)=> { setAiButtonShapeState(v); localStorage.setItem("setting_ai_shape", v); saveToServer({ aiButtonShape: v }); };
+  const setAiButtonColor    = (v: AiButtonColor)=> { setAiButtonColorState(v); localStorage.setItem("setting_ai_color", v); saveToServer({ aiButtonColor: v }); };
+  const setAiEnabled        = (v: boolean)      => { setAiEnabledState(v); localStorage.setItem("setting_ai_enabled", String(v)); saveToServer({ aiEnabled: v }); };
+  const setAiAvatarStyle    = (v: AvatarStyle)  => { setAiAvatarStyleState(v); localStorage.setItem("setting_ai_avatar", v); saveToServer({ aiAvatarStyle: v }); };
+  const setAiButtonSize     = (v: AiButtonSize) => { setAiButtonSizeState(v); localStorage.setItem("setting_ai_size", v); saveToServer({ aiButtonSize: v }); };
+  const setAiButtonCustomColor = (v: string)    => { setAiButtonCustomColorState(v); localStorage.setItem("setting_ai_custom_color", v); saveToServer({ aiButtonCustomColor: v }); };
 
   const setSidebarStyle = (v: SidebarStyle) => {
     setSidebarStyleState(v); localStorage.setItem("setting_sidebar_style", v);
     applyUiStyles(v, tableStyle, cardStyle);
+    saveToServer({ sidebarStyle: v });
   };
   const setTableStyle = (v: TableStyle) => {
     setTableStyleState(v); localStorage.setItem("setting_table_style", v);
     applyUiStyles(sidebarStyle, v, cardStyle);
+    saveToServer({ tableStyle: v });
   };
   const setCardStyle = (v: CardStyle) => {
     setCardStyleState(v); localStorage.setItem("setting_card_style", v);
     applyUiStyles(sidebarStyle, tableStyle, v);
+    saveToServer({ cardStyle: v });
   };
   const setCardColorMode = (v: CardColorMode) => {
     setCardColorModeState(v); localStorage.setItem("setting_card_color_mode", v);
     applyCardColor(v, cardColor);
+    saveToServer({ cardColorMode: v });
   };
   const setCardColor = (v: string) => {
     setCardColorState(v); localStorage.setItem("setting_card_color", v);
     applyCardColor(cardColorMode, v);
+    saveToServer({ cardColor: v });
   };
   const setFontColorMode = (v: FontColorMode) => {
     setFontColorModeState(v); localStorage.setItem("setting_font_color_mode", v);
     applyFontColor(v, fontColor);
+    saveToServer({ fontColorMode: v });
   };
   const setFontColor = (v: string) => {
     setFontColorState(v); localStorage.setItem("setting_font_color", v);
     applyFontColor(fontColorMode, v);
+    saveToServer({ fontColor: v });
   };
   const setGlassIntensity = (v: GlassIntensity) => {
     setGlassIntensityState(v); localStorage.setItem("setting_glass_intensity", v); applyGlass(v);
+    saveToServer({ glassIntensity: v });
   };
   const setBackgroundMode = (v: BackgroundMode) => {
     setBackgroundModeState(v); localStorage.setItem("setting_bg_mode", v);
     applyBackground(v, backgroundImage, backgroundGradient);
+    saveToServer({ backgroundMode: v });
   };
   const setBackgroundImage = (v: string) => {
     setBackgroundImageState(v); localStorage.setItem("setting_bg_image", v);
     applyBackground(backgroundMode, v, backgroundGradient);
+    saveToServer({ backgroundImage: v });
   };
   const setBackgroundGradient = (v: string) => {
     setBackgroundGradientState(v); localStorage.setItem("setting_bg_gradient", v);
     applyBackground(backgroundMode, backgroundImage, v);
+    saveToServer({ backgroundGradient: v });
   };
 
   const resetAppearance = () => {
@@ -586,6 +600,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     applyCardColor("auto", cardColor);
     setFontColorModeState("auto"); localStorage.setItem("setting_font_color_mode", "auto");
     applyFontColor("auto", fontColor);
+    saveToServer({ glassIntensity: "off", backgroundMode: "default", backgroundImage: "", backgroundGradient: "aurora", cardColorMode: "auto", fontColorMode: "auto", cardStyle: "rounded" });
   };
 
   const applyAccentHex = (hex: string) => {
@@ -618,50 +633,172 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   const setFontFamily = (v: FontFamily) => {
-    setFontFamilyState(v); localStorage.setItem("setting_font_family", v); applyFontFamily(v);
+    setFontFamilyState(v); localStorage.setItem("setting_font_family", v); applyFontFamily(v); saveToServer({ fontFamily: v });
   };
   const setFontWeight = (v: FontWeight) => {
-    setFontWeightState(v); localStorage.setItem("setting_font_weight", v); applyFontWeight(v);
+    setFontWeightState(v); localStorage.setItem("setting_font_weight", v); applyFontWeight(v); saveToServer({ fontWeight: v });
   };
   const setAccentColor = (v: string) => {
-    setAccentColorState(v); localStorage.setItem("setting_accent_color", v); applyAccentHex(v);
+    setAccentColorState(v); localStorage.setItem("setting_accent_color", v); applyAccentHex(v); saveToServer({ accentColor: v });
   };
 
   /* ── New effects setters ─────────────────────────────────────── */
-  const setAuroraBgEnabled       = (v: boolean) => { setAuroraBgEnabledState(v); localStorage.setItem("setting_aurora_bg", String(v)); };
-  const setParticlesEnabled      = (v: boolean) => { setParticlesEnabledState(v); localStorage.setItem("setting_particles", String(v)); };
-  const setMouseLightEnabled     = (v: boolean) => { setMouseLightEnabledState(v); localStorage.setItem("setting_mouse_light", String(v)); };
-  const setAuroraPalette         = (v: AuroraPalette) => { setAuroraPaletteState(v); localStorage.setItem("setting_aurora_palette", v); };
-  const setWelcomeBannerEnabled  = (v: boolean) => { setWelcomeBannerEnabledState(v); localStorage.setItem("setting_welcome_banner", String(v)); };
-  const setWelcomeMessage        = (v: string)  => { setWelcomeMessageState(v); localStorage.setItem("setting_welcome_message", v); };
-  const setWelcomeShape          = (v: WelcomeShape) => { setWelcomeShapeState(v); localStorage.setItem("setting_welcome_shape", v); };
-  const setWelcomeImage          = (v: string)  => { setWelcomeImageState(v); localStorage.setItem("setting_welcome_image", v); };
-  const setWelcomeTitle          = (v: string)  => { setWelcomeTitleState(v); localStorage.setItem("setting_welcome_title", v); };
-  const setWelcomeStyle          = (v: WelcomeStyle) => { setWelcomeStyleState(v); localStorage.setItem("setting_welcome_style", v); };
-  const setAiVoiceResponse       = (v: boolean) => { setAiVoiceResponseState(v); localStorage.setItem("setting_ai_voice_response", String(v)); };
-  const setSoundEnabled          = (v: boolean) => { setSoundEnabledState(v); localStorage.setItem("setting_sound_enabled", String(v)); };
-  const setSoundVolume           = (v: number)  => { setSoundVolumeState(v); localStorage.setItem("setting_sound_volume", String(v)); };
-  const setLatenessAlertEnabled  = (v: boolean) => { setLatenessAlertEnabledState(v); localStorage.setItem("setting_lateness_alert", String(v)); };
-  const setLatenessAlertDays     = (v: number)  => { setLatenessAlertDaysState(v); localStorage.setItem("setting_lateness_days", String(v)); };
-  const setDashboardCardOrder    = (v: string)  => { setDashboardCardOrderState(v); localStorage.setItem("setting_dashboard_order", v); };
-  const setDashboardCardsHidden  = (v: string)  => { setDashboardCardsHiddenState(v); localStorage.setItem("setting_dashboard_hidden", v); };
-  const setCurrency              = (v: Currency) => { setCurrencyState(v); localStorage.setItem("setting_currency", v); };
-  const setSplashBgGradient      = (v: SplashBgGradient) => { setSplashBgGradientState(v); localStorage.setItem("setting_splash_bg", v); };
-  const setSplashTagline         = (v: string)  => { setSplashTaglineState(v); localStorage.setItem("setting_splash_tagline", v); };
-  const setSplashDuration        = (v: number)  => { setSplashDurationState(Math.max(3, Math.min(15, v))); localStorage.setItem("setting_splash_duration", String(v)); };
-  const setSplashShowStars       = (v: boolean) => { setSplashShowStarsState(v); localStorage.setItem("setting_splash_stars", String(v)); };
-  const setSplashShowParticles   = (v: boolean) => { setSplashShowParticlesState(v); localStorage.setItem("setting_splash_particles", String(v)); };
-  const setSplashLogoUrl         = (v: string)  => { setSplashLogoUrlState(v); localStorage.setItem("setting_splash_logo", v); };
-  const setSplashLogoWidth       = (v: number)  => { setSplashLogoWidthState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_w", String(v)); };
-  const setSplashLogoHeight      = (v: number)  => { setSplashLogoHeightState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_h", String(v)); };
-  const setSplashLogoRadius      = (v: number)  => { setSplashLogoRadiusState(Math.max(0, Math.min(150, v))); localStorage.setItem("setting_splash_logo_r", String(v)); };
-  const setSplashLogoOffsetX     = (v: number)  => { setSplashLogoOffsetXState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_ox", String(v)); };
-  const setSplashLogoOffsetY     = (v: number)  => { setSplashLogoOffsetYState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_oy", String(v)); };
-  const setSplashLogoBgSize      = (v: number)  => { setSplashLogoBgSizeState(Math.max(0, Math.min(60, v))); localStorage.setItem("setting_splash_logo_bg", String(v)); };
-  const setSplashAppName         = (v: string)  => { setSplashAppNameState(v); localStorage.setItem("setting_splash_app_name", v); };
-  const setSplashStyle           = (v: SplashStyle) => { setSplashStyleState(v); localStorage.setItem("setting_splash_style", v); };
+  const setAuroraBgEnabled       = (v: boolean) => { setAuroraBgEnabledState(v); localStorage.setItem("setting_aurora_bg", String(v)); saveToServer({ auroraBgEnabled: v }); };
+  const setParticlesEnabled      = (v: boolean) => { setParticlesEnabledState(v); localStorage.setItem("setting_particles", String(v)); saveToServer({ particlesEnabled: v }); };
+  const setMouseLightEnabled     = (v: boolean) => { setMouseLightEnabledState(v); localStorage.setItem("setting_mouse_light", String(v)); saveToServer({ mouseLightEnabled: v }); };
+  const setAuroraPalette         = (v: AuroraPalette) => { setAuroraPaletteState(v); localStorage.setItem("setting_aurora_palette", v); saveToServer({ auroraPalette: v }); };
+  const setWelcomeBannerEnabled  = (v: boolean) => { setWelcomeBannerEnabledState(v); localStorage.setItem("setting_welcome_banner", String(v)); saveToServer({ welcomeBannerEnabled: v }); };
+  const setWelcomeMessage        = (v: string)  => { setWelcomeMessageState(v); localStorage.setItem("setting_welcome_message", v); saveToServer({ welcomeMessage: v }); };
+  const setWelcomeShape          = (v: WelcomeShape) => { setWelcomeShapeState(v); localStorage.setItem("setting_welcome_shape", v); saveToServer({ welcomeShape: v }); };
+  const setWelcomeImage          = (v: string)  => { setWelcomeImageState(v); localStorage.setItem("setting_welcome_image", v); saveToServer({ welcomeImage: v }); };
+  const setWelcomeTitle          = (v: string)  => { setWelcomeTitleState(v); localStorage.setItem("setting_welcome_title", v); saveToServer({ welcomeTitle: v }); };
+  const setWelcomeStyle          = (v: WelcomeStyle) => { setWelcomeStyleState(v); localStorage.setItem("setting_welcome_style", v); saveToServer({ welcomeStyle: v }); };
+  const setAiVoiceResponse       = (v: boolean) => { setAiVoiceResponseState(v); localStorage.setItem("setting_ai_voice_response", String(v)); saveToServer({ aiVoiceResponse: v }); };
+  const setSoundEnabled          = (v: boolean) => { setSoundEnabledState(v); localStorage.setItem("setting_sound_enabled", String(v)); saveToServer({ soundEnabled: v }); };
+  const setSoundVolume           = (v: number)  => { setSoundVolumeState(v); localStorage.setItem("setting_sound_volume", String(v)); saveToServer({ soundVolume: v }); };
+  const setLatenessAlertEnabled  = (v: boolean) => { setLatenessAlertEnabledState(v); localStorage.setItem("setting_lateness_alert", String(v)); saveToServer({ latenessAlertEnabled: v }); };
+  const setLatenessAlertDays     = (v: number)  => { setLatenessAlertDaysState(v); localStorage.setItem("setting_lateness_days", String(v)); saveToServer({ latenessAlertDays: v }); };
+  const setDashboardCardOrder    = (v: string)  => { setDashboardCardOrderState(v); localStorage.setItem("setting_dashboard_order", v); saveToServer({ dashboardCardOrder: v }); };
+  const setDashboardCardsHidden  = (v: string)  => { setDashboardCardsHiddenState(v); localStorage.setItem("setting_dashboard_hidden", v); saveToServer({ dashboardCardsHidden: v }); };
+  const setCurrency              = (v: Currency) => { setCurrencyState(v); localStorage.setItem("setting_currency", v); saveToServer({ currency: v }); };
+  const setSplashBgGradient      = (v: SplashBgGradient) => { setSplashBgGradientState(v); localStorage.setItem("setting_splash_bg", v); saveToServer({ splashBgGradient: v }); };
+  const setSplashTagline         = (v: string)  => { setSplashTaglineState(v); localStorage.setItem("setting_splash_tagline", v); saveToServer({ splashTagline: v }); };
+  const setSplashDuration        = (v: number)  => { setSplashDurationState(Math.max(3, Math.min(15, v))); localStorage.setItem("setting_splash_duration", String(v)); saveToServer({ splashDuration: v }); };
+  const setSplashShowStars       = (v: boolean) => { setSplashShowStarsState(v); localStorage.setItem("setting_splash_stars", String(v)); saveToServer({ splashShowStars: v }); };
+  const setSplashShowParticles   = (v: boolean) => { setSplashShowParticlesState(v); localStorage.setItem("setting_splash_particles", String(v)); saveToServer({ splashShowParticles: v }); };
+  const setSplashLogoUrl         = (v: string)  => { setSplashLogoUrlState(v); localStorage.setItem("setting_splash_logo", v); saveToServer({ splashLogoUrl: v }); };
+  const setSplashLogoWidth       = (v: number)  => { setSplashLogoWidthState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_w", String(v)); saveToServer({ splashLogoWidth: v }); };
+  const setSplashLogoHeight      = (v: number)  => { setSplashLogoHeightState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_h", String(v)); saveToServer({ splashLogoHeight: v }); };
+  const setSplashLogoRadius      = (v: number)  => { setSplashLogoRadiusState(Math.max(0, Math.min(150, v))); localStorage.setItem("setting_splash_logo_r", String(v)); saveToServer({ splashLogoRadius: v }); };
+  const setSplashLogoOffsetX     = (v: number)  => { setSplashLogoOffsetXState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_ox", String(v)); saveToServer({ splashLogoOffsetX: v }); };
+  const setSplashLogoOffsetY     = (v: number)  => { setSplashLogoOffsetYState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_oy", String(v)); saveToServer({ splashLogoOffsetY: v }); };
+  const setSplashLogoBgSize      = (v: number)  => { setSplashLogoBgSizeState(Math.max(0, Math.min(60, v))); localStorage.setItem("setting_splash_logo_bg", String(v)); saveToServer({ splashLogoBgSize: v }); };
+  const setSplashAppName         = (v: string)  => { setSplashAppNameState(v); localStorage.setItem("setting_splash_app_name", v); saveToServer({ splashAppName: v }); };
+  const setSplashStyle           = (v: SplashStyle) => { setSplashStyleState(v); localStorage.setItem("setting_splash_style", v); saveToServer({ splashStyle: v }); };
+
+  /* ── Server sync helpers ───────────────────────────────────────── */
+
+  /** Fire-and-forget: persist a partial UI settings patch to the server so
+   *  any other device/browser gets the same config when it next loads.    */
+  function saveToServer(patch: Record<string, unknown>) {
+    fetch("/api/settings/app", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ uiSettings: patch }),
+    }).catch(() => { /* ignore network errors — localStorage is always fresh */ });
+  }
+
+  /** Apply a uiSettings blob that arrived from the server.
+   *  Uses internal *State setters so we never trigger another server save. */
+  function applyServerUiSettings(s: Record<string, unknown>) {
+    if (s.language)             { const v = s.language as Language;             setLanguageState(v);              localStorage.setItem("settings_lang", v);                    i18n.changeLanguage(v); applyDirection(v); }
+    if (s.theme)                { const v = s.theme as Theme;                   setThemeState(v);                 localStorage.setItem("settings_theme", v);                   applyTheme(v); }
+    if (s.fontSize)             { const v = s.fontSize as FontSize;             setFontSizeState(v);              localStorage.setItem("settings_size", v);                    document.documentElement.classList.remove("text-font-small","text-font-medium","text-font-large"); document.documentElement.classList.add(`text-font-${v}`); }
+    if (s.fontFamily)           { const v = s.fontFamily as FontFamily;         setFontFamilyState(v);            localStorage.setItem("setting_font_family", v);              applyFontFamily(v); }
+    if (s.fontWeight)           { const v = s.fontWeight as FontWeight;         setFontWeightState(v);            localStorage.setItem("setting_font_weight", v);              applyFontWeight(v); }
+    if (s.ttsEnabled !== undefined)       { const v = Boolean(s.ttsEnabled);    setTtsEnabledState(v);            localStorage.setItem("setting_tts", String(v)); }
+    if (s.wakeWord !== undefined)         { const v = String(s.wakeWord);       setWakeWordState(v);              localStorage.setItem("setting_wake_word", v); }
+    if (s.assistantName !== undefined)    { const v = String(s.assistantName);  setAssistantNameState(v);         localStorage.setItem("setting_assistant_name", v); }
+    if (s.assistantPersonality)           { const v = s.assistantPersonality as AssistantPersonality; setAssistantPersonalityState(v); localStorage.setItem("setting_assistant_personality", v); }
+    if (s.clockFormat)          { const v = s.clockFormat as ClockFormat;       setClockFormatState(v);           localStorage.setItem("setting_clock_format", v); }
+    if (s.clockLocale)          { const v = s.clockLocale as ClockLocale;       setClockLocaleState(v);           localStorage.setItem("setting_clock_locale", v); }
+    if (s.clockStyle)           { const v = s.clockStyle as ClockStyle;         setClockStyleState(v);            localStorage.setItem("setting_clock_style", v); }
+    if (s.clockSize)            { const v = s.clockSize as ClockSize;           setClockSizeState(v);             localStorage.setItem("setting_clock_size", v); }
+    if (s.floatingClockEnabled !== undefined) { const v = Boolean(s.floatingClockEnabled); setFloatingClockEnabledState(v); localStorage.setItem("setting_floating_clock", String(v)); }
+    if (s.floatingClockCheckIn !== undefined) { const v = Boolean(s.floatingClockCheckIn); setFloatingClockCheckInState(v); localStorage.setItem("setting_floating_checkin", String(v)); }
+    if (s.aiButtonIcon)         { const v = s.aiButtonIcon as AiButtonIcon;     setAiButtonIconState(v);          localStorage.setItem("setting_ai_icon", v); }
+    if (s.aiButtonShape)        { const v = s.aiButtonShape as AiButtonShape;   setAiButtonShapeState(v);         localStorage.setItem("setting_ai_shape", v); }
+    if (s.aiButtonColor)        { const v = s.aiButtonColor as AiButtonColor;   setAiButtonColorState(v);         localStorage.setItem("setting_ai_color", v); }
+    if (s.aiButtonCustomColor !== undefined) { const v = String(s.aiButtonCustomColor); setAiButtonCustomColorState(v); localStorage.setItem("setting_ai_custom_color", v); }
+    if (s.aiEnabled !== undefined)           { const v = Boolean(s.aiEnabled);  setAiEnabledState(v);             localStorage.setItem("setting_ai_enabled", String(v)); }
+    if (s.aiAvatarStyle)        { const v = s.aiAvatarStyle as AvatarStyle;     setAiAvatarStyleState(v);         localStorage.setItem("setting_ai_avatar", v); }
+    if (s.aiButtonSize)         { const v = s.aiButtonSize as AiButtonSize;     setAiButtonSizeState(v);          localStorage.setItem("setting_ai_size", v); }
+    if (s.sidebarStyle)         { const v = s.sidebarStyle as SidebarStyle;     setSidebarStyleState(v);          localStorage.setItem("setting_sidebar_style", v); }
+    if (s.tableStyle)           { const v = s.tableStyle as TableStyle;         setTableStyleState(v);            localStorage.setItem("setting_table_style", v); }
+    if (s.cardStyle)            { const v = s.cardStyle as CardStyle;           setCardStyleState(v);             localStorage.setItem("setting_card_style", v); }
+    if (s.cardColorMode)        { const v = s.cardColorMode as CardColorMode;   setCardColorModeState(v);         localStorage.setItem("setting_card_color_mode", v); }
+    if (s.cardColor !== undefined)          { const v = String(s.cardColor);    setCardColorState(v);             localStorage.setItem("setting_card_color", v); }
+    if (s.fontColorMode)        { const v = s.fontColorMode as FontColorMode;   setFontColorModeState(v);         localStorage.setItem("setting_font_color_mode", v); }
+    if (s.fontColor !== undefined)          { const v = String(s.fontColor);    setFontColorState(v);             localStorage.setItem("setting_font_color", v); }
+    if (s.accentColor !== undefined)        { const v = String(s.accentColor);  setAccentColorState(v);           localStorage.setItem("setting_accent_color", v); if (v) applyAccentHex(v); }
+    if (s.glassIntensity)       { const v = s.glassIntensity as GlassIntensity; setGlassIntensityState(v);        localStorage.setItem("setting_glass_intensity", v);          applyGlass(v); }
+    if (s.backgroundMode)       { const v = s.backgroundMode as BackgroundMode; setBackgroundModeState(v);        localStorage.setItem("setting_bg_mode", v); }
+    if (s.backgroundImage !== undefined)    { const v = String(s.backgroundImage); setBackgroundImageState(v);    localStorage.setItem("setting_bg_image", v); }
+    if (s.backgroundGradient !== undefined) { const v = String(s.backgroundGradient); setBackgroundGradientState(v); localStorage.setItem("setting_bg_gradient", v); }
+    if (s.auroraBgEnabled !== undefined)    { const v = Boolean(s.auroraBgEnabled); setAuroraBgEnabledState(v);   localStorage.setItem("setting_aurora_bg", String(v)); }
+    if (s.particlesEnabled !== undefined)   { const v = Boolean(s.particlesEnabled); setParticlesEnabledState(v); localStorage.setItem("setting_particles", String(v)); }
+    if (s.mouseLightEnabled !== undefined)  { const v = Boolean(s.mouseLightEnabled); setMouseLightEnabledState(v); localStorage.setItem("setting_mouse_light", String(v)); }
+    if (s.auroraPalette)        { const v = s.auroraPalette as AuroraPalette;   setAuroraPaletteState(v);         localStorage.setItem("setting_aurora_palette", v); }
+    if (s.welcomeBannerEnabled !== undefined) { const v = Boolean(s.welcomeBannerEnabled); setWelcomeBannerEnabledState(v); localStorage.setItem("setting_welcome_banner", String(v)); }
+    if (s.welcomeMessage !== undefined)     { const v = String(s.welcomeMessage); setWelcomeMessageState(v);       localStorage.setItem("setting_welcome_message", v); }
+    if (s.welcomeShape)         { const v = s.welcomeShape as WelcomeShape;     setWelcomeShapeState(v);          localStorage.setItem("setting_welcome_shape", v); }
+    if (s.welcomeImage !== undefined)       { const v = String(s.welcomeImage); setWelcomeImageState(v);          localStorage.setItem("setting_welcome_image", v); }
+    if (s.welcomeTitle !== undefined)       { const v = String(s.welcomeTitle); setWelcomeTitleState(v);          localStorage.setItem("setting_welcome_title", v); }
+    if (s.welcomeStyle)         { const v = s.welcomeStyle as WelcomeStyle;     setWelcomeStyleState(v);          localStorage.setItem("setting_welcome_style", v); }
+    if (s.aiVoiceResponse !== undefined)    { const v = Boolean(s.aiVoiceResponse); setAiVoiceResponseState(v);   localStorage.setItem("setting_ai_voice_response", String(v)); }
+    if (s.soundEnabled !== undefined)       { const v = Boolean(s.soundEnabled); setSoundEnabledState(v);         localStorage.setItem("setting_sound_enabled", String(v)); }
+    if (s.soundVolume !== undefined)        { const v = Number(s.soundVolume);   setSoundVolumeState(v);          localStorage.setItem("setting_sound_volume", String(v)); }
+    if (s.latenessAlertEnabled !== undefined) { const v = Boolean(s.latenessAlertEnabled); setLatenessAlertEnabledState(v); localStorage.setItem("setting_lateness_alert", String(v)); }
+    if (s.latenessAlertDays !== undefined)  { const v = Number(s.latenessAlertDays); setLatenessAlertDaysState(v); localStorage.setItem("setting_lateness_days", String(v)); }
+    if (s.dashboardCardOrder !== undefined) { const v = String(s.dashboardCardOrder); setDashboardCardOrderState(v); localStorage.setItem("setting_dashboard_order", v); }
+    if (s.dashboardCardsHidden !== undefined) { const v = String(s.dashboardCardsHidden); setDashboardCardsHiddenState(v); localStorage.setItem("setting_dashboard_hidden", v); }
+    if (s.currency)             { const v = s.currency as Currency;             setCurrencyState(v);              localStorage.setItem("setting_currency", v); }
+    if (s.splashStyle)          { const v = s.splashStyle as SplashStyle;       setSplashStyleState(v);           localStorage.setItem("setting_splash_style", v); }
+    if (s.splashBgGradient)     { const v = s.splashBgGradient as SplashBgGradient; setSplashBgGradientState(v); localStorage.setItem("setting_splash_bg", v); }
+    if (s.splashTagline !== undefined)      { const v = String(s.splashTagline); setSplashTaglineState(v);         localStorage.setItem("setting_splash_tagline", v); }
+    if (s.splashDuration !== undefined)     { const v = Number(s.splashDuration); setSplashDurationState(Math.max(3, Math.min(15, v))); localStorage.setItem("setting_splash_duration", String(v)); }
+    if (s.splashShowStars !== undefined)    { const v = Boolean(s.splashShowStars); setSplashShowStarsState(v);   localStorage.setItem("setting_splash_stars", String(v)); }
+    if (s.splashShowParticles !== undefined){ const v = Boolean(s.splashShowParticles); setSplashShowParticlesState(v); localStorage.setItem("setting_splash_particles", String(v)); }
+    if (s.splashLogoUrl !== undefined)      { const v = String(s.splashLogoUrl); setSplashLogoUrlState(v);        localStorage.setItem("setting_splash_logo", v); }
+    if (s.splashLogoWidth !== undefined)    { const v = Number(s.splashLogoWidth); setSplashLogoWidthState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_w", String(v)); }
+    if (s.splashLogoHeight !== undefined)   { const v = Number(s.splashLogoHeight); setSplashLogoHeightState(Math.max(40, Math.min(300, v))); localStorage.setItem("setting_splash_logo_h", String(v)); }
+    if (s.splashLogoRadius !== undefined)   { const v = Number(s.splashLogoRadius); setSplashLogoRadiusState(Math.max(0, Math.min(150, v))); localStorage.setItem("setting_splash_logo_r", String(v)); }
+    if (s.splashLogoOffsetX !== undefined)  { const v = Number(s.splashLogoOffsetX); setSplashLogoOffsetXState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_ox", String(v)); }
+    if (s.splashLogoOffsetY !== undefined)  { const v = Number(s.splashLogoOffsetY); setSplashLogoOffsetYState(Math.max(-200, Math.min(200, v))); localStorage.setItem("setting_splash_logo_oy", String(v)); }
+    if (s.splashLogoBgSize !== undefined)   { const v = Number(s.splashLogoBgSize); setSplashLogoBgSizeState(Math.max(0, Math.min(60, v))); localStorage.setItem("setting_splash_logo_bg", String(v)); }
+    if (s.splashAppName !== undefined)      { const v = String(s.splashAppName); setSplashAppNameState(v);         localStorage.setItem("setting_splash_app_name", v); }
+
+    // Re-apply composite visual effects after all values are updated
+    const bgMode = (s.backgroundMode as BackgroundMode) ?? undefined;
+    const bgImg  = s.backgroundImage  !== undefined ? String(s.backgroundImage)  : undefined;
+    const bgGrad = s.backgroundGradient !== undefined ? String(s.backgroundGradient) : undefined;
+    if (bgMode || bgImg !== undefined || bgGrad !== undefined) {
+      applyBackground(
+        bgMode  ?? (localStorage.getItem("setting_bg_mode") as BackgroundMode)    ?? "default",
+        bgImg   ?? localStorage.getItem("setting_bg_image")                        ?? "",
+        bgGrad  ?? localStorage.getItem("setting_bg_gradient")                     ?? "aurora",
+      );
+    }
+    const cm = (s.cardColorMode as CardColorMode) ?? undefined;
+    const cc = s.cardColor !== undefined ? String(s.cardColor) : undefined;
+    const fm = (s.fontColorMode as FontColorMode) ?? undefined;
+    const fc = s.fontColor !== undefined ? String(s.fontColor) : undefined;
+    if (cm || cc !== undefined || fm || fc !== undefined) {
+      applyCardColor(
+        cm ?? (localStorage.getItem("setting_card_color_mode") as CardColorMode) ?? "auto",
+        cc ?? localStorage.getItem("setting_card_color") ?? "#1e293b",
+      );
+      applyFontColor(
+        fm ?? (localStorage.getItem("setting_font_color_mode") as FontColorMode) ?? "auto",
+        fc ?? localStorage.getItem("setting_font_color") ?? "#1e293b",
+      );
+    }
+    const ss = (s.sidebarStyle as SidebarStyle) ?? undefined;
+    const ts = (s.tableStyle as TableStyle)     ?? undefined;
+    const cs = (s.cardStyle as CardStyle)       ?? undefined;
+    if (ss || ts || cs) {
+      applyUiStyles(
+        ss ?? (localStorage.getItem("setting_sidebar_style") as SidebarStyle) ?? "default",
+        ts ?? (localStorage.getItem("setting_table_style")   as TableStyle)   ?? "comfortable",
+        cs ?? (localStorage.getItem("setting_card_style")    as CardStyle)    ?? "rounded",
+      );
+    }
+  }
+
   /* ── Bootstrap on first mount ──────────────────────────────────── */
   useEffect(() => {
+    // 1. Apply localStorage values immediately (fast, synchronous)
     applyTheme(theme);
     applyDirection(language);
     i18n.changeLanguage(language);
@@ -675,6 +812,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     applyFontWeight(fontWeight);
     applyCardColor(cardColorMode, cardColor);
     applyFontColor(fontColorMode, fontColor);
+
+    // 2. Fetch server settings and override — ensures fresh devices/browsers
+    //    always get the admin's latest config, not just the localStorage defaults.
+    fetch("/api/settings/app", { cache: "no-cache" })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: any) => {
+        if (data?.uiSettings && typeof data.uiSettings === "object") {
+          applyServerUiSettings(data.uiSettings);
+        }
+      })
+      .catch(() => { /* network error — localhost values remain in effect */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

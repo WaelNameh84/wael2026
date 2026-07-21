@@ -50,6 +50,9 @@ interface GeminiConfig {
   logoBgColor?: string;
   logoBgOpacity?: number;
   logoBgRadius?: number;
+  // Global UI settings — all client appearance/behaviour as a JSON blob.
+  // Stored here so every device that opens the app loads the admin's config.
+  uiSettings?: string;
 }
 
 function readLegacyFile(): GeminiConfig {
@@ -114,6 +117,7 @@ export async function initConfigCache(): Promise<void> {
         logoBgColor:   (row as any).logoBgColor   ?? undefined,
         logoBgOpacity: (row as any).logoBgOpacity ?? undefined,
         logoBgRadius:  (row as any).logoBgRadius  ?? undefined,
+        uiSettings:    (row as any).uiSettings    ?? undefined,
       };
     } else {
       // Nothing saved in the DB yet — seed once from the legacy local file
@@ -168,6 +172,7 @@ async function persistNow(config: GeminiConfig): Promise<void> {
     logoBgColor:   config.logoBgColor   ?? "#3b82f6",
     logoBgOpacity: config.logoBgOpacity ?? 10,
     logoBgRadius:  config.logoBgRadius  ?? 16,
+    uiSettings:    config.uiSettings    ?? null,
   };
   await db.insert(appConfigTable)
     .values(row)
@@ -240,6 +245,23 @@ export function saveLogoDisplaySettings(s: {
   logoBgOpacity?: number; logoBgRadius?: number;
 }): void {
   persist(s);
+}
+
+/* ── Global UI settings (all client appearance / behaviour) ───────────────
+   Stored as a JSON blob so any device that opens the app gets the latest
+   admin-configured look without needing a localStorage entry.            */
+export function getUiSettings(): Record<string, unknown> {
+  try {
+    return cache.uiSettings ? JSON.parse(cache.uiSettings) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveUiSettings(patch: Record<string, unknown>): void {
+  const current = getUiSettings();
+  const merged = { ...current, ...patch };
+  persist({ uiSettings: JSON.stringify(merged) });
 }
 
 /** workStartTime stored as "HH:MM" UTC, default "09:00" */

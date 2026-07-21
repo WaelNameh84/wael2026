@@ -13,6 +13,7 @@ import {
   getManagerApiAccess, saveManagerApiAccess,
   getGpsEnabled, saveGpsEnabled, getGpsRadius, saveGpsRadius,
   getLogoDisplaySettings, saveLogoDisplaySettings,
+  getUiSettings, saveUiSettings,
 } from "../lib/gemini-config.js";
 import { initVapid } from "./push.js";
 import { getPrimaryAdminEmail } from "../lib/mailer.js";
@@ -31,6 +32,7 @@ function appConfigResponse(adminEmail: string) {
     gpsEnabled: getGpsEnabled(),
     gpsRadius: getGpsRadius(),
     ...getLogoDisplaySettings(),
+    uiSettings: getUiSettings(),
   };
 }
 
@@ -64,6 +66,8 @@ router.patch("/app", requireAuth, requireAdmin, async (req, res) => {
       logoBgColor:   z.string().max(20).optional(),
       logoBgOpacity: z.number().int().min(0).max(100).optional(),
       logoBgRadius:  z.number().int().min(0).max(100).optional(),
+      // Global UI settings blob — partial patch merged into existing blob
+      uiSettings: z.record(z.unknown()).optional(),
     }).parse(req.body);
 
     if (body.appName !== undefined) saveAppName(body.appName.trim());
@@ -85,6 +89,11 @@ router.patch("/app", requireAuth, requireAdmin, async (req, res) => {
     };
     const hasLogoFields = Object.values(logoFields).some(v => v !== undefined);
     if (hasLogoFields) saveLogoDisplaySettings(logoFields as any);
+
+    // Merge partial UI settings patch into the stored blob
+    if (body.uiSettings && Object.keys(body.uiSettings).length > 0) {
+      saveUiSettings(body.uiSettings);
+    }
 
     const adminEmail = await getPrimaryAdminEmail();
     return res.json(appConfigResponse(adminEmail ?? ""));
