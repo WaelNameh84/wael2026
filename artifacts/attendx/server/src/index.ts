@@ -313,6 +313,9 @@ async function runMigrations() {
       ALTER TABLE app_config ADD COLUMN IF NOT EXISTS logo_bg_color varchar(20) DEFAULT '#3b82f6';
       ALTER TABLE app_config ADD COLUMN IF NOT EXISTS logo_bg_opacity integer DEFAULT 10;
       ALTER TABLE app_config ADD COLUMN IF NOT EXISTS logo_bg_radius integer DEFAULT 16;
+      -- Global UI settings blob: persists all client appearance/behaviour so every
+      -- device gets the admin's config. Added as a migration so it survives fresh deploys.
+      ALTER TABLE app_config ADD COLUMN IF NOT EXISTS ui_settings text;
 
       -- FIX #2: new detail columns on payroll_reports (allowances + breakdown fields)
       ALTER TABLE payroll_reports ADD COLUMN IF NOT EXISTS total_normal_hours double precision NOT NULL DEFAULT 0;
