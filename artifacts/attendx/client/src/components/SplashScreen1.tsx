@@ -25,7 +25,7 @@ const PARTICLES = Array.from({ length: 120 }, (_, i) => ({
   dur:   Number((5 + (i * 0.042) % 10 ).toFixed(2)),
 }));
 
-const SHOWN_KEY = "attendx_s1_v2";
+const SHOWN_KEY = "pulse_splash_v1";
 
 export default function SplashScreen1() {
   const {
