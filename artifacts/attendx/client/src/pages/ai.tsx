@@ -166,22 +166,40 @@ export default function AiPage() {
     setVoiceSupported(!!SR);
   }, []);
 
-  /* show key setup banner if no key stored — also try syncing from server */
+  /* show key setup banner only when neither server nor user has a key */
   useEffect(() => {
-    if (!localStorage.getItem("gemini_api_key")) {
-      const token = localStorage.getItem("auth_token");
-      fetch("/api/settings/my-ai-key", { headers: token ? { Authorization: `Bearer ${token}` } : {} })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data?.key) {
-            localStorage.setItem("gemini_api_key", data.key);
-            setShowKeySetup(false);
-          } else {
-            setShowKeySetup(true);
-          }
-        })
-        .catch(() => setShowKeySetup(true));
-    }
+    const token = localStorage.getItem("auth_token");
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+    // First check if server already has a key configured by admin
+    fetch("/api/ai/status", { headers })
+      .then(r => r.ok ? r.json() : null)
+      .then(async (status) => {
+        if (status?.serverHasKey) {
+          // Admin configured key — no need for user to enter one
+          setShowKeySetup(false);
+          return;
+        }
+        // Server has no key — check if user has their own personal key
+        if (localStorage.getItem("gemini_api_key")) {
+          setShowKeySetup(false);
+          return;
+        }
+        // Try fetching user's saved personal key from DB
+        const userKeyData = await fetch("/api/settings/my-ai-key", { headers })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+        if (userKeyData?.key) {
+          localStorage.setItem("gemini_api_key", userKeyData.key);
+          setShowKeySetup(false);
+        } else {
+          setShowKeySetup(true);
+        }
+      })
+      .catch(() => {
+        // If status check fails, fall back to local check
+        if (!localStorage.getItem("gemini_api_key")) setShowKeySetup(true);
+      });
   }, []);
 
   const handleQuickSaveKey = useCallback(async () => {

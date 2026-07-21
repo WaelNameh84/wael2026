@@ -163,6 +163,12 @@ router.delete("/config", requireAuth, requireAdmin, async (_req, res) => {
   }
 });
 
+// ── Public status check — any logged-in user can ask if the server has a key ──
+router.get("/status", requireAuth, async (_req, res) => {
+  const source = getGeminiKeySource();
+  return res.json({ serverHasKey: source !== "none" });
+});
+
 router.post("/verify-key", requireAuth, async (req, res) => {
   try {
     const schema = z.object({ key: z.string().min(1) });
