@@ -2,7 +2,7 @@ services:
   - type: web
     name: attendx
     runtime: node
-    buildCommand: corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm --filter @workspace/attendx run build
+    buildCommand: corepack prepare pnpm@latest --activate && corepack pnpm install && corepack pnpm --filter @workspace/attendx run build
     startCommand: node artifacts/attendx/server/dist/index.cjs
     envVars:
       - key: NODE_ENV
