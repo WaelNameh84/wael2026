@@ -1203,6 +1203,21 @@ function ActionCenterContent() {
                   {justifyDialog.checkIn && ` · ${isArabic ? "دخول" : "In"}: ${fmtTime(justifyDialog.checkIn)}`}
                 </p>
               </div>
+
+              {/* Current status banner (when already reviewed) */}
+              {justifyDialog.status && justifyDialog.status !== "pending" && (
+                <div className={`rounded-lg px-4 py-2.5 text-sm font-medium text-center flex items-center justify-center gap-2 ${
+                  justifyDialog.status === "approved"
+                    ? "bg-green-50 border border-green-200 text-green-800"
+                    : "bg-red-50 border border-red-200 text-red-800"
+                }`}>
+                  {justifyDialog.status === "approved"
+                    ? (isArabic ? "✅ تمت الموافقة مسبقاً — يمكنك تغيير القرار" : "✅ Already approved — you can change the decision")
+                    : (isArabic ? "❌ تم الرفض مسبقاً — يمكنك تغيير القرار" : "❌ Already rejected — you can change the decision")
+                  }
+                </div>
+              )}
+
               <div className="bg-violet-50 border border-violet-200 rounded-lg px-4 py-3">
                 <p className="text-xs font-semibold text-violet-700 mb-1">
                   {t("late_reason") ?? (isArabic ? "سبب التأخر" : "Reason for Late")}:

@@ -897,9 +897,16 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
                         </p>
                       )}
 
-                      {/* ── Admin actions for pending justifications ── */}
-                      {isAdmin && relatedData.status === "pending" && (
+                      {/* ── Admin actions (always visible for admin) ── */}
+                      {isAdmin && (
                         <div className="space-y-2 pt-1">
+                          {relatedData.status !== "pending" && (
+                            <div className={cn("rounded-xl px-3 py-2 text-center text-xs font-medium flex items-center justify-center gap-1.5", STATUS_COLOR[relatedData.status])}>
+                              <span>القرار الحالي:</span>
+                              <span className="font-bold">{STATUS_AR[relatedData.status]}</span>
+                              <span className="opacity-70">— يمكنك تغييره</span>
+                            </div>
+                          )}
                           <div className="relative">
                             <MessageSquare className="absolute start-3 top-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                             <Textarea
@@ -931,13 +938,6 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
                               رفض
                             </Button>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Status badge when already resolved */}
-                      {relatedData.status !== "pending" && (
-                        <div className={cn("rounded-xl px-4 py-2.5 text-center text-sm font-medium", STATUS_COLOR[relatedData.status])}>
-                          {STATUS_AR[relatedData.status]}
                         </div>
                       )}
                     </div>

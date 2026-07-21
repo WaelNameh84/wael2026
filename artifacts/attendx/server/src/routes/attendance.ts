@@ -723,7 +723,6 @@ router.patch("/justifications/:id", requireAdmin, async (req: any, res) => {
     const [just] = await db.select().from(lateJustificationsTable)
       .where(eq(lateJustificationsTable.id, id)).limit(1);
     if (!just) return res.status(404).json({ error: "Justification not found" });
-    if (just.status !== "pending") return res.status(400).json({ error: "تمت المراجعة مسبقاً" });
 
     const [updated] = await db.update(lateJustificationsTable).set({
       status:     body.status,
