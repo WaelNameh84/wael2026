@@ -379,7 +379,7 @@ export default function EmployeesPage() {
     workEndTime: "" as string,
   });
 
-  const { data: users, isLoading } = useListUsers({ search: debouncedSearch }, { query: { queryKey: getListUsersQueryKey({ search: debouncedSearch }), refetchInterval: 30_000, refetchIntervalInBackground: false } });
+  const { data: users, isLoading } = useListUsers({ search: debouncedSearch }, { query: { queryKey: getListUsersQueryKey({ search: debouncedSearch }), staleTime: 0, refetchOnMount: "always", refetchOnWindowFocus: true, refetchInterval: 30_000, refetchIntervalInBackground: false } });
   const createMut = useCreateUser();
   const deleteMut = useDeleteUser();
   const updateMut = useUpdateUser();
