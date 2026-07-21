@@ -4,6 +4,7 @@ import path from "path";
 import { readFileSync } from "fs";
 import router from "./routes/index.js";
 import { getAppName } from "./lib/gemini-config.js";
+import { SERVER_START_TIME } from "./lib/server-version.js";
 
 // NOTE: __dirname is a native CommonJS global here — the server bundle is
 // built with esbuild's "cjs" format (see server/build.mjs) because several
@@ -76,6 +77,22 @@ function renderTemplate(fileName: string): string {
   const raw = readFileSync(path.join(STATIC_DIR, fileName), "utf8");
   return raw.replaceAll("{{APP_NAME}}", getAppName());
 }
+
+// Serve sw.js dynamically so __BUILD_TIME__ is always the current server
+// start time. Every server restart (= deploy / code change) generates a new
+// value → the browser detects a changed sw.js → installs a fresh SW →
+// clears the old caches → all PWA clients reload automatically.
+app.get("/sw.js", (_req, res) => {
+  noCacheHeaders(res);
+  res.setHeader("Content-Type", "application/javascript");
+  res.setHeader("Service-Worker-Allowed", "/");
+  try {
+    const raw = readFileSync(path.join(STATIC_DIR, "sw.js"), "utf8");
+    res.send(raw.replace("__BUILD_TIME__", SERVER_START_TIME));
+  } catch {
+    res.status(404).send("// sw.js not found");
+  }
+});
 
 app.get("/manifest.json", (_req, res) => {
   noCacheHeaders(res);

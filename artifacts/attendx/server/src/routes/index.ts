@@ -24,11 +24,15 @@ import purchasesRouter from "./purchases.js";
 import holidaysRouter from "./holidays.js";
 import backupsRouter from "./backups.js";
 import geocodeRouter from "./geocode.js";
+import { SERVER_START_TIME } from "../lib/server-version.js";
 
 const router: IRouter = Router();
 
 router.get("/health", (_req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
-router.get("/version", (_req, res) => res.json({ version: typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : Date.now().toString() }));
+router.get("/version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.json({ version: SERVER_START_TIME });
+});
 
 router.use(uploadsRouter);
 router.use("/auth", authRouter);
