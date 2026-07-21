@@ -73,9 +73,20 @@ const noCacheHeaders = (res: import("express").Response) => {
 // request so a name change made in Settings (persisted via getAppName/
 // saveAppName in gemini-config.ts) shows up immediately — including the
 // PWA home-screen label — without needing a rebuild.
+//
+// Performance: cache the rendered output in memory and only re-render when
+// the app name changes. readFileSync on every request blocks the event loop
+// and causes measurable latency under load.
+const _templateCache = new Map<string, { appName: string; rendered: string }>();
+
 function renderTemplate(fileName: string): string {
+  const currentName = getAppName();
+  const cached = _templateCache.get(fileName);
+  if (cached && cached.appName === currentName) return cached.rendered;
   const raw = readFileSync(path.join(STATIC_DIR, fileName), "utf8");
-  return raw.replaceAll("{{APP_NAME}}", getAppName());
+  const rendered = raw.replaceAll("{{APP_NAME}}", currentName);
+  _templateCache.set(fileName, { appName: currentName, rendered });
+  return rendered;
 }
 
 // Serve sw.js dynamically so __BUILD_TIME__ is always the current server

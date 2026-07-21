@@ -45,8 +45,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 60_000,
-      gcTime: 5 * 60_000,
+      // 5 minutes: data stays fresh across page navigations without re-fetching
+      staleTime: 5 * 60_000,
+      // 15 minutes: keep unused data in memory so navigating back is instant
+      gcTime: 15 * 60_000,
       refetchOnWindowFocus: false,
       refetchIntervalInBackground: false,
     },
@@ -81,9 +83,11 @@ function restoreCache() {
 
 restoreCache();
 
-// Save cache to localStorage every 30 seconds and on page hide
+// Save cache to localStorage every 5 minutes and on page hide.
+// Serialising the whole cache every 30 s was causing main-thread jank;
+// 5 min is plenty — the primary save path is the pagehide/visibilitychange events.
 if (typeof window !== "undefined") {
-  setInterval(saveCache, 30_000);
+  setInterval(saveCache, 5 * 60_000);
   window.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveCache(); });
   window.addEventListener("pagehide", saveCache);
 }

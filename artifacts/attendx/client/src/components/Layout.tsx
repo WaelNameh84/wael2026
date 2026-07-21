@@ -39,6 +39,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const sidebarWidth = isIconOnly ? "w-16" : isCompact ? "w-44" : isWide ? "w-64" : "w-56";
 
+  // Poll every 2 min — badge counts don't need sub-minute freshness,
+  // and 3 concurrent requests every 60 s was adding measurable background load.
+  const NOTIF_POLL = 2 * 60_000;
+  const NOTIF_STALE = NOTIF_POLL - 5_000;
+
   const { data: countData } = useQuery<{ count: number }>({
     queryKey: ["notifications-count"],
     queryFn: async () => {
@@ -52,9 +57,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       } catch { clearTimeout(timer); return { count: 0 }; }
     },
     enabled: isAdmin,
-    refetchInterval: 60_000,
-    staleTime:       55_000,
-    gcTime:         120_000,
+    refetchInterval: NOTIF_POLL,
+    staleTime:       NOTIF_STALE,
+    gcTime:         10 * 60_000,
   });
 
   const { data: myNotifCountData } = useQuery<{ count: number }>({
@@ -70,9 +75,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       } catch { clearTimeout(timer); return { count: 0 }; }
     },
     enabled: !!me && !isAdmin,
-    refetchInterval: 60_000,
-    staleTime:       55_000,
-    gcTime:         120_000,
+    refetchInterval: NOTIF_POLL,
+    staleTime:       NOTIF_STALE,
+    gcTime:         10 * 60_000,
   });
 
   const { data: msgCountData } = useQuery<{ count: number }>({
@@ -87,9 +92,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         return res.json();
       } catch { clearTimeout(timer); return { count: 0 }; }
     },
-    refetchInterval: 60_000,
-    staleTime:       55_000,
-    gcTime:         120_000,
+    refetchInterval: NOTIF_POLL,
+    staleTime:       NOTIF_STALE,
+    gcTime:         10 * 60_000,
   });
 
   const unreadCount = countData?.count ?? 0;

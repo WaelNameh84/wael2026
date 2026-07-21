@@ -3,7 +3,8 @@ import { useEffect, useRef } from "react";
 // How often to poll the server version endpoint as a safety net.
 // The primary update path is the SW_UPDATED message from the service worker
 // (fired as soon as the new SW activates), so this is just a fallback.
-const POLL_INTERVAL = 30 * 1000;
+// 5 min is enough — the SW path handles instant deploys; the poll is a safety net only.
+const POLL_INTERVAL = 5 * 60 * 1000;
 
 function getVersionUrl(): string {
   const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
