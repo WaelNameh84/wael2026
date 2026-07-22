@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Loader2, Moon, Sun, Monitor, Globe, Type, Lock,
@@ -319,7 +320,7 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
                   </div>
                 )}
 
-                <div className="px-5 pb-5 pt-3 border-t shrink-0 flex gap-2">
+                <div className="px-5 pt-3 border-t shrink-0 flex gap-2" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
                   <button type="button" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors">
                     {L("إلغاء", "Cancel")}
                   </button>
@@ -360,7 +361,7 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
                   ))}
                 </div>
 
-                <div className="px-5 pb-5 pt-3 border-t shrink-0 flex gap-2">
+                <div className="px-5 pt-3 border-t shrink-0 flex gap-2" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
                   <button type="button" onClick={() => setStep("employees")} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors">
                     ← {L("رجوع", "Back")}
                   </button>
