@@ -230,6 +230,8 @@ export default function FloatingAI() {
   const isDragging  = useRef(false);
   const hasMoved    = useRef(false);
   const dragStart   = useRef({ px: 0, py: 0, bx: 0, by: 0 });
+  const btnRef      = useRef<HTMLButtonElement>(null);
+  const livePos     = useRef(loadPos() ?? getDefaultPos());
   const bottomRef   = useRef<HTMLDivElement>(null);
   const recRef      = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
   const wakeRecRef  = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
@@ -247,7 +249,12 @@ export default function FloatingAI() {
   }, [messages, open]);
 
   useEffect(() => {
-    const onResize = () => setPos(prev => { const c = clamp(prev); savePos(c); return c; });
+    const onResize = () => {
+      const c = clamp(livePos.current);
+      livePos.current = c;
+      savePos(c);
+      setPos(c);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -427,26 +434,43 @@ export default function FloatingAI() {
   }, [listening, stopListening, startActiveListening]);
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
-    isDragging.current = true; hasMoved.current = false;
-    dragStart.current = { px: e.clientX, py: e.clientY, bx: pos.x, by: pos.y };
+    isDragging.current = true;
+    hasMoved.current   = false;
+    dragStart.current  = { px: e.clientX, py: e.clientY, bx: livePos.current.x, by: livePos.current.y };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // remove transition during drag for instant feel
+    if (btnRef.current) btnRef.current.style.transition = "none";
     e.preventDefault();
-  }, [pos]);
+  }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
     if (!isDragging.current) return;
-    const dx = e.clientX - dragStart.current.px, dy = e.clientY - dragStart.current.py;
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) hasMoved.current = true;
+    const dx = e.clientX - dragStart.current.px;
+    const dy = e.clientY - dragStart.current.py;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved.current = true;
     if (!hasMoved.current) return;
-    setPos(clamp({ x: dragStart.current.bx + dx, y: dragStart.current.by + dy }));
+    // move button directly on DOM — zero React re-renders during drag
+    const next = clamp({ x: dragStart.current.bx + dx, y: dragStart.current.by + dy });
+    livePos.current = next;
+    if (btnRef.current) {
+      btnRef.current.style.left = `${next.x}px`;
+      btnRef.current.style.top  = `${next.y}px`;
+    }
     e.preventDefault();
   }, []);
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    if (!hasMoved.current) setOpen(o => !o);
-    else setPos(prev => { savePos(prev); return prev; });
+    // restore transition
+    if (btnRef.current) btnRef.current.style.transition = "";
+    if (!hasMoved.current) {
+      setOpen(o => !o);
+    } else {
+      const snapped = livePos.current;
+      savePos(snapped);
+      setPos(snapped);       // sync React state once on release
+    }
     e.preventDefault();
   }, []);
 
@@ -623,6 +647,7 @@ export default function FloatingAI() {
 
       {/* Floating draggable button */}
       <button
+        ref={btnRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
