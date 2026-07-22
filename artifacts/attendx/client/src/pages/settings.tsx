@@ -2202,37 +2202,47 @@ export default function SettingsPage() {
               { value: "readex"     as const, label: "Readex Pro",    preview: "Aa مرحبا", family: "'Readex Pro', sans-serif",        tag: isArabic ? "ثنائي" : "Bilingual" },
               { value: "ibm"        as const, label: "IBM Plex AR",   preview: "Aa مرحبا", family: "'IBM Plex Arabic', sans-serif",   tag: "Pro"      },
             ];
-            const current = fontOpts.find(f => f.value === fontFamily);
             return (
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-xs">
                   <Type className="w-3.5 h-3.5" />
                   {isArabic ? "عائلة الخط" : "Font Family"}
                 </Label>
-                <Select value={fontFamily} onValueChange={v => setFontFamily(v as any)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
-                      {current
-                        ? <span className="flex items-center gap-2">
-                            <span className="text-sm font-medium" style={{ fontFamily: current.family }}>{current.preview}</span>
-                            <span className="text-xs text-muted-foreground">{current.label}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{current.tag}</span>
-                          </span>
-                        : fontFamily}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fontOpts.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        <span className="flex items-center gap-3">
-                          <span className="text-base font-medium w-20 shrink-0" style={{ fontFamily: opt.family }}>{opt.preview}</span>
-                          <span className="text-xs text-muted-foreground">{opt.label}</span>
-                          <span className="text-[10px] px-1 py-0.5 rounded bg-muted text-muted-foreground ms-auto">{opt.tag}</span>
+                <div
+                  className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory"
+                  style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+                >
+                  {fontOpts.map(opt => {
+                    const isSelected = fontFamily === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setFontFamily(opt.value as any)}
+                        className={`snap-start shrink-0 flex flex-col items-center justify-between gap-1 rounded-xl border px-3 py-2.5 transition-all w-[88px] text-center ${
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-sm"
+                            : "border-border bg-card hover:bg-muted/50"
+                        }`}
+                      >
+                        <span
+                          className="text-lg leading-tight font-semibold"
+                          style={{ fontFamily: opt.family }}
+                        >
+                          {opt.preview}
                         </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                        <span className="text-[10px] font-medium text-foreground/80 truncate w-full text-center">
+                          {opt.label}
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full truncate max-w-full ${
+                          isSelected ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                        }`}>
+                          {opt.tag}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             );
           })()}
