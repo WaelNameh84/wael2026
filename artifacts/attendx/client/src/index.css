@@ -188,18 +188,20 @@ html, body {
   background-color: hsl(var(--background));
 }
 
-/* لا تحديد نص في كل التطبيق (مثل تطبيقات الموبايل) */
+/* لا تحديد نص ولا قائمة iOS في كل التطبيق (مثل تطبيقات الموبايل) */
 body, nav, header, main, aside, footer,
 button, a, [role="button"], label, span, p, h1, h2, h3, h4, h5, h6,
 div:not([contenteditable="true"]) {
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none; /* يمنع قائمة "Open / Copy Link" على iOS */
 }
 
-/* السماح بالتحديد فقط في حقول الإدخال */
+/* السماح بالتحديد والـ callout فقط في حقول الإدخال */
 input, textarea, [contenteditable="true"], select {
   -webkit-user-select: text;
   user-select: text;
+  -webkit-touch-callout: default;
 }
 
 /* لا تكبير مزدوج (double-tap zoom) على كل العناصر التفاعلية */
