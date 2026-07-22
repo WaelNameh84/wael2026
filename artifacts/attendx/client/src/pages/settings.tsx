@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Loader2, Moon, Sun, Monitor, Globe, Type, Lock,
   Fingerprint, MapPin, Database, Download, KeyRound,
@@ -206,21 +206,6 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
 
   const canNextEmps = allEmps || selEmps.size > 0;
 
-  // Lock the main scroll container on iOS when modal is open
-  useEffect(() => {
-    if (!open) return;
-    // The actual scroll container is <main>, not document.body
-    const container = document.querySelector("main") as HTMLElement | null;
-    if (!container) return;
-    const scrollTop = container.scrollTop;
-    const origOverflow = container.style.overflow;
-    container.style.overflow = "hidden";
-    return () => {
-      container.style.overflow = origOverflow;
-      container.scrollTop = scrollTop;
-    };
-  }, [open]);
-
   return (
     <>
       <button
@@ -235,11 +220,11 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
         </div>
       </button>
 
-      {open && createPortal(
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative z-10 w-full max-w-sm mx-auto bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="bottom"
+          className="p-0 rounded-t-2xl max-h-[88vh] flex flex-col overflow-hidden [&>button]:hidden"
+        >
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b shrink-0">
               <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
@@ -425,9 +410,8 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
               </div>
             )}
 
-          </div>
-        </div>
-      , document.body)}
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
