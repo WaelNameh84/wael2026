@@ -98,7 +98,7 @@ function LocationCard({
       {/* ── Delete zone — only receives events when open ── */}
       <div
         className="absolute inset-y-0 end-0 w-[82px] bg-destructive rounded-2xl flex flex-col items-center justify-center gap-1"
-        style={{ pointerEvents: isSwipeOpen ? "all" : "none", zIndex: 10 }}
+        style={{ pointerEvents: isSwipeOpen ? "all" : "none", zIndex: isSwipeOpen ? 30 : 10 }}
       >
         <button
           className="w-full h-full flex flex-col items-center justify-center gap-1 text-white"
