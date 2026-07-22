@@ -13,7 +13,7 @@ export const pool = new Pool({
   // Hard limits so a slow/lost DB connection never hangs the server forever
   connectionTimeoutMillis: 8_000,   // fail fast if we can't get a connection
   idleTimeoutMillis:       30_000,  // release idle connections after 30 s
-  max:                     10,      // cap the pool size
+  max:                     20,      // cap the pool size
   statement_timeout:       15_000,  // kill any query running > 15 s
 });
 

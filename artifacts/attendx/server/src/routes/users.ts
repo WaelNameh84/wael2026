@@ -6,7 +6,7 @@ import {
   attendanceCorrectionsTable, notificationsTable,
   announcementsTable, messagesTable,
 } from "../../../db/src/index.js";
-import { eq, isNotNull, or } from "drizzle-orm";
+import { eq, isNotNull, or, ilike, and } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "./auth.js";
 import { createNotification } from "../lib/notify.js";
@@ -43,6 +43,15 @@ router.get("/", requireAuth, async (req: any, res) => {
       .from(usersTable).where(eq(usersTable.id, req.userId)).limit(1);
     const isPrivileged = me && ["admin", "manager"].includes(me.role);
 
+    // Build SQL WHERE conditions — filter in the DB, not in JS
+    const conds: any[] = [];
+    if (search) {
+      const pattern = `%${search}%`;
+      conds.push(or(ilike(usersTable.name, pattern), ilike(usersTable.email, pattern)));
+    }
+    if (role) conds.push(eq(usersTable.role, role));
+    const whereClause = conds.length > 0 ? and(...conds) : undefined;
+
     const users = isPrivileged
       ? await db.select({
           id: usersTable.id,
@@ -65,7 +74,7 @@ router.get("/", requireAuth, async (req: any, res) => {
           contractEndDate: usersTable.contractEndDate,
           isApproved: usersTable.isApproved,
           createdAt: usersTable.createdAt,
-        }).from(usersTable)
+        }).from(usersTable).where(whereClause)
       : await db.select({
           // الموظف العادي: بيانات أساسية فقط — بدون راتب أو بدلات أو تفاصيل مالية
           id: usersTable.id,
@@ -76,17 +85,9 @@ router.get("/", requireAuth, async (req: any, res) => {
           position: usersTable.position,
           avatarUrl: usersTable.avatarUrl,
           isApproved: usersTable.isApproved,
-        }).from(usersTable);
+        }).from(usersTable).where(whereClause);
 
-    let result = users;
-    if (search) {
-      const s = search.toLowerCase();
-      result = (result as any[]).filter((u: any) =>
-        u.name.toLowerCase().includes(s) || u.email?.toLowerCase().includes(s)
-      );
-    }
-    if (role) result = (result as any[]).filter((u: any) => u.role === role);
-    return res.json(result);
+    return res.json(users);
   } catch (err: any) {
     return res.status(httpStatus(err)).json({ error: err.message });
   }

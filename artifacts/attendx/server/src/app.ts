@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import compression from "compression";
 import path from "path";
 import { readFileSync } from "fs";
 import router from "./routes/index.js";
@@ -24,6 +25,9 @@ app.use(
     optionsSuccessStatus: 204,
   }),
 );
+
+// ── Compression — gzip/deflate all responses ───────────────────────────────
+app.use(compression());
 
 // ── Security Headers ─────────────────────────────────────────────────────────
 app.use((_req, res, next) => {
@@ -117,7 +121,12 @@ app.get(["/", "/index.html"], (_req, res) => {
   res.send(renderTemplate("index.html"));
 });
 
+// Vite builds assets with content-hash filenames (e.g. main-A3kX9.js) so
+// they are truly immutable — safe to cache for 1 year. index.html is served
+// via its own route above with no-cache headers, so it never hits this.
 app.use(express.static(STATIC_DIR, {
+  maxAge: "1y",
+  immutable: true,
   setHeaders: (res, filePath) => {
     if (filePath.endsWith("index.html")) {
       noCacheHeaders(res);

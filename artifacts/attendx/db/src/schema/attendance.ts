@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, text, real, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, text, real, boolean, date, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "./users";
@@ -22,7 +22,11 @@ export const attendanceTable = pgTable("attendance", {
   gpsLng: real("gps_lng"),
   gpsAddress: text("gps_address"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("attendance_user_id_idx").on(table.userId),
+  index("attendance_date_idx").on(table.date),
+  index("attendance_user_date_idx").on(table.userId, table.date),
+]);
 
 export const insertAttendanceSchema = createInsertSchema(attendanceTable).omit({ id: true, createdAt: true });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;

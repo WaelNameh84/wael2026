@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, attendanceTable, usersTable, locationsTable, lateJustificationsTable, messagesTable, leaveTable } from "../../../db/src/index.js";
-import { eq, and, gte, lte, desc, isNull, isNotNull, inArray } from "drizzle-orm";
+import { eq, and, gte, lte, desc, isNull, isNotNull, inArray, SQL } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "./auth.js";
 import { createNotification, createNotificationForUser } from "../lib/notify.js";
@@ -155,6 +155,13 @@ router.get("/", requireAuth, async (req: any, res) => {
     const [me] = await db.select().from(usersTable).where(eq(usersTable.id, req.userId)).limit(1);
     const targetUserId = ["admin","manager"].includes(me.role) && userId ? parseInt(userId) : req.userId;
 
+    // Build SQL WHERE conditions — filter in the DB, not in JS
+    const conds: SQL[] = [];
+    if (!["admin","manager"].includes(me.role) || userId) conds.push(eq(attendanceTable.userId, targetUserId));
+    if (from)   conds.push(gte(attendanceTable.date, from));
+    if (to)     conds.push(lte(attendanceTable.date, to));
+    if (status) conds.push(eq(attendanceTable.status, status));
+
     const records = await db.select({
       id: attendanceTable.id,
       userId: attendanceTable.userId,
@@ -177,15 +184,10 @@ router.get("/", requireAuth, async (req: any, res) => {
       .from(attendanceTable)
       .leftJoin(usersTable, eq(attendanceTable.userId, usersTable.id))
       .leftJoin(locationsTable, eq(attendanceTable.locationId, locationsTable.id))
-      .where(["admin","manager"].includes(me.role) && !userId ? undefined : eq(attendanceTable.userId, targetUserId))
+      .where(conds.length > 0 ? and(...conds) : undefined)
       .orderBy(desc(attendanceTable.checkIn));
 
-    let result = records;
-    if (from) result = result.filter(r => r.date >= from);
-    if (to) result = result.filter(r => r.date <= to);
-    if (status) result = result.filter(r => r.status === status);
-
-    return res.json(result.map(serializeRecord));
+    return res.json(records.map(serializeRecord));
   } catch (err: any) {
     return res.status(httpStatus(err)).json({ error: err.message });
   }
