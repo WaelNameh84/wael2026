@@ -12,6 +12,33 @@ if (Number.isNaN(port) || port <= 0) {
   process.exit(1);
 }
 
+// ── Critical tables: always created first, independently of the main migration ──
+// These tables MUST exist before the server accepts any requests. We run them
+// in a completely separate query so that a failure in the main migration block
+// cannot prevent their creation.
+async function ensureCriticalTables() {
+  const client = await pool.connect();
+  try {
+    // image_store: uploaded image binary data lives here, not on disk.
+    // Running this independently guarantees it exists even if runMigrations()
+    // encounters an error in a different statement and stops early.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS image_store (
+        id         SERIAL PRIMARY KEY,
+        data       TEXT NOT NULL,
+        mime_type  VARCHAR(50) NOT NULL DEFAULT 'image/jpeg',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+    console.log("✅  Critical tables ensured (image_store)");
+  } catch (err) {
+    // This is fatal — without image_store the upload routes will break.
+    console.error("🚨  Failed to create critical tables:", err);
+  } finally {
+    client.release();
+  }
+}
+
 // ── Auto-migrations: run idempotent ALTER TABLE statements on every startup ──
 async function runMigrations() {
   const client = await pool.connect();
@@ -490,7 +517,7 @@ function startMaintenanceScheduler() {
   console.log("🧹 Maintenance scheduler started (runs every 24h).");
 }
 
-runMigrations().then(() => initConfigCache()).then(() => initVapid()).then(() => {
+ensureCriticalTables().then(() => runMigrations()).then(() => initConfigCache()).then(() => initVapid()).then(() => {
   const server = app.listen(port, "0.0.0.0", (err?: Error) => {
     if (err) {
       console.error("Error starting server:", err);

@@ -101,21 +101,20 @@ async function storeInDatabase(base64Data: string): Promise<string> {
 /**
  * Upload an image and return a stable URL.
  *
+ * Always stores in the PostgreSQL image_store table and returns /api/images/:id.
+ * This guarantees images survive restarts and redeployments on platforms
+ * like Render where the filesystem is ephemeral.
+ *
+ * Cloudinary is intentionally NOT used here: misconfigured or expired
+ * Cloudinary credentials would silently produce broken URLs.
+ *
  * @param base64Data  Raw base64 string (with or without data: prefix).
- * @param folder      Cloudinary folder name (ignored for DB fallback).
- * @returns           A stable URL: either a Cloudinary https:// URL or /api/images/:id.
+ * @returns           A stable root-relative URL: /api/images/:id
  */
 export async function storeImage(
   base64Data: string,
-  folder = "uploads",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _folder = "uploads",
 ): Promise<string> {
-  const creds = cloudinaryCreds();
-  if (creds) {
-    try {
-      return await uploadToCloudinary(base64Data, folder);
-    } catch (err) {
-      console.warn("[store-image] Cloudinary failed, falling back to DB:", (err as Error).message);
-    }
-  }
   return storeInDatabase(base64Data);
 }
