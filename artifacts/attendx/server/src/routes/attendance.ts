@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, attendanceTable, usersTable, locationsTable, lateJustificationsTable, messagesTable } from "../../../db/src/index.js";
+import { db, attendanceTable, usersTable, locationsTable, lateJustificationsTable, messagesTable, leaveTable } from "../../../db/src/index.js";
 import { eq, and, gte, lte, desc, isNull, isNotNull, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "./auth.js";
@@ -221,6 +221,29 @@ router.post("/check-in", requireAuth, async (req: any, res) => {
 
     if (openSession.length > 0) {
       return res.status(400).json({ error: "Already checked in. Please check out before starting a new session." });
+    }
+
+    // ── منع تسجيل الدخول إذا كان اليوم ضمن إجازة موافق عليها ─────────────
+    const activeLeave = await db.select()
+      .from(leaveTable)
+      .where(and(
+        eq(leaveTable.userId, req.userId),
+        eq(leaveTable.status, "approved"),
+        lte(leaveTable.startDate, today),
+        gte(leaveTable.endDate, today),
+      ))
+      .limit(1);
+
+    if (activeLeave.length > 0) {
+      const leave = activeLeave[0];
+      return res.status(403).json({
+        error: "لا يمكن تسجيل الدخول — لديك إجازة موافق عليها اليوم",
+        error_en: "Check-in blocked: you have an approved leave for today",
+        code: "ON_APPROVED_LEAVE",
+        leaveType: leave.type,
+        leaveStart: leave.startDate,
+        leaveEnd: leave.endDate,
+      });
     }
 
     const now = new Date();

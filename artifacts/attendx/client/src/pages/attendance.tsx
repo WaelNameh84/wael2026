@@ -280,8 +280,19 @@ export default function AttendancePage() {
         setJustifyReason("");
       }
     } catch (e: any) {
-      const msg = e?.data?.error ?? e?.message ?? t("check_in_failed");
-      toast({ title: t("check_in_failed"), description: msg, variant: "destructive" });
+      const data = e?.data ?? {};
+      if (data?.code === "ON_APPROVED_LEAVE") {
+        toast({
+          title: isArabic ? "⛔ تسجيل الدخول مرفوض" : "⛔ Check-in blocked",
+          description: isArabic
+            ? `لديك إجازة موافق عليها اليوم (${data.leaveStart ?? ""} → ${data.leaveEnd ?? ""}). لا يمكن تسجيل الدخول أثناء الإجازة.`
+            : `You have an approved leave today (${data.leaveStart ?? ""} → ${data.leaveEnd ?? ""}). Check-in is not allowed during leave.`,
+          variant: "destructive",
+        });
+      } else {
+        const msg = data?.error ?? e?.message ?? t("check_in_failed");
+        toast({ title: t("check_in_failed"), description: msg, variant: "destructive" });
+      }
     }
   };
 
