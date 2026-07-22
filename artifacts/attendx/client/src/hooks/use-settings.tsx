@@ -6,7 +6,7 @@ type Language = "en" | "ar" | "sv" | "fr" | "de" | "es" | "tr" | "ur";
 export type Theme = "light" | "dark" | "system" | "ocean" | "forest" | "rose" | "sunset" | "purple" | "gold" | "ruby" | "slate" | "indigo" | "lime" | "coral" | "midnight" | "deepPurple" | "violet" | "navy" | "magenta" | "amber" | "copper" | "sakura" | "arctic";
 export type Currency = "USD" | "EUR" | "SEK";
 type FontSize = "small" | "medium" | "large";
-export type FontFamily = "default" | "inter" | "nunito" | "poppins" | "cairo" | "tajawal" | "ibm";
+export type FontFamily = "default" | "inter" | "nunito" | "poppins" | "cairo" | "tajawal" | "ibm" | "montserrat" | "raleway" | "lexend" | "rubik" | "outfit" | "space" | "oswald" | "almarai" | "readex";
 export type FontWeight = "light" | "normal" | "semibold" | "bold" | "heavy";
 export type ClockFormat = "12h" | "24h";
 export type ClockLocale = "en" | "ar" | "sv";
@@ -349,13 +349,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   ]);
 
   const FONT_MAP: Record<FontFamily, string> = {
-    default: "'Plus Jakarta Sans', sans-serif",
-    inter:   "'Inter', 'Plus Jakarta Sans', sans-serif",
-    nunito:  "'Nunito', 'Plus Jakarta Sans', sans-serif",
-    poppins: "'Poppins', 'Plus Jakarta Sans', sans-serif",
-    cairo:   "'Cairo', 'Plus Jakarta Sans', sans-serif",
-    tajawal: "'Tajawal', 'Plus Jakarta Sans', sans-serif",
-    ibm:     "'IBM Plex Arabic', 'Plus Jakarta Sans', sans-serif",
+    default:    "'Plus Jakarta Sans', sans-serif",
+    inter:      "'Inter', 'Plus Jakarta Sans', sans-serif",
+    nunito:     "'Nunito', 'Plus Jakarta Sans', sans-serif",
+    poppins:    "'Poppins', 'Plus Jakarta Sans', sans-serif",
+    cairo:      "'Cairo', 'Plus Jakarta Sans', sans-serif",
+    tajawal:    "'Tajawal', 'Plus Jakarta Sans', sans-serif",
+    ibm:        "'IBM Plex Arabic', 'Plus Jakarta Sans', sans-serif",
+    montserrat: "'Montserrat', 'Plus Jakarta Sans', sans-serif",
+    raleway:    "'Raleway', 'Plus Jakarta Sans', sans-serif",
+    lexend:     "'Lexend', 'Plus Jakarta Sans', sans-serif",
+    rubik:      "'Rubik', 'Plus Jakarta Sans', sans-serif",
+    outfit:     "'Outfit', 'Plus Jakarta Sans', sans-serif",
+    space:      "'Space Grotesk', 'Plus Jakarta Sans', sans-serif",
+    oswald:     "'Oswald', 'Plus Jakarta Sans', sans-serif",
+    almarai:    "'Almarai', 'Cairo', sans-serif",
+    readex:     "'Readex Pro', 'Cairo', sans-serif",
   };
 
   const applyFontFamily = (f: FontFamily) => {

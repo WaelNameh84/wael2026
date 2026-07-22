@@ -2185,13 +2185,22 @@ export default function SettingsPage() {
           {/* Font Family */}
           {(() => {
             const fontOpts = [
-              { value: "default" as const, label: "Jakarta Sans", preview: "Aa مرحبا", family: "'Plus Jakarta Sans', sans-serif", tag: isArabic ? "افتراضي" : "Default" },
-              { value: "inter"   as const, label: "Inter",        preview: "Aa Hello",  family: "'Inter', sans-serif",              tag: "Modern"  },
-              { value: "nunito"  as const, label: "Nunito",       preview: "Aa Hello",  family: "'Nunito', sans-serif",             tag: "Rounded" },
-              { value: "poppins" as const, label: "Poppins",      preview: "Aa Hello",  family: "'Poppins', sans-serif",            tag: "Geo"     },
-              { value: "cairo"   as const, label: "Cairo",        preview: "Aa مرحبا", family: "'Cairo', sans-serif",              tag: "Arabic"  },
-              { value: "tajawal" as const, label: "Tajawal",      preview: "Aa مرحبا", family: "'Tajawal', sans-serif",            tag: "Arabic"  },
-              { value: "ibm"     as const, label: "IBM Plex AR",  preview: "Aa مرحبا", family: "'IBM Plex Arabic', sans-serif",    tag: "Pro"     },
+              { value: "default"    as const, label: "Jakarta Sans",  preview: "Aa مرحبا", family: "'Plus Jakarta Sans', sans-serif",  tag: isArabic ? "افتراضي" : "Default" },
+              { value: "inter"      as const, label: "Inter",         preview: "Aa Hello",  family: "'Inter', sans-serif",             tag: "Modern"   },
+              { value: "nunito"     as const, label: "Nunito",        preview: "Aa Hello",  family: "'Nunito', sans-serif",            tag: "Rounded"  },
+              { value: "poppins"    as const, label: "Poppins",       preview: "Aa Hello",  family: "'Poppins', sans-serif",           tag: "Geo"      },
+              { value: "montserrat" as const, label: "Montserrat",    preview: "Aa Hello",  family: "'Montserrat', sans-serif",        tag: isArabic ? "عريض" : "Bold"    },
+              { value: "raleway"    as const, label: "Raleway",       preview: "Aa Hello",  family: "'Raleway', sans-serif",           tag: isArabic ? "عريض" : "Bold"    },
+              { value: "oswald"     as const, label: "Oswald",        preview: "Aa Hello",  family: "'Oswald', sans-serif",            tag: isArabic ? "ضيق عريض" : "Condensed" },
+              { value: "lexend"     as const, label: "Lexend",        preview: "Aa Hello",  family: "'Lexend', sans-serif",            tag: isArabic ? "واضح" : "Clear"   },
+              { value: "rubik"      as const, label: "Rubik",         preview: "Aa مرحبا", family: "'Rubik', sans-serif",             tag: isArabic ? "مدوّر" : "Round"  },
+              { value: "outfit"     as const, label: "Outfit",        preview: "Aa Hello",  family: "'Outfit', sans-serif",            tag: isArabic ? "هندسي" : "Geometric" },
+              { value: "space"      as const, label: "Space Grotesk", preview: "Aa Hello",  family: "'Space Grotesk', sans-serif",     tag: "Tech"     },
+              { value: "cairo"      as const, label: "Cairo",         preview: "Aa مرحبا", family: "'Cairo', sans-serif",             tag: "Arabic"   },
+              { value: "tajawal"    as const, label: "Tajawal",       preview: "Aa مرحبا", family: "'Tajawal', sans-serif",           tag: "Arabic"   },
+              { value: "almarai"    as const, label: "Almarai",       preview: "Aa مرحبا", family: "'Almarai', sans-serif",           tag: isArabic ? "عربي عريض" : "AR Bold" },
+              { value: "readex"     as const, label: "Readex Pro",    preview: "Aa مرحبا", family: "'Readex Pro', sans-serif",        tag: isArabic ? "ثنائي" : "Bilingual" },
+              { value: "ibm"        as const, label: "IBM Plex AR",   preview: "Aa مرحبا", family: "'IBM Plex Arabic', sans-serif",   tag: "Pro"      },
             ];
             const current = fontOpts.find(f => f.value === fontFamily);
             return (
