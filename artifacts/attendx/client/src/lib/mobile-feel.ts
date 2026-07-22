@@ -56,7 +56,32 @@ const observer = new MutationObserver((mutations) => {
   }
 });
 
+/* ── Swipe to go back — من الحافة اليسرى (LTR) أو اليمنى (RTL) ── */
+export function initSwipeBack() {
+  const isRTL = document.documentElement.dir === "rtl";
+  let startX = 0, startY = 0;
+
+  document.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = Math.abs(e.changedTouches[0].clientY - startY);
+    if (dy > 60) return; // مجرد تمرير عمودي
+
+    const W = window.innerWidth;
+    const fromEdge = isRTL
+      ? startX > W - 40 && dx < -80   // RTL: من اليمين لليسار
+      : startX < 40    && dx > 80;    // LTR: من اليسار لليمين
+
+    if (fromEdge) window.history.back();
+  }, { passive: true });
+}
+
 export function initMobileFeel() {
   scanAndAttach();
   observer.observe(document.body, { childList: true, subtree: true });
+  initSwipeBack();
 }

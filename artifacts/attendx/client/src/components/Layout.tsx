@@ -10,6 +10,9 @@ import {
   BarChart3, Settings, Bot, LogOut, Menu, Building2, Bell, Inbox, DollarSign, MessageSquare, Trash2, Award, ClipboardList, Camera, Banknote, PenLine, Megaphone, UserCircle, ShoppingBag, PartyPopper
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { useSwipeBack } from "@/hooks/use-swipe-back";
 import { Button } from "@/components/ui/button";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import FloatingAI from "@/components/FloatingAI";
@@ -19,6 +22,46 @@ import { playNotification, primeAudio } from "@/lib/sounds";
 import { playAlarmSound, getAlarmSettings, warmUpAudioContext } from "@/lib/alarm";
 import { syncPushSubscription } from "@/lib/push-alarm";
 import { useNavTTS } from "@/hooks/use-tts";
+
+/* ── Module-level nav direction tracker (survives Layout remounts) ── */
+const _navHistory: string[] = [];
+let _lastDirection: "forward" | "back" = "forward";
+
+function trackNavDirection(location: string): "forward" | "back" {
+  if (_navHistory.length === 0) {
+    _navHistory.push(location);
+    _lastDirection = "forward";
+    return _lastDirection;
+  }
+  const idx = _navHistory.lastIndexOf(location);
+  if (idx >= 0 && idx < _navHistory.length - 1) {
+    // Going back: trim the stack
+    _lastDirection = "back";
+    _navHistory.splice(idx + 1);
+  } else if (_navHistory[_navHistory.length - 1] !== location) {
+    _lastDirection = "forward";
+    _navHistory.push(location);
+  }
+  return _lastDirection;
+}
+
+/* ── Framer-motion slide variants (iOS-style) ── */
+const slideVariants = {
+  initial: (dir: "forward" | "back") => ({
+    x: dir === "back" ? "-28%" : "100%",
+    opacity: dir === "back" ? 0.6 : 0,
+  }),
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+  exit: (dir: "forward" | "back") => ({
+    x: dir === "back" ? "100%" : "-28%",
+    opacity: dir === "back" ? 0 : 0.5,
+    transition: { duration: 0.26, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
+};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
@@ -31,6 +74,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [alarmModal, setAlarmModal] = useState<{ label: string; body: string } | null>(null);
   const alarmPlayedRef = useRef(false);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Track direction for slide animation
+  const direction = trackNavDirection(location);
+
+  usePullToRefresh(mainRef);
+  useSwipeBack();
 
   const qc = useQueryClient();
   const isAdmin = me?.role === "admin" || me?.role === "manager";
@@ -40,8 +90,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const sidebarWidth = isIconOnly ? "w-16" : isCompact ? "w-44" : isWide ? "w-64" : "w-56";
 
-  // Poll every 2 min — badge counts don't need sub-minute freshness,
-  // and 3 concurrent requests every 60 s was adding measurable background load.
+  // Poll every 2 min
   const NOTIF_POLL = 2 * 60_000;
   const NOTIF_STALE = NOTIF_POLL - 5_000;
 
@@ -98,14 +147,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     gcTime:         10 * 60_000,
   });
 
-  const unreadCount = countData?.count ?? 0;
-  const myNotifCount = myNotifCountData?.count ?? 0;
+  const unreadCount    = countData?.count ?? 0;
+  const myNotifCount   = myNotifCountData?.count ?? 0;
   const unreadMsgCount = msgCountData?.count ?? 0;
 
-  /* ── Browser push notifications for admins ──────────────── */
-  const prevUnreadRef = useRef<number | null>(null);
-
-  /* ── Pre-fetch notifications so panel opens instantly ───────── */
+  /* ── Pre-fetch notifications ─────────────────────── */
   useEffect(() => {
     if (!isAdmin) return;
     qc.prefetchQuery({
@@ -132,7 +178,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [isAdmin]);
 
-  // ── Auto-sync push subscription on every app open ─────────────────────────
   useEffect(() => {
     if (!me?.id) return;
     const t = setTimeout(() => {
@@ -141,29 +186,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [me?.id]);
 
-  // ── Shift alarm: plays when notification is tapped (app opens) ──────────
-  // iOS blocks Web Audio outside a direct user gesture, so we show an alarm
-  // modal that guarantees a tap (user gesture) before audio plays.
-  // Additionally we try to play immediately — works on Android and desktop.
+  const prevUnreadRef = useRef<number | null>(null);
 
   const triggerAlarm = useCallback((label: string, body: string) => {
     if (alarmPlayedRef.current) return;
     alarmPlayedRef.current = true;
-    setTimeout(() => { alarmPlayedRef.current = false; }, 60_000); // allow re-trigger after 60s
-
-    // Try immediate audio (works when AudioContext is already running / Android)
+    setTimeout(() => { alarmPlayedRef.current = false; }, 60_000);
     try {
       warmUpAudioContext();
       const settings = getAlarmSettings();
       playAlarmSound(settings.soundType, settings.volume, settings.repeatCount).catch(() => {});
-    } catch { /* silently ignore — modal guarantees a fallback */ }
-
-    // Show modal so user can tap → guaranteed iOS audio
+    } catch { /* silently ignore */ }
     setAlarmModal({ label, body });
   }, []);
 
-  // Trigger 1: SW message — registered immediately on mount so PLAY_ALARM
-  // is never missed due to a race with me?.id loading.
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "PLAY_ALARM") {
@@ -176,8 +212,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return () => navigator.serviceWorker?.removeEventListener("message", handler);
   }, [triggerAlarm]);
 
-  // Trigger 2: URL param set by SW notificationclick (app was closed / opened fresh)
-  // Still gated on me?.id so we know we're authenticated before firing.
   useEffect(() => {
     if (!me?.id) return;
     const params = new URLSearchParams(window.location.search);
@@ -195,22 +229,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (!isAdmin) return;
     if (typeof Notification === "undefined") return;
     if (Notification.permission !== "granted") return;
-
     const prev = prevUnreadRef.current;
     if (prev !== null && unreadCount > prev) {
       const newCount = unreadCount - prev;
       const notif = new Notification(`${appName} — إشعار جديد`, {
-        body: newCount === 1
-          ? "لديك إشعار جديد يستحق المراجعة"
-          : `لديك ${newCount} إشعارات جديدة`,
+        body: newCount === 1 ? "لديك إشعار جديد يستحق المراجعة" : `لديك ${newCount} إشعارات جديدة`,
         icon: "/icon-192.png",
         badge: "/icon-192.png",
         tag: "attendx-admin-notif",
       });
-      notif.onclick = () => {
-        window.focus();
-        notif.close();
-      };
+      notif.onclick = () => { window.focus(); notif.close(); };
     }
     prevUnreadRef.current = unreadCount;
   }, [unreadCount, isAdmin]);
@@ -218,11 +246,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { speakNav } = useNavTTS();
   const prevLocationRef = useRef<string>("");
 
-  // Speak page name when navigating to a new route
   useEffect(() => {
     if (location === prevLocationRef.current) return;
     prevLocationRef.current = location;
-    // Find matching nav item label
     const allItems = [
       { href: "/dashboard", label: t("dashboard") },
       { href: "/attendance", label: t("attendance") },
@@ -275,6 +301,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...(isAdmin ? [{ href: "/action-center", icon: Inbox, label: t("action_center"), badge: unreadCount }] : []),
     { href: "/settings", icon: Settings, label: t("settings") },
   ];
+
+  /* ── Bottom nav tabs (mobile only) ── */
+  const bottomTabs = [
+    { href: "/attendance", icon: Clock, label: t("attendance") },
+    { href: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
+    { href: "/leave", icon: Calendar, label: t("leave") },
+    {
+      href: "/messages",
+      icon: MessageSquare,
+      label: t("messages_menu"),
+      badge: unreadMsgCount,
+    },
+    ...(isAdmin
+      ? [{ href: "/action-center", icon: Inbox, label: t("action_center"), badge: unreadCount }]
+      : [{ href: "/announcements", icon: Megaphone, label: t("announcements_menu"), badge: myNotifCount }]
+    ),
+  ] as { href: string; icon: React.ElementType; label: string; badge?: number }[];
 
   const BellButton = ({ className }: { className?: string }) => (
     <Button
@@ -383,11 +426,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <NavContent />
       </aside>
 
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] md:hidden animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 start-0 w-56 bg-sidebar flex flex-col">
+          <aside className="absolute inset-y-0 start-0 w-56 bg-sidebar flex flex-col animate-in slide-in-from-start duration-250">
             <NavContent />
           </aside>
         </div>
@@ -421,9 +464,62 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <BellButton />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6" style={{ scrollbarGutter: "stable", paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
-          {children}
+        {/* Scrollable page area — overflow container */}
+        <main
+          ref={mainRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden relative"
+          style={{ scrollbarGutter: "stable" }}
+        >
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={location}
+              custom={direction}
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="min-h-full p-4 md:p-6"
+              style={{
+                paddingBottom: 'max(80px, calc(env(safe-area-inset-bottom) + 72px))',
+              }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
+
+        {/* ── iOS-style Bottom Navigation Bar (mobile only) ── */}
+        <nav
+          className="md:hidden fixed bottom-0 inset-x-0 z-30 bottom-nav-bar"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          <div className="flex items-stretch h-[56px]">
+            {bottomTabs.map(({ href, icon: Icon, label, badge }) => {
+              const active = location === href || location.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "bottom-nav-item flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-90",
+                    active ? "bottom-nav-active" : "bottom-nav-inactive"
+                  )}
+                >
+                  <div className="relative">
+                    <Icon className="w-[22px] h-[22px]" />
+                    {badge != null && badge > 0 && (
+                      <span className="absolute -top-1.5 -end-1.5 min-w-[16px] h-[16px] rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none">
+                        {badge > 99 ? "99+" : badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-semibold leading-none truncate max-w-[52px] text-center">{label}</span>
+                  {active && <span className="bottom-nav-indicator" />}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
 
       {/* Floating AI assistant */}
@@ -433,7 +529,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {alarmModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="mx-4 w-full max-w-sm bg-card border border-card-border rounded-2xl shadow-2xl overflow-hidden">
-            {/* Pulsing ring header */}
             <div className="bg-destructive/10 px-6 pt-7 pb-5 flex flex-col items-center gap-3">
               <div className="relative flex items-center justify-center">
                 <span className="absolute w-20 h-20 rounded-full bg-destructive/20 animate-ping" />
@@ -444,13 +539,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <h2 className="text-xl font-bold text-foreground text-center mt-1">{alarmModal.label}</h2>
               <p className="text-sm text-muted-foreground text-center">{alarmModal.body}</p>
             </div>
-
-            {/* Dismiss button — guaranteed user gesture → plays alarm sound */}
             <div className="px-6 py-5 flex flex-col gap-3">
               <button
                 className="w-full py-3.5 rounded-xl bg-destructive text-destructive-foreground font-bold text-base hover:bg-destructive/90 active:scale-95 transition-transform"
                 onClick={() => {
-                  // This tap IS a user gesture — AudioContext can play here
                   try {
                     warmUpAudioContext();
                     const settings = getAlarmSettings();

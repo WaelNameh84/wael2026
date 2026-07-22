@@ -215,7 +215,111 @@ button, a, [role="button"], input, select, textarea, label {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   3. RIPPLE — تأثير موجة عند الضغط على الأزرار
+   3. PAGE TRANSITIONS — الانتقال بين الصفحات (framer-motion)
+   ══════════════════════════════════════════════════════════════ */
+/* The main slide animation is handled by framer-motion in Layout.tsx.
+   The .page-transition class is kept for any fallback usage. */
+@keyframes page-slide-in {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+.page-transition {
+  animation: page-slide-in 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+html[dir="rtl"] .page-transition {
+  animation-name: page-slide-in-rtl;
+}
+
+@keyframes page-slide-in-rtl {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3b. BOTTOM NAVIGATION BAR — شريط التنقل السفلي (iOS-style)
+   ══════════════════════════════════════════════════════════════ */
+.bottom-nav-bar {
+  background: hsl(var(--card) / 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid hsl(var(--border));
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dark .bottom-nav-bar {
+  background: hsl(var(--card) / 0.85);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom background: match glass style */
+body.app-bg-custom .bottom-nav-bar {
+  background: hsl(var(--card) / 0.75);
+}
+
+.bottom-nav-item {
+  position: relative;
+  color: hsl(var(--muted-foreground));
+  padding-top: 6px;
+  padding-bottom: 4px;
+}
+
+.bottom-nav-inactive {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.75;
+}
+
+.bottom-nav-active {
+  color: hsl(var(--primary));
+  opacity: 1;
+}
+
+/* Active indicator dot / pill above the icon */
+.bottom-nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: hsl(var(--primary));
+}
+
+/* Press feedback */
+.bottom-nav-item:active {
+  opacity: 0.6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. PULL-TO-REFRESH — مؤشر السحب للتحديث
+   ══════════════════════════════════════════════════════════════ */
+.ptr-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: height 80ms ease, opacity 80ms ease;
+  color: hsl(var(--primary));
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ptr-spinner {
+  width: 22px;
+  height: 22px;
+  transition: transform 150ms ease;
+}
+
+.ptr-indicator.ptr-loading .ptr-spinner {
+  animation: ptr-spin 700ms linear infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. RIPPLE — تأثير موجة عند الضغط على الأزرار
    ══════════════════════════════════════════════════════════════ */
 .ripple-host {
   position: relative;
