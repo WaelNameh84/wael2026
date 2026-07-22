@@ -111,6 +111,178 @@ const Toggle = ({ enabled, onChange, label }: { enabled: boolean; onChange: (v: 
 );
 
 /* ─────────────────────────────────────────────────────────────
+   Clear Records Dialog
+───────────────────────────────────────────────────────────── */
+const CLEAR_ITEMS = [
+  { key: "attendance",             labelAr: "سجل الحضور والغياب",      labelEn: "Attendance Records"       },
+  { key: "attendance_corrections", labelAr: "تصحيحات الحضور",          labelEn: "Attendance Corrections"   },
+  { key: "late_justifications",    labelAr: "مبررات التأخر",            labelEn: "Late Justifications"      },
+  { key: "leave",                  labelAr: "سجل الإجازات",             labelEn: "Leave Records"            },
+  { key: "work_reports",           labelAr: "تقارير العمل",             labelEn: "Work Reports"             },
+  { key: "requests",               labelAr: "الطلبات",                  labelEn: "Requests"                 },
+  { key: "notifications",          labelAr: "الإشعارات",                labelEn: "Notifications"            },
+  { key: "messages",               labelAr: "الرسائل",                  labelEn: "Messages"                 },
+  { key: "salary_advances",        labelAr: "السلف",                    labelEn: "Salary Advances"          },
+  { key: "bonuses",                labelAr: "المكافآت",                 labelEn: "Bonuses"                  },
+  { key: "purchases",              labelAr: "المشتريات",                labelEn: "Purchases"                },
+  { key: "payroll_reports",        labelAr: "كشف الرواتب",              labelEn: "Payroll Reports"          },
+];
+
+function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
+  const { toast } = useToast();
+  const L = (ar: string, en: string) => isArabic ? ar : en;
+  const [open, setOpen]         = useState(false);
+  const [confirm, setConfirm]   = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const toggle = (key: string) =>
+    setSelected(prev => { const s = new Set(prev); s.has(key) ? s.delete(key) : s.add(key); return s; });
+
+  const toggleAll = () =>
+    setSelected(selected.size === CLEAR_ITEMS.length ? new Set() : new Set(CLEAR_ITEMS.map(i => i.key)));
+
+  const handleClear = async () => {
+    if (selected.size === 0) return;
+    setClearing(true);
+    try {
+      const res = await authFetch(apiUrl("/api/backups/clear-records"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tables: Array.from(selected) }),
+      });
+      if (!res.ok) throw new Error();
+      toast({ title: L("تم المسح بنجاح ✓", "Records cleared successfully ✓") });
+      setOpen(false);
+      setConfirm(false);
+      setSelected(new Set());
+    } catch {
+      toast({ title: L("فشل المسح", "Clear failed"), variant: "destructive" });
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => { setOpen(true); setConfirm(false); setSelected(new Set()); }}
+        className="w-full flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
+      >
+        <Trash2 className="w-4 h-4 shrink-0" />
+        <div className="text-start">
+          <p className="text-sm font-semibold">{L("مسح السجل", "Clear Records")}</p>
+          <p className="text-xs opacity-70">{L("اختر نوع البيانات التي تريد حذفها", "Choose which records to delete")}</p>
+        </div>
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="relative z-10 w-full max-w-sm mx-auto bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b">
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                <Trash2 className="w-4 h-4" />
+                <span className="font-semibold text-sm">{L("مسح السجل", "Clear Records")}</span>
+              </div>
+              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground p-1">✕</button>
+            </div>
+
+            {!confirm ? (
+              <>
+                {/* Select all */}
+                <div className="px-5 pt-3 pb-1">
+                  <button
+                    type="button"
+                    onClick={toggleAll}
+                    className="text-xs text-primary font-medium hover:underline"
+                  >
+                    {selected.size === CLEAR_ITEMS.length
+                      ? L("إلغاء تحديد الكل", "Deselect all")
+                      : L("تحديد الكل", "Select all")}
+                  </button>
+                </div>
+
+                {/* Items */}
+                <div className="overflow-y-auto max-h-72 px-5 pb-2 space-y-1">
+                  {CLEAR_ITEMS.map(item => (
+                    <label
+                      key={item.key}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors ${
+                        selected.has(item.key)
+                          ? "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800"
+                          : "hover:bg-muted/50 border border-transparent"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.has(item.key)}
+                        onChange={() => toggle(item.key)}
+                        className="accent-red-500 w-4 h-4 shrink-0"
+                      />
+                      <span className="text-sm">{isArabic ? item.labelAr : item.labelEn}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="px-5 pb-5 pt-3 border-t flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors"
+                  >
+                    {L("إلغاء", "Cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={selected.size === 0}
+                    onClick={() => setConfirm(true)}
+                    className="flex-1 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-40 text-white px-4 py-2.5 text-sm font-medium transition-colors"
+                  >
+                    {L(`مسح (${selected.size})`, `Clear (${selected.size})`)}
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Confirmation step */
+              <div className="px-5 py-5 space-y-4">
+                <p className="text-sm text-center text-muted-foreground">
+                  {L(
+                    `سيتم حذف ${selected.size} نوع من السجلات نهائياً ولا يمكن التراجع عن هذا الإجراء.`,
+                    `${selected.size} record type(s) will be permanently deleted. This cannot be undone.`
+                  )}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirm(false)}
+                    className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors"
+                  >
+                    {L("رجوع", "Back")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    disabled={clearing}
+                    className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white px-4 py-2.5 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    {clearing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    {L("نعم، امسح الآن", "Yes, clear now")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
    Backup Section Component
 ───────────────────────────────────────────────────────────── */
 function BackupSection({ isArabic }: { isArabic: boolean }) {
@@ -4926,6 +5098,9 @@ export default function SettingsPage() {
           accent="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
         >
           <BackupSection isArabic={isArabic} />
+          <div className="mt-3">
+            <ClearRecordsDialog isArabic={isArabic} />
+          </div>
         </Section>
         )}
 

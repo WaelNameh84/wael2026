@@ -238,4 +238,47 @@ router.post("/auto-settings", requireSuperAdmin, async (req, res) => {
   }
 });
 
+// ── POST /api/backups/clear-records — مسح سجلات محددة ──────────────────
+const CLEARABLE_TABLES: Record<string, string> = {
+  attendance:               "attendance",
+  attendance_corrections:   "attendance_corrections",
+  late_justifications:      "late_justifications",
+  leave:                    "leave",
+  work_reports:             "work_reports",
+  requests:                 "requests",
+  notifications:            "notifications",
+  messages:                 "messages",
+  salary_advances:          "salary_advances",
+  bonuses:                  "bonuses",
+  purchases:                "purchases",
+  payroll_reports:          "payroll_reports",
+};
+
+router.post("/clear-records", requireSuperAdmin, async (req, res) => {
+  try {
+    const { tables }: { tables: string[] } = req.body;
+    if (!Array.isArray(tables) || tables.length === 0)
+      return res.status(400).json({ error: "لم يتم تحديد أي جدول" });
+
+    // التحقق من أن الجداول المطلوبة مسموح بمسحها فقط
+    const invalid = tables.filter(t => !CLEARABLE_TABLES[t]);
+    if (invalid.length > 0)
+      return res.status(400).json({ error: `جداول غير مسموحة: ${invalid.join(", ")}` });
+
+    const client = await pool.connect();
+    try {
+      for (const key of tables) {
+        const tbl = CLEARABLE_TABLES[key];
+        await client.query(`DELETE FROM "${tbl}"`);
+      }
+    } finally {
+      client.release();
+    }
+
+    res.json({ ok: true, cleared: tables });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "فشل المسح" });
+  }
+});
+
 export default router;
