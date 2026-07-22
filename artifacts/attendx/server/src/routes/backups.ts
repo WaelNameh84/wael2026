@@ -239,7 +239,8 @@ router.post("/auto-settings", requireSuperAdmin, async (req, res) => {
 });
 
 // ── POST /api/backups/clear-records — مسح سجلات محددة ──────────────────
-const CLEARABLE_TABLES: Record<string, string> = {
+// الجداول التي تحتوي على user_id مباشرة
+const USER_ID_TABLES: Record<string, string> = {
   attendance:               "attendance",
   attendance_corrections:   "attendance_corrections",
   late_justifications:      "late_justifications",
@@ -247,35 +248,63 @@ const CLEARABLE_TABLES: Record<string, string> = {
   work_reports:             "work_reports",
   requests:                 "requests",
   notifications:            "notifications",
-  messages:                 "messages",
   salary_advances:          "salary_advances",
   bonuses:                  "bonuses",
   purchases:                "purchases",
   payroll_reports:          "payroll_reports",
 };
+// جداول ذات منطق خاص
+const SPECIAL_TABLES: Record<string, string> = {
+  messages: "messages",
+};
+const CLEARABLE_TABLES = { ...USER_ID_TABLES, ...SPECIAL_TABLES };
 
 router.post("/clear-records", requireSuperAdmin, async (req, res) => {
   try {
-    const { tables }: { tables: string[] } = req.body;
+    const { tables, userIds }: { tables: string[]; userIds?: number[] } = req.body;
     if (!Array.isArray(tables) || tables.length === 0)
       return res.status(400).json({ error: "لم يتم تحديد أي جدول" });
 
-    // التحقق من أن الجداول المطلوبة مسموح بمسحها فقط
     const invalid = tables.filter(t => !CLEARABLE_TABLES[t]);
     if (invalid.length > 0)
       return res.status(400).json({ error: `جداول غير مسموحة: ${invalid.join(", ")}` });
 
+    // إذا كان userIds مصفوفة فارغة، لا تمسح شيئاً
+    if (Array.isArray(userIds) && userIds.length === 0)
+      return res.json({ ok: true, cleared: [] });
+
+    const filterByUser = Array.isArray(userIds) && userIds.length > 0;
+    const idList = filterByUser ? userIds!.join(",") : null;
+
     const client = await pool.connect();
     try {
       for (const key of tables) {
-        const tbl = CLEARABLE_TABLES[key];
-        await client.query(`DELETE FROM "${tbl}"`);
+        if (SPECIAL_TABLES[key] === "messages") {
+          if (filterByUser) {
+            await client.query(
+              `DELETE FROM "messages" WHERE sender_id = ANY($1::int[]) OR receiver_id = ANY($1::int[])`,
+              [userIds]
+            );
+          } else {
+            await client.query(`DELETE FROM "messages"`);
+          }
+        } else {
+          const tbl = USER_ID_TABLES[key];
+          if (filterByUser) {
+            await client.query(
+              `DELETE FROM "${tbl}" WHERE user_id = ANY($1::int[])`,
+              [userIds]
+            );
+          } else {
+            await client.query(`DELETE FROM "${tbl}"`);
+          }
+        }
       }
     } finally {
       client.release();
     }
 
-    res.json({ ok: true, cleared: tables });
+    res.json({ ok: true, cleared: tables, userIds: userIds ?? "all" });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "فشل المسح" });
   }
