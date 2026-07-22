@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Layout from "@/components/Layout";
 import { useTranslation } from "@/lib/i18n";
 import { useListLocations, useCreateLocation, useDeleteLocation, getListLocationsQueryKey } from "@/lib/api-client/index";
@@ -11,16 +11,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Plus, MapPin, Trash2, Loader2, Navigation, ChevronRight, LocateFixed } from "lucide-react";
 
+const DELETE_W = 82; // px — width of the revealed delete zone
+const SNAP_THRESHOLD = 40; // px — minimum swipe to snap open
+
 function LocationCard({
   loc,
   onDelete,
   isDeleting,
+  openCardId,
+  setOpenCardId,
 }: {
   loc: { id: number; name: string; address: string; lat?: number | null; lng?: number | null };
   onDelete: (id: number, name: string) => void;
   isDeleting: boolean;
+  openCardId: number | null;
+  setOpenCardId: (id: number | null) => void;
 }) {
+  const isSwipeOpen = openCardId === loc.id;
+
+  // current live offset while finger is down
+  const [liveX, setLiveX] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const [pressed, setPressed] = useState(false);
+
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const didSwipe = useRef(false);   // true once finger moved horizontally enough
+
+  // Computed card offset: base (open→-DELETE_W, closed→0) + live delta
+  const baseX = isSwipeOpen ? -DELETE_W : 0;
+  const clampedX = Math.max(-DELETE_W, Math.min(0, baseX + liveX));
 
   const openMaps = () => {
     const url =
@@ -30,40 +50,113 @@ function LocationCard({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handlePressStart = () => setPressed(true);
-  const handlePressEnd = () => {
-    setPressed(false);
-    openMaps();
+  /* ── Touch handlers ── */
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    didSwipe.current = false;
+    setDragging(false);
+    setPressed(true);
   };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+
+    // Ignore mostly-vertical scrolls
+    if (!didSwipe.current && dy > Math.abs(dx) && dy > 6) return;
+
+    if (Math.abs(dx) > 6) {
+      didSwipe.current = true;
+      setDragging(true);
+      setPressed(false);
+    }
+
+    if (didSwipe.current) {
+      e.preventDefault(); // stop page scroll while swiping card
+      setLiveX(dx);
+    }
+  };
+
+  const onTouchEnd = () => {
+    setDragging(false);
+    setPressed(false);
+
+    if (!didSwipe.current) {
+      // Pure tap
+      if (isSwipeOpen) {
+        setOpenCardId(null); // close on tap
+      } else {
+        openMaps();
+      }
+      setLiveX(0);
+      return;
+    }
+
+    // Snap decision
+    const finalX = clampedX;
+    if (finalX < -SNAP_THRESHOLD) {
+      setOpenCardId(loc.id);  // snap open
+    } else {
+      setOpenCardId(null);    // snap closed
+    }
+    setLiveX(0);
+  };
+
+  /* ── Mouse handlers (desktop) ── */
+  const onMouseDown = (e: React.MouseEvent) => {
+    touchStartX.current = e.clientX;
+    didSwipe.current = false;
+    setPressed(true);
+  };
+  const onMouseUp = (e: React.MouseEvent) => {
+    setPressed(false);
+    if (!didSwipe.current) {
+      if (isSwipeOpen) setOpenCardId(null);
+      else openMaps();
+    }
+  };
+
+  const transitionStyle = dragging
+    ? "none"
+    : "transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
 
   return (
     <div
       className="relative rounded-2xl overflow-hidden select-none"
-      style={{
-        transform: pressed ? "scale(0.96)" : "scale(1)",
-        transition: "transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      }}
       data-testid={`row-location-${loc.id}`}
     >
-      {/* Card background */}
+      {/* ── Red delete zone (behind the card) ── */}
+      <div className="absolute inset-0 rounded-2xl bg-destructive flex items-center justify-end">
+        <button
+          className="w-[82px] h-full flex flex-col items-center justify-center gap-1 text-white"
+          onClick={() => onDelete(loc.id, loc.name)}
+          disabled={isDeleting}
+          data-testid={`button-delete-location-${loc.id}`}
+        >
+          {isDeleting
+            ? <Loader2 className="w-5 h-5 animate-spin" />
+            : <Trash2 className="w-5 h-5" />}
+          <span className="text-[11px] font-semibold">حذف</span>
+        </button>
+      </div>
+
+      {/* ── Card face (slides left on swipe) ── */}
       <div
-        className="absolute inset-0 rounded-2xl bg-card border border-card-border"
+        className="relative bg-card border border-card-border rounded-2xl flex items-center gap-4 px-4 py-4 cursor-pointer"
         style={{
+          transform: `translateX(${dragging ? clampedX : isSwipeOpen ? -DELETE_W : 0}px) scale(${pressed ? 0.97 : 1})`,
+          transition: transitionStyle,
           boxShadow: pressed
             ? "0 1px 3px rgba(0,0,0,0.10)"
             : "0 3px 14px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)",
-          transition: "box-shadow 0.12s ease",
         }}
-      />
-
-      {/* Tappable area */}
-      <div
-        className="relative flex items-center gap-4 px-4 py-4 cursor-pointer"
-        onMouseDown={handlePressStart}
-        onMouseUp={handlePressEnd}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
         onMouseLeave={() => setPressed(false)}
-        onTouchStart={handlePressStart}
-        onTouchEnd={handlePressEnd}
         data-testid={`button-maps-location-${loc.id}`}
       >
         {/* Icon */}
@@ -91,23 +184,12 @@ function LocationCard({
           )}
         </div>
 
-        {/* Chevron */}
-        <ChevronRight className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+        {/* Chevron — rotates when open */}
+        <ChevronRight
+          className="w-4 h-4 text-muted-foreground/40 flex-shrink-0 transition-transform duration-300"
+          style={{ transform: isSwipeOpen ? "rotate(180deg)" : "none" }}
+        />
       </div>
-
-      {/* Delete button — sits outside the tappable area */}
-      <button
-        className="absolute top-2 end-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive/20 text-destructive"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(loc.id, loc.name);
-        }}
-        disabled={isDeleting}
-        data-testid={`button-delete-location-${loc.id}`}
-        title="Delete"
-      >
-        {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
-      </button>
     </div>
   );
 }
@@ -120,6 +202,7 @@ export default function LocationsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", address: "", lat: "", lng: "" });
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [openCardId, setOpenCardId] = useState<number | null>(null);
 
   const { data: locations, isLoading } = useListLocations({ query: { queryKey: getListLocationsQueryKey() } });
   const createMut = useCreateLocation();
@@ -147,15 +230,15 @@ export default function LocationsPage() {
     }
   };
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete "${name}"?`)) return;
+  const handleDelete = async (id: number, _name: string) => {
     setDeletingId(id);
     try {
       await deleteMut.mutateAsync({ id });
-      toast({ title: "Location deleted" });
+      setOpenCardId(null);
+      toast({ title: "تم حذف الموقع" });
       refresh();
     } catch {
-      toast({ title: "Failed", variant: "destructive" });
+      toast({ title: "فشل الحذف", variant: "destructive" });
     } finally {
       setDeletingId(null);
     }
@@ -248,6 +331,8 @@ export default function LocationsPage() {
                 loc={loc}
                 onDelete={handleDelete}
                 isDeleting={deletingId === loc.id}
+                openCardId={openCardId}
+                setOpenCardId={setOpenCardId}
               />
             ))}
           </div>
