@@ -1,86 +1,11 @@
 import { Router } from "express";
 import { db, workReportsTable, usersTable } from "../../../db/src/index.js";
 import { eq, desc } from "drizzle-orm";
-import { createHash } from "crypto";
 import { requireAuth } from "./auth.js";
 import { createNotification } from "../lib/notify.js";
-import { uploadBase64Image, isObjectStorageEnabled } from "../lib/objectStorage.js";
+import { storeImage } from "../lib/store-image.js";
 
 const router = Router();
-
-/* ─── Cloudinary signed upload helper ──────────────────────── */
-
-function cloudinaryEnabled(): boolean {
-  return !!(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-  );
-}
-
-async function uploadToCloudinary(base64Data: string): Promise<string> {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME!;
-  const apiKey    = process.env.CLOUDINARY_API_KEY!;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET!;
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const folder    = "work_reports";
-
-  const paramStr  = `folder=${folder}&timestamp=${timestamp}`;
-  const signature = createHash("sha1")
-    .update(paramStr + apiSecret)
-    .digest("hex");
-
-  const formData = new FormData();
-  formData.append("file",      `data:image/jpeg;base64,${base64Data}`);
-  formData.append("api_key",   apiKey);
-  formData.append("timestamp", timestamp);
-  formData.append("folder",    folder);
-  formData.append("signature", signature);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: "POST", body: formData }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Cloudinary upload failed: ${err}`);
-  }
-
-  const json = await res.json() as any;
-  return json.secure_url as string;
-}
-
-/* ─── DB fallback: store as base64 data URI (no external service needed) ── */
-
-function detectMime(base64Data: string): string {
-  try {
-    const buf = Buffer.from(base64Data.slice(0, 12), "base64");
-    if (buf[0] === 0xff && buf[1] === 0xd8) return "image/jpeg";
-    if (buf[0] === 0x89 && buf[1] === 0x50) return "image/png";
-    if (buf.slice(8, 12).toString("ascii") === "WEBP") return "image/webp";
-    if (buf.slice(0, 6).toString("ascii").startsWith("GIF")) return "image/gif";
-  } catch { /* ignore */ }
-  return "image/jpeg";
-}
-
-function saveLocalImage(base64Data: string): string {
-  // Store as data URI in DB — survives server restarts and redeploys.
-  const mime = detectMime(base64Data);
-  return `data:${mime};base64,${base64Data}`;
-}
-
-/* ─── Upload dispatcher (priority: Cloudinary > Object Storage > local) ─── */
-
-async function uploadImage(base64Data: string): Promise<string> {
-  if (cloudinaryEnabled()) {
-    return uploadToCloudinary(base64Data);
-  }
-  if (isObjectStorageEnabled()) {
-    return uploadBase64Image(base64Data, "work_reports");
-  }
-  return saveLocalImage(base64Data);
-}
 
 /* ─── Routes ─────────────────────────────────────────────── */
 
@@ -108,7 +33,7 @@ router.post("/", requireAuth, async (req: any, res) => {
       return res.status(400).json({ error: "imageData is not valid base64" });
     }
 
-    const imageUrl = await uploadImage(imageData);
+    const imageUrl = await storeImage(imageData, "work_reports");
 
     const [report] = await db
       .insert(workReportsTable)

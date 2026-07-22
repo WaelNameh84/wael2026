@@ -386,6 +386,15 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);
       CREATE INDEX IF NOT EXISTS idx_purchases_period  ON purchases(period);
 
+      -- image_store: stores uploaded image binary data in PostgreSQL.
+      -- Avoids disk-file ephemerality on Render. Served via GET /api/images/:id.
+      CREATE TABLE IF NOT EXISTS image_store (
+        id         SERIAL PRIMARY KEY,
+        data       TEXT NOT NULL,
+        mime_type  VARCHAR(50) NOT NULL DEFAULT 'image/jpeg',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+
       -- push subscriptions (replaces push-subscriptions.json file)
       CREATE TABLE IF NOT EXISTS push_subscriptions (
         id serial PRIMARY KEY,

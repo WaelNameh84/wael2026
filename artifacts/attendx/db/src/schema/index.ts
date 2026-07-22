@@ -18,3 +18,4 @@ export * from "./announcements.js";
 export * from "./purchases.js";
 export * from "./holidays.js";
 export * from "./app-config.js";
+export * from "./images.js";

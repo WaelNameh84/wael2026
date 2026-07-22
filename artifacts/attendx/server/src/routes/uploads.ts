@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { requireAuth } from "./auth.js";
-import { uploadBase64Image } from "../lib/objectStorage.js";
+import { storeImage } from "../lib/store-image.js";
 
 const router = Router();
 
@@ -18,9 +18,9 @@ router.post("/uploads", requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "fileName and fileData are required" });
     }
 
-    // uploadBase64Image tries Cloudinary (if configured) then falls back to
-    // a data URI — never saves to disk. This keeps images intact across restarts.
-    const url = await uploadBase64Image(fileData, "attendx");
+    // storeImage tries Cloudinary first; falls back to PostgreSQL image_store table.
+    // No disk files — images survive server restarts and redeploys.
+    const url = await storeImage(fileData, "attendx");
     return res.json({ path: url, name: fileName });
   } catch (err: any) {
     console.error("[uploads] upload error:", err.message);

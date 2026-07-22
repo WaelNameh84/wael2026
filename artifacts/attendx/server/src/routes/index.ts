@@ -24,6 +24,7 @@ import purchasesRouter from "./purchases.js";
 import holidaysRouter from "./holidays.js";
 import backupsRouter from "./backups.js";
 import geocodeRouter from "./geocode.js";
+import imagesRouter from "./images.js";
 import { SERVER_START_TIME } from "../lib/server-version.js";
 
 const router: IRouter = Router();
@@ -59,5 +60,6 @@ router.use("/purchases", purchasesRouter);
 router.use("/holidays", holidaysRouter);
 router.use("/backups", backupsRouter);
 router.use("/geocode", geocodeRouter);
+router.use(imagesRouter);
 
 export default router;
