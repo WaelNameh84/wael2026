@@ -205,26 +205,18 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
 
   const canNextEmps = allEmps || selEmps.size > 0;
 
-  // Lock body scroll on iOS when modal is open
+  // Lock the main scroll container on iOS when modal is open
   useEffect(() => {
     if (!open) return;
-    const scrollY = window.scrollY;
-    const original = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top:      document.body.style.top,
-      width:    document.body.style.width,
-    };
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top      = `-${scrollY}px`;
-    document.body.style.width    = "100%";
+    // The actual scroll container is <main>, not document.body
+    const container = document.querySelector("main") as HTMLElement | null;
+    if (!container) return;
+    const scrollTop = container.scrollTop;
+    const origOverflow = container.style.overflow;
+    container.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = original.overflow;
-      document.body.style.position = original.position;
-      document.body.style.top      = original.top;
-      document.body.style.width    = original.width;
-      window.scrollTo(0, scrollY);
+      container.style.overflow = origOverflow;
+      container.scrollTop = scrollTop;
     };
   }, [open]);
 
