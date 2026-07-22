@@ -45,14 +45,13 @@ function LocationCard({
       }}
       data-testid={`row-location-${loc.id}`}
     >
-      {/* Card background with gradient */}
+      {/* Card background */}
       <div
-        className="absolute inset-0 rounded-2xl"
+        className="absolute inset-0 rounded-2xl bg-card border border-card-border"
         style={{
-          background: "linear-gradient(135deg, var(--card) 0%, color-mix(in srgb, var(--primary) 6%, var(--card)) 100%)",
           boxShadow: pressed
-            ? "0 1px 4px rgba(0,0,0,0.08)"
-            : "0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04)",
+            ? "0 1px 3px rgba(0,0,0,0.10)"
+            : "0 3px 14px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)",
           transition: "box-shadow 0.12s ease",
         }}
       />
