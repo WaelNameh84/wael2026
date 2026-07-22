@@ -1,9 +1,7 @@
 import { Router } from "express";
 import { db, workReportsTable, usersTable } from "../../../db/src/index.js";
 import { eq, desc } from "drizzle-orm";
-import { createHash, randomUUID } from "crypto";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
-import path from "path";
+import { createHash } from "crypto";
 import { requireAuth } from "./auth.js";
 import { createNotification } from "../lib/notify.js";
 import { uploadBase64Image, isObjectStorageEnabled } from "../lib/objectStorage.js";
@@ -53,15 +51,23 @@ async function uploadToCloudinary(base64Data: string): Promise<string> {
   return json.secure_url as string;
 }
 
-/* ─── Local storage fallback (dev only) ─────────────────────── */
+/* ─── DB fallback: store as base64 data URI (no external service needed) ── */
 
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
-if (!existsSync(UPLOADS_DIR)) mkdirSync(UPLOADS_DIR, { recursive: true });
+function detectMime(base64Data: string): string {
+  try {
+    const buf = Buffer.from(base64Data.slice(0, 12), "base64");
+    if (buf[0] === 0xff && buf[1] === 0xd8) return "image/jpeg";
+    if (buf[0] === 0x89 && buf[1] === 0x50) return "image/png";
+    if (buf.slice(8, 12).toString("ascii") === "WEBP") return "image/webp";
+    if (buf.slice(0, 6).toString("ascii").startsWith("GIF")) return "image/gif";
+  } catch { /* ignore */ }
+  return "image/jpeg";
+}
 
 function saveLocalImage(base64Data: string): string {
-  const filename = `wr_${randomUUID()}.jpg`;
-  writeFileSync(path.join(UPLOADS_DIR, filename), Buffer.from(base64Data, "base64"));
-  return `/api/uploads/${filename}`;
+  // Store as data URI in DB — survives server restarts and redeploys.
+  const mime = detectMime(base64Data);
+  return `data:${mime};base64,${base64Data}`;
 }
 
 /* ─── Upload dispatcher (priority: Cloudinary > Object Storage > local) ─── */
