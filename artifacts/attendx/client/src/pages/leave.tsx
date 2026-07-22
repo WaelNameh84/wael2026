@@ -24,7 +24,7 @@ import { Link } from "wouter";
 import {
   Plus, Check, X, Trash2, Loader2, Calendar, Paperclip, FileText,
   ExternalLink, UploadCloud, CheckCircle2, AlertCircle, WifiOff, RefreshCw,
-  BarChart3, ChevronDown, ChevronUp, CalendarDays, PartyPopper,
+  BarChart3, ChevronDown, ChevronUp, CalendarDays, PartyPopper, Eye, Pencil,
 } from "lucide-react";
 import { useHolidays } from "@/pages/holidays";
 
@@ -194,6 +194,10 @@ export default function LeavePage() {
 
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [viewLeave, setViewLeave] = useState<any | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({ type: "annual" as string, otherType: "", startDate: "", endDate: "", reason: "" });
+  const [editLoading, setEditLoading] = useState(false);
   const [form, setForm] = useState({ type: "annual" as string, otherType: "", startDate: "", endDate: "", reason: "" });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -345,6 +349,54 @@ export default function LeavePage() {
     } catch {
       toast({ title: t("failed"), variant: "destructive" });
       setDeleteId(null);
+    }
+  };
+
+  /* ── View / Edit leave ── */
+  const openViewLeave = (leave: any) => {
+    setViewLeave(leave);
+    setEditMode(false);
+    const baseType = leaveTypes.find(lt => lt.value === leave.type) ? leave.type : "other";
+    setEditForm({
+      type: baseType,
+      otherType: baseType === "other" ? leave.type : "",
+      startDate: leave.startDate ?? "",
+      endDate: leave.endDate ?? "",
+      reason: leave.reason ?? "",
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!viewLeave) return;
+    setEditLoading(true);
+    try {
+      const finalType = editForm.type === "other" ? (editForm.otherType.trim() || "other") : editForm.type;
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`/api/leave/${viewLeave.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          type: finalType,
+          startDate: editForm.startDate,
+          endDate: editForm.endDate,
+          reason: editForm.reason,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error ?? t("failed"));
+      }
+      toast({ title: "✅ تم تعديل الإجازة بنجاح" });
+      setViewLeave(null);
+      setEditMode(false);
+      refresh();
+    } catch (err: any) {
+      toast({ title: t("failed"), description: err?.message, variant: "destructive" });
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -544,6 +596,7 @@ export default function LeavePage() {
                 {leave.reason && <p className="text-xs text-muted-foreground italic">{leave.reason}</p>}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
+                <Button size="icon" variant="ghost" className="text-primary hover:text-primary w-8 h-8" onClick={() => openViewLeave(leave)} title="عرض التفاصيل"><Eye className="w-4 h-4" /></Button>
                 {isAdmin && leave.status === "pending" && (
                   <>
                     <Button size="icon" variant="ghost" className="text-green-600 hover:text-green-600 w-8 h-8" onClick={() => handleApprove(leave.id, leave.type)} data-testid={`button-approve-leave-${leave.id}`}><Check className="w-4 h-4" /></Button>
@@ -609,6 +662,147 @@ export default function LeavePage() {
                 موافقة {approveIsPaid ? "(مدفوعة)" : "(غير مدفوعة)"}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── View / Edit leave dialog ── */}
+        <Dialog open={!!viewLeave} onOpenChange={v => { if (!v) { setViewLeave(null); setEditMode(false); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {editMode
+                  ? <><Pencil className="w-4 h-4 text-primary" /> تعديل الإجازة</>
+                  : <><Eye className="w-4 h-4 text-primary" /> تفاصيل الإجازة</>}
+              </DialogTitle>
+            </DialogHeader>
+
+            {viewLeave && !editMode && (
+              <div className="space-y-4 py-1">
+                {/* Status */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={statusVariant(viewLeave.status)} className="text-sm capitalize">
+                    {viewLeave.status === "approved" ? t("approved") : viewLeave.status === "pending" ? t("pending") : viewLeave.status === "rejected" ? t("rejected") : viewLeave.status}
+                  </Badge>
+                  {viewLeave.status === "approved" && (
+                    (() => {
+                      const isUnpaid = viewLeave.isPaid === false || (viewLeave.isPaid === null && viewLeave.type === "unpaid");
+                      return isUnpaid
+                        ? <Badge variant="outline" className="text-xs border-orange-400 text-orange-600">غير مدفوعة</Badge>
+                        : <Badge variant="outline" className="text-xs border-green-500 text-green-700">مدفوعة</Badge>;
+                    })()
+                  )}
+                </div>
+
+                {/* Fields */}
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">{t("leave_type")}</p>
+                    <p className="font-medium">{getLeaveTypeLabel(viewLeave.type)}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">{t("working_days")}</p>
+                    <p className="font-medium">{viewLeave.totalDays}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">{t("start_date")}</p>
+                    <p className="font-medium">{viewLeave.startDate}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">{t("end_date")}</p>
+                    <p className="font-medium">{viewLeave.endDate}</p>
+                  </div>
+                </div>
+
+                {viewLeave.reason && (
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">{t("reason")}</p>
+                    <p className="text-sm bg-muted/50 rounded-lg px-3 py-2">{viewLeave.reason}</p>
+                  </div>
+                )}
+
+                {viewLeave.documentPath && (
+                  <a href={viewLeave.documentPath} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                    <FileText className="w-4 h-4" />{t("view_document")}<ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+
+                {isAdmin && viewLeave.userName && (
+                  <p className="text-xs text-muted-foreground border-t pt-2">الموظف: {viewLeave.userName}</p>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  {/* Allow editing pending leaves (employees can change their mind) */}
+                  {viewLeave.status === "pending" && (
+                    <Button size="sm" className="gap-1.5 flex-1" onClick={() => setEditMode(true)}>
+                      <Pencil className="w-3.5 h-3.5" /> تعديل الطلب
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => { setViewLeave(null); setEditMode(false); }}>
+                    إغلاق
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {viewLeave && editMode && (
+              <div className="space-y-4 py-1">
+                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  يمكنك تعديل تفاصيل الإجازة. التعديل يعيد الطلب إلى حالة "معلق" للمراجعة.
+                </div>
+
+                {/* Leave Type */}
+                <div className="space-y-1">
+                  <Label>{t("leave_type")}</Label>
+                  <Select value={editForm.type} onValueChange={v => setEditForm(f => ({ ...f, type: v, otherType: "" }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {leaveTypes.map(lt => <SelectItem key={lt.value} value={lt.value}>{lt.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {editForm.type === "other" && (
+                  <div className="space-y-1">
+                    <Label>{t("other_leave_specify")}</Label>
+                    <Input value={editForm.otherType} onChange={e => setEditForm(f => ({ ...f, otherType: e.target.value }))} placeholder={t("other_leave_specify")} />
+                  </div>
+                )}
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>{t("start_date")}</Label>
+                    <Input type="date" value={editForm.startDate} onChange={e => setEditForm(f => ({ ...f, startDate: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>{t("end_date")}</Label>
+                    <Input type="date" value={editForm.endDate} onChange={e => setEditForm(f => ({ ...f, endDate: e.target.value }))} required />
+                  </div>
+                </div>
+
+                {/* Reason */}
+                <div className="space-y-1">
+                  <Label>{t("reason")}</Label>
+                  <Textarea value={editForm.reason} onChange={e => setEditForm(f => ({ ...f, reason: e.target.value }))} placeholder={t("reason") + "..."} rows={3} />
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditMode(false)} disabled={editLoading}>
+                    رجوع
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 gap-1.5"
+                    disabled={editLoading || !editForm.startDate || !editForm.endDate}
+                    onClick={handleEditSave}
+                  >
+                    {editLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    حفظ التعديلات
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
