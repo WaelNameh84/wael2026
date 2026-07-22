@@ -94,8 +94,23 @@ if (typeof window !== "undefined") {
 
 function PageLoader() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    <div className="space-y-5 animate-pulse max-w-3xl">
+      {/* Page title */}
+      <div className="h-7 w-36 bg-muted rounded-lg" />
+      {/* Stat cards row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-24 bg-muted rounded-2xl" />
+        ))}
+      </div>
+      {/* Main content block */}
+      <div className="h-48 bg-muted rounded-2xl" />
+      {/* List rows */}
+      <div className="space-y-3">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-16 bg-muted rounded-xl" style={{ opacity: 1 - i * 0.15 }} />
+        ))}
+      </div>
     </div>
   );
 }
