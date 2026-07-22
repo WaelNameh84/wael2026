@@ -302,22 +302,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/settings", icon: Settings, label: t("settings") },
   ];
 
-  /* ── Bottom nav tabs (mobile only) ── */
-  const bottomTabs = [
-    { href: "/attendance", icon: Clock, label: t("attendance") },
-    { href: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
-    { href: "/leave", icon: Calendar, label: t("leave") },
-    {
-      href: "/messages",
-      icon: MessageSquare,
-      label: t("messages_menu"),
-      badge: unreadMsgCount,
-    },
-    ...(isAdmin
-      ? [{ href: "/action-center", icon: Inbox, label: t("action_center"), badge: unreadCount }]
-      : [{ href: "/announcements", icon: Megaphone, label: t("announcements_menu"), badge: myNotifCount }]
-    ),
-  ] as { href: string; icon: React.ElementType; label: string; badge?: number }[];
 
   const BellButton = ({ className }: { className?: string }) => (
     <Button
@@ -479,47 +463,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate="animate"
               exit="exit"
               className="min-h-full p-4 md:p-6"
-              style={{
-                paddingBottom: 'max(80px, calc(env(safe-area-inset-bottom) + 72px))',
-              }}
             >
               {children}
             </motion.div>
           </AnimatePresence>
         </main>
 
-        {/* ── iOS-style Bottom Navigation Bar (mobile only) ── */}
-        <nav
-          className="md:hidden fixed bottom-0 inset-x-0 z-30 bottom-nav-bar"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-        >
-          <div className="flex items-stretch h-[56px]">
-            {bottomTabs.map(({ href, icon: Icon, label, badge }) => {
-              const active = location === href || location.startsWith(href + "/");
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "bottom-nav-item flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-90",
-                    active ? "bottom-nav-active" : "bottom-nav-inactive"
-                  )}
-                >
-                  <div className="relative">
-                    <Icon className="w-[22px] h-[22px]" />
-                    {badge != null && badge > 0 && (
-                      <span className="absolute -top-1.5 -end-1.5 min-w-[16px] h-[16px] rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none">
-                        {badge > 99 ? "99+" : badge}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] font-semibold leading-none truncate max-w-[52px] text-center">{label}</span>
-                  {active && <span className="bottom-nav-indicator" />}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
       </div>
 
       {/* Floating AI assistant */}
