@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Loader2, Moon, Sun, Monitor, Globe, Type, Lock,
   Fingerprint, MapPin, Database, Download, KeyRound,
@@ -234,7 +235,7 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
         </div>
       </button>
 
-      {open && (
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="relative z-10 w-full max-w-sm mx-auto bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -426,7 +427,7 @@ function ClearRecordsDialog({ isArabic }: { isArabic: boolean }) {
 
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
