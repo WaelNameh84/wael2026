@@ -175,7 +175,7 @@ function BackupSection({ isArabic }: { isArabic: boolean }) {
   const handleSaveInApp = async () => {
     setSaving(true);
     try {
-      const name = `${L("نسخة", "Backup")} ${new Date().toLocaleDateString(isArabic ? "ar-EG" : "en-GB")}`;
+      const name = `${L("نسخة", "Backup")} ${new Date().toLocaleDateString(isArabic ? "ar-EG-u-ca-gregory" : "en-GB")}`;
       const res  = await authFetch(apiUrl("/api/backups/save"), {
         method: "POST", body: JSON.stringify({ name }),
       });
@@ -353,7 +353,7 @@ function BackupSection({ isArabic }: { isArabic: boolean }) {
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{b.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(b.created_at).toLocaleDateString(isArabic ? "ar-EG" : "en-GB")}
+                    {new Date(b.created_at).toLocaleDateString(isArabic ? "ar-EG-u-ca-gregory" : "en-GB")}
                     {" · "}
                     {fmtSize(b.size_bytes)}
                   </p>

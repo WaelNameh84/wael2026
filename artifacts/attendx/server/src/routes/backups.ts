@@ -77,7 +77,7 @@ router.post("/download", requireSuperAdmin, async (_req, res) => {
 // ── POST /api/backups/save — حفظ نسخة في قاعدة البيانات ────────────────
 router.post("/save", requireSuperAdmin, async (req, res) => {
   try {
-    const name: string = req.body?.name || `نسخة ${new Date().toLocaleDateString("ar-SA")}`;
+    const name: string = req.body?.name || `نسخة ${new Date().toLocaleDateString("ar-SA-u-ca-gregory")}`;
     const snapshot = await buildSnapshot();
     const payload = {
       version: 1,
