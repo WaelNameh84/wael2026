@@ -47,6 +47,7 @@ interface SettingsContextType {
   fontWeight: FontWeight;
   setFontWeight: (v: FontWeight) => void;
   ttsEnabled: boolean;
+  navTtsEnabled: boolean;
   wakeWord: string;
   assistantName: string;
   assistantPersonality: AssistantPersonality;
@@ -103,6 +104,7 @@ interface SettingsContextType {
   setTheme: (theme: Theme) => void;
   setFontSize: (size: FontSize) => void;
   setTtsEnabled: (v: boolean) => void;
+  setNavTtsEnabled: (v: boolean) => void;
   setWakeWord: (v: string) => void;
   setAssistantName: (v: string) => void;
   setAssistantPersonality: (v: AssistantPersonality) => void;
@@ -183,6 +185,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState]                 = useState<Theme>(() => (localStorage.getItem("settings_theme") as Theme) || "system");
   const [fontSize, setFontSizeState]           = useState<FontSize>(() => (localStorage.getItem("settings_size") as FontSize) || "medium");
   const [ttsEnabled, setTtsEnabledState]       = useState<boolean>(() => localStorage.getItem("setting_tts") !== "false");
+  const [navTtsEnabled, setNavTtsEnabledState] = useState<boolean>(() => localStorage.getItem("setting_nav_tts") === "true");
   const [wakeWord, setWakeWordState]           = useState<string>(() => localStorage.getItem("setting_wake_word") ?? "مساعد");
   const [assistantName, setAssistantNameState] = useState<string>(() => localStorage.getItem("setting_assistant_name") ?? "مساعدي");
   const [assistantPersonality, setAssistantPersonalityState] = useState<AssistantPersonality>(() => (localStorage.getItem("setting_assistant_personality") as AssistantPersonality) ?? "friendly");
@@ -527,6 +530,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   const setTtsEnabled       = (v: boolean) => { setTtsEnabledState(v); localStorage.setItem("setting_tts", String(v)); saveToServer({ ttsEnabled: v }); };
+  const setNavTtsEnabled    = (v: boolean) => { setNavTtsEnabledState(v); localStorage.setItem("setting_nav_tts", String(v)); };
   const setWakeWord         = (v: string)  => { setWakeWordState(v); localStorage.setItem("setting_wake_word", v); saveToServer({ wakeWord: v }); };
   const setAssistantName    = (v: string)  => { setAssistantNameState(v); localStorage.setItem("setting_assistant_name", v); saveToServer({ assistantName: v }); };
   const setAssistantPersonality = (v: AssistantPersonality) => { setAssistantPersonalityState(v); localStorage.setItem("setting_assistant_personality", v); saveToServer({ assistantPersonality: v }); };
@@ -836,7 +840,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SettingsContext.Provider value={{
-      language, theme, fontSize, fontFamily, fontWeight, ttsEnabled, wakeWord, assistantName, assistantPersonality,
+      language, theme, fontSize, fontFamily, fontWeight, ttsEnabled, navTtsEnabled, wakeWord, assistantName, assistantPersonality,
       aiButtonIcon, aiButtonShape, aiButtonColor, aiButtonCustomColor, aiEnabled, aiAvatarStyle, aiButtonSize,
       clockFormat, clockLocale, clockStyle, clockSize, floatingClockEnabled, floatingClockCheckIn,
       sidebarStyle, tableStyle, cardStyle, cardColorMode, cardColor, fontColorMode, fontColor, accentColor,
@@ -849,7 +853,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       splashBgGradient, splashTagline, splashDuration, splashShowStars, splashShowParticles,
       splashLogoUrl, splashLogoWidth, splashLogoHeight, splashLogoRadius, splashLogoOffsetX, splashLogoOffsetY, splashLogoBgSize,
       splashAppName, splashStyle,
-      setLanguage, setTheme, setFontSize, setFontFamily, setFontWeight, setTtsEnabled, setWakeWord, setAssistantName, setAssistantPersonality,
+      setLanguage, setTheme, setFontSize, setFontFamily, setFontWeight, setTtsEnabled, setNavTtsEnabled, setWakeWord, setAssistantName, setAssistantPersonality,
       setAiButtonIcon, setAiButtonShape, setAiButtonColor, setAiButtonCustomColor,
       setAiEnabled, setAiAvatarStyle, setAiButtonSize,
       setClockFormat, setClockLocale, setClockStyle, setClockSize, setFloatingClockEnabled, setFloatingClockCheckIn,

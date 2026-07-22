@@ -85,7 +85,7 @@ self.addEventListener("fetch", (event) => {
 /* ─── Web Push ─────────────────────────────────────────────── */
 
 self.addEventListener("push", (event) => {
-  let data = { title: "AttendX", body: "إشعار جديد", icon: "/icon-192.svg", tag: "alarm" };
+  let data = { title: "{{APP_NAME}}", body: "إشعار جديد", icon: "/icon-192.svg", tag: "alarm" };
   try { if (event.data) data = { ...data, ...JSON.parse(event.data.text()) }; } catch { /* ignore */ }
 
   const isAlarm   = data.tag?.startsWith("alarm-") || data.tag === "alarm";

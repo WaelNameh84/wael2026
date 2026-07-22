@@ -890,10 +890,10 @@ export default function SettingsPage() {
    */
   const {
     theme: liveTheme, fontSize: liveFontSize, language: liveLanguage,
-    ttsEnabled: liveTtsEnabled, wakeWord: liveWakeWord, assistantName: liveAssistantName, assistantPersonality: liveAssistantPersonality,
+    ttsEnabled: liveTtsEnabled, navTtsEnabled: liveNavTtsEnabled, wakeWord: liveWakeWord, assistantName: liveAssistantName, assistantPersonality: liveAssistantPersonality,
     aiButtonIcon: liveAiButtonIcon, aiButtonShape: liveAiButtonShape, aiButtonColor: liveAiButtonColor, aiButtonCustomColor: liveAiButtonCustomColor,
     aiEnabled: liveAiEnabled, aiAvatarStyle: liveAiAvatarStyle, aiButtonSize: liveAiButtonSize,
-    setTheme: applyTheme, setFontSize: applyFontSize, setLanguage: applyLanguage, setTtsEnabled: applyTtsEnabled, setWakeWord: applyWakeWord, setAssistantName: applyAssistantName, setAssistantPersonality: applyAssistantPersonality,
+    setTheme: applyTheme, setFontSize: applyFontSize, setLanguage: applyLanguage, setTtsEnabled: applyTtsEnabled, setNavTtsEnabled: applyNavTtsEnabled, setWakeWord: applyWakeWord, setAssistantName: applyAssistantName, setAssistantPersonality: applyAssistantPersonality,
     setAiButtonIcon: applyAiButtonIcon, setAiButtonShape: applyAiButtonShape, setAiButtonColor: applyAiButtonColor, setAiButtonCustomColor: applyAiButtonCustomColor,
     setAiEnabled: applyAiEnabled, setAiAvatarStyle: applyAiAvatarStyle, setAiButtonSize: applyAiButtonSize,
     clockFormat: liveClockFormat, clockLocale: liveClockLocale, clockStyle: liveClockStyle, clockSize: liveClockSize, floatingClockEnabled: liveFloatingClockEnabled, floatingClockCheckIn: liveFloatingClockCheckIn,
@@ -943,6 +943,7 @@ export default function SettingsPage() {
   const [fontSize, setFontSize] = useState(liveFontSize);
   const [language, setLanguage] = useState(liveLanguage);
   const [ttsEnabled, setTtsEnabled] = useState(liveTtsEnabled);
+  const [navTtsEnabled, setNavTtsEnabled] = useState(liveNavTtsEnabled);
   const [wakeWord, setWakeWord] = useState(liveWakeWord);
   const [assistantName, setAssistantName] = useState(liveAssistantName);
   const [assistantPersonality, setAssistantPersonality] = useState(liveAssistantPersonality);
@@ -1010,6 +1011,7 @@ export default function SettingsPage() {
   useEffect(() => { setFontSize(liveFontSize); }, [liveFontSize]);
   useEffect(() => { setLanguage(liveLanguage); }, [liveLanguage]);
   useEffect(() => { setTtsEnabled(liveTtsEnabled); }, [liveTtsEnabled]);
+  useEffect(() => { setNavTtsEnabled(liveNavTtsEnabled); }, [liveNavTtsEnabled]);
   useEffect(() => { setWakeWord(liveWakeWord); }, [liveWakeWord]);
   useEffect(() => { setAssistantName(liveAssistantName); }, [liveAssistantName]);
   useEffect(() => { setAssistantPersonality(liveAssistantPersonality); }, [liveAssistantPersonality]);

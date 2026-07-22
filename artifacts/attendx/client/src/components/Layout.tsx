@@ -18,6 +18,7 @@ import { apiUrl, authHeaders } from "@/lib/api-url";
 import { playNotification, primeAudio } from "@/lib/sounds";
 import { playAlarmSound, getAlarmSettings, warmUpAudioContext } from "@/lib/alarm";
 import { syncPushSubscription } from "@/lib/push-alarm";
+import { useNavTTS } from "@/hooks/use-tts";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
@@ -198,7 +199,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const prev = prevUnreadRef.current;
     if (prev !== null && unreadCount > prev) {
       const newCount = unreadCount - prev;
-      const notif = new Notification("Pulse — إشعار جديد", {
+      const notif = new Notification(`${appName} — إشعار جديد`, {
         body: newCount === 1
           ? "لديك إشعار جديد يستحق المراجعة"
           : `لديك ${newCount} إشعارات جديدة`,
@@ -213,6 +214,42 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
     prevUnreadRef.current = unreadCount;
   }, [unreadCount, isAdmin]);
+
+  const { speakNav } = useNavTTS();
+  const prevLocationRef = useRef<string>("");
+
+  // Speak page name when navigating to a new route
+  useEffect(() => {
+    if (location === prevLocationRef.current) return;
+    prevLocationRef.current = location;
+    // Find matching nav item label
+    const allItems = [
+      { href: "/dashboard", label: t("dashboard") },
+      { href: "/attendance", label: t("attendance") },
+      { href: "/employees", label: t("employees") },
+      { href: "/departments", label: t("departments") },
+      { href: "/locations", label: t("locations") },
+      { href: "/leave", label: t("leave") },
+      { href: "/holidays", label: t("holidays_menu") },
+      { href: "/payroll", label: t("payroll") },
+      { href: "/bonuses", label: isAdmin ? t("bonuses_deductions") : t("my_bonuses") },
+      { href: "/work-requests", label: t("work_requests_permissions") },
+      { href: "/work-reports", label: t("task_documentation") },
+      { href: "/salary-advances", label: t("salary_advance_requests") },
+      { href: "/purchases", label: t("purchases_menu") },
+      { href: "/attendance-corrections", label: t("attendance_corrections_menu") },
+      { href: "/announcements", label: t("announcements_menu") },
+      { href: "/profile", label: t("my_profile_menu") },
+      { href: "/reports", label: t("reports") },
+      { href: "/messages", label: t("messages_menu") },
+      { href: "/ai", label: t("ai_assistant") },
+      { href: "/action-center", label: t("action_center") },
+      { href: "/settings", label: t("settings") },
+    ];
+    const match = allItems.find(item => location === item.href || location.startsWith(item.href + "/"));
+    if (match) speakNav(match.label);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, speakNav]);
 
   const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },

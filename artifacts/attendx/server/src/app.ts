@@ -99,7 +99,7 @@ app.get("/sw.js", (_req, res) => {
   res.setHeader("Service-Worker-Allowed", "/");
   try {
     const raw = readFileSync(path.join(STATIC_DIR, "sw.js"), "utf8");
-    res.send(raw.replace("__BUILD_TIME__", SERVER_START_TIME));
+    res.send(raw.replace("__BUILD_TIME__", SERVER_START_TIME).replaceAll("{{APP_NAME}}", getAppName()));
   } catch {
     res.status(404).send("// sw.js not found");
   }
