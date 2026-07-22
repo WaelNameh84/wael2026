@@ -13,6 +13,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useSwipeBack } from "@/hooks/use-swipe-back";
+import { useKeyboardAvoid } from "@/hooks/use-keyboard-avoid";
 import { Button } from "@/components/ui/button";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import FloatingAI from "@/components/FloatingAI";
@@ -81,6 +82,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   usePullToRefresh(mainRef);
   useSwipeBack();
+  useKeyboardAvoid();
 
   const qc = useQueryClient();
   const isAdmin = me?.role === "admin" || me?.role === "manager";

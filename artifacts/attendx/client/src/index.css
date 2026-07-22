@@ -970,3 +970,117 @@ span.ripple-wave {
 .enter-up {
   animation: slide-up-fade 0.4s ease-out forwards;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE FEEL — ميزات تجربة الموبايل الاحترافية
+   ══════════════════════════════════════════════════════════════ */
+
+/* 1. Active press scale — ضغط الأزرار يُصغّرها بشكل طبيعي */
+button,
+a,
+[role="button"] {
+  transition: transform 0.12s ease, opacity 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+button:active,
+a:active,
+[role="button"]:active {
+  transform: scale(0.96);
+}
+/* استثناء العناصر اللي عندها تحريك خاص */
+button:active > svg,
+a:active > svg {
+  transform: none;
+}
+
+/* 2. Prevent text selection — منع تحديد النص على العناصر التفاعلية */
+button,
+a,
+[role="button"],
+label,
+nav,
+header,
+.card-header,
+[data-no-select] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 3. Overscroll behavior — منع الارتداد عند نهاية الصفحة */
+html {
+  overscroll-behavior: none;
+}
+body {
+  overscroll-behavior: none;
+}
+main,
+[data-scroll-container] {
+  overscroll-behavior-y: contain;
+}
+
+/* 4. Skeleton loading animation */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted) / 0.3) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* 5. Bottom Sheet — drawer handle indicator */
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--muted-foreground) / 0.35);
+  margin: 10px auto 4px;
+  flex-shrink: 0;
+}
+
+/* 6. Swipe to dismiss — عنصر قابل للمسح بالسحب */
+.swipe-dismiss-wrapper {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+.swipe-dismiss-inner {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform, opacity;
+}
+.swipe-dismiss-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.swipe-dismiss-bg.swipe-right {
+  justify-content: flex-start;
+  background: hsl(var(--destructive) / 0.12);
+}
+.swipe-dismiss-bg.swipe-left {
+  justify-content: flex-end;
+  background: hsl(var(--primary) / 0.12);
+}
+

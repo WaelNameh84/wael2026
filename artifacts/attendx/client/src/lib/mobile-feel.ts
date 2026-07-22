@@ -80,8 +80,31 @@ export function initSwipeBack() {
   }, { passive: true });
 }
 
+/* ── Theme color — يحدّث لون شريط الساعة ليتطابق مع لون التطبيق ── */
+export function syncThemeColor() {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!meta) return;
+
+  const primary = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary")
+    .trim();
+
+  if (!primary) return;
+
+  // --primary هو قيم HSL بدون hsl() — نحوّلها للون كامل
+  meta.content = `hsl(${primary})`;
+}
+
 export function initMobileFeel() {
   scanAndAttach();
   observer.observe(document.body, { childList: true, subtree: true });
   initSwipeBack();
+
+  // مزامنة أولية ثم مراقبة تغييرات الثيم
+  syncThemeColor();
+  const themeObserver = new MutationObserver(syncThemeColor);
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class", "style"],
+  });
 }
