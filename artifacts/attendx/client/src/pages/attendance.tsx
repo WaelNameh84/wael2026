@@ -838,9 +838,15 @@ export default function AttendancePage() {
           )}
         </div>
 
-        {/* Justification Dialog — Late or Early Leave */}
-        <Dialog open={!!justifyTarget} onOpenChange={v => { if (!v) setJustifyTarget(null); }}>
-          <DialogContent className="max-w-md">
+        {/* Justification Dialog — Late or Early Leave (mandatory, cannot be dismissed without submitting) */}
+        <Dialog open={!!justifyTarget} onOpenChange={() => {}}>
+          <DialogContent
+            className="max-w-md"
+            hideClose
+            onPointerDownOutside={e => e.preventDefault()}
+            onEscapeKeyDown={e => e.preventDefault()}
+            onInteractOutside={e => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle className={`flex items-center gap-2 ${justifyTarget?.type === "early_leave" ? "text-orange-700" : "text-amber-700"}`}>
                 <AlertCircle className="w-5 h-5" />
@@ -852,8 +858,8 @@ export default function AttendancePage() {
                 <p className="font-semibold mb-1">📅 التاريخ: {justifyTarget?.date}</p>
                 <p>
                   {justifyTarget?.type === "early_leave"
-                    ? "اكتب سبباً واضحاً للخروج المبكر. إذا وافق المدير، لن يُحسب الخروج المبكر عليك."
-                    : "اكتب سبباً واضحاً لتأخرك. إذا وافق المدير، سيُحتسب حضورك كاملاً بدون خصم."}
+                    ? "يجب كتابة سبب واضح للخروج المبكر قبل المتابعة. إذا وافق المدير، لن يُحسب الخروج المبكر عليك."
+                    : "يجب كتابة سبب واضح للتأخر قبل المتابعة. إذا وافق المدير، سيُحتسب حضورك كاملاً بدون خصم."}
                 </p>
               </div>
               <div className="space-y-1.5">
@@ -876,12 +882,9 @@ export default function AttendancePage() {
               </div>
             </div>
             <DialogFooter className="gap-2">
-              <Button variant="outline" size="sm" onClick={() => setJustifyTarget(null)}>
-                إلغاء
-              </Button>
               <Button
                 size="sm"
-                className={`gap-1.5 text-white border-0 ${justifyTarget?.type === "early_leave" ? "bg-orange-600 hover:bg-orange-700" : "bg-amber-600 hover:bg-amber-700"}`}
+                className={`gap-1.5 text-white border-0 w-full ${justifyTarget?.type === "early_leave" ? "bg-orange-600 hover:bg-orange-700" : "bg-amber-600 hover:bg-amber-700"}`}
                 disabled={justifyLoading || justifyReason.trim().length < 5}
                 onClick={handleSubmitJustification}
               >
