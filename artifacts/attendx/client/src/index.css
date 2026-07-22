@@ -188,11 +188,18 @@ html, body {
   background-color: hsl(var(--background));
 }
 
-/* لا تحديد نص عند الضغط على الأزرار والعناصر التفاعلية */
-button, a, [role="button"], label,
-nav, header, .select-none {
+/* لا تحديد نص في كل التطبيق (مثل تطبيقات الموبايل) */
+body, nav, header, main, aside, footer,
+button, a, [role="button"], label, span, p, h1, h2, h3, h4, h5, h6,
+div:not([contenteditable="true"]) {
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* السماح بالتحديد فقط في حقول الإدخال */
+input, textarea, [contenteditable="true"], select {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* لا تكبير مزدوج (double-tap zoom) على كل العناصر التفاعلية */
