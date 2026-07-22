@@ -14,6 +14,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useSwipeBack } from "@/hooks/use-swipe-back";
 import { useKeyboardAvoid } from "@/hooks/use-keyboard-avoid";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { usePageProgress } from "@/hooks/use-page-progress";
 import { Button } from "@/components/ui/button";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import FloatingAI from "@/components/FloatingAI";
@@ -83,6 +85,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   usePullToRefresh(mainRef);
   useSwipeBack();
   useKeyboardAvoid();
+
+  const isOnline = useNetworkStatus();
+  const { progress, visible: progressVisible } = usePageProgress(location);
+  const [showBackOnline, setShowBackOnline] = useState(false);
+  const prevOnlineRef = useRef(true);
+
+  useEffect(() => {
+    if (!prevOnlineRef.current && isOnline) {
+      setShowBackOnline(true);
+      const t = setTimeout(() => setShowBackOnline(false), 2500);
+      return () => clearTimeout(t);
+    }
+    prevOnlineRef.current = isOnline;
+  }, [isOnline]);
+
+  const scrollToTop = () => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const qc = useQueryClient();
   const isAdmin = me?.role === "admin" || me?.role === "manager";
@@ -407,6 +427,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={cn("flex h-screen overflow-hidden", backgroundMode === "default" ? "bg-background" : "bg-transparent")}>
+
+      {/* ── Page progress bar ── */}
+      {progressVisible && (
+        <div
+          className={cn("page-progress-bar", progress === 100 && "done")}
+          style={{ width: `${progress}%` }}
+        />
+      )}
+
+      {/* ── Network status banners ── */}
+      {!isOnline && (
+        <div className="network-offline-banner">
+          <span>🔴</span>
+          <span>لا يوجد اتصال بالإنترنت</span>
+        </div>
+      )}
+      {showBackOnline && (
+        <div className="network-back-banner">
+          <span>✅</span>
+          <span>عاد الاتصال بالإنترنت</span>
+        </div>
+      )}
       {/* Desktop sidebar */}
       <aside className={cn("hidden md:flex flex-col bg-sidebar border-e border-sidebar-border flex-shrink-0 transition-all duration-200", sidebarWidth)}>
         <NavContent />
@@ -441,7 +483,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} data-testid="button-menu" className="text-white hover:bg-white/20 hover:text-white">
             <Menu className="w-5 h-5" />
           </Button>
-          <span className="font-bold text-sm flex-1 text-white">{appName}</span>
+          <span className="font-bold text-sm flex-1 text-white cursor-pointer" onClick={scrollToTop}>{appName}</span>
           <BellButton className="text-white hover:bg-white/20 hover:text-white" />
         </header>
 

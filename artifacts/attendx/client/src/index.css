@@ -972,6 +972,67 @@ span.ripple-wave {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   PAGE PROGRESS BAR — شريط التقدم العلوي
+   ══════════════════════════════════════════════════════════════ */
+.page-progress-bar {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  height: 3px;
+  z-index: 9999;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.6);
+  transition: width 0.25s ease, opacity 0.3s ease;
+  border-radius: 0 2px 2px 0;
+  pointer-events: none;
+}
+.page-progress-bar.done {
+  opacity: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NETWORK STATUS — شريط حالة الإنترنت
+   ══════════════════════════════════════════════════════════════ */
+.network-offline-banner {
+  position: fixed;
+  top: 0;
+  inset-x: 0;
+  z-index: 9998;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  animation: slide-down 0.3s ease;
+}
+.network-back-banner {
+  position: fixed;
+  top: 0;
+  inset-x: 0;
+  z-index: 9998;
+  background: #16a34a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  animation: slide-down 0.3s ease;
+}
+@keyframes slide-down {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════════════════
    MOBILE FEEL — ميزات تجربة الموبايل الاحترافية
    ══════════════════════════════════════════════════════════════ */
 
