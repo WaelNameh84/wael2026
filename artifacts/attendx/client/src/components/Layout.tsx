@@ -416,7 +416,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] md:hidden animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 start-0 w-56 bg-sidebar flex flex-col animate-in slide-in-from-start duration-250">
+          <aside className="absolute inset-y-0 start-0 w-56 bg-sidebar flex flex-col animate-in slide-in-from-start duration-250" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
             <NavContent />
           </aside>
         </div>
