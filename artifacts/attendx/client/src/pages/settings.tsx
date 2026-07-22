@@ -5098,9 +5098,23 @@ export default function SettingsPage() {
           accent="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
         >
           <BackupSection isArabic={isArabic} />
-          <div className="mt-3">
-            <ClearRecordsDialog isArabic={isArabic} />
-          </div>
+        </Section>
+        )}
+
+        {/* ── 11b. مسح السجل (admin فقط) ── */}
+        {isAdminOnly && (
+        <Section
+          id="clear-records" open={isOpen("clear-records")} onToggle={() => toggleSection("clear-records")}
+          icon={<Trash2 className="w-4 h-4" />}
+          title={isArabic ? "مسح السجل" : "Clear Records"}
+          accent="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+        >
+          <p className="text-xs text-muted-foreground mb-3">
+            {isArabic
+              ? "احذف بيانات محددة من سجلات الموظفين بشكل دائم. هذا الإجراء لا يمكن التراجع عنه."
+              : "Permanently delete selected employee record types. This action cannot be undone."}
+          </p>
+          <ClearRecordsDialog isArabic={isArabic} />
         </Section>
         )}
 
