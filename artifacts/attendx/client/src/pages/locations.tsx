@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, MapPin, Trash2, Loader2, Navigation, ChevronRight } from "lucide-react";
+import { Plus, MapPin, Trash2, Loader2, Navigation, ChevronRight, LocateFixed } from "lucide-react";
 
 function LocationCard({
   loc,
@@ -76,7 +76,10 @@ function LocationCard({
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm leading-tight">{loc.name}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-semibold text-sm leading-tight">{loc.name}</p>
+            <LocateFixed className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{loc.address}</p>
           {loc.lat != null && loc.lng != null && (
             <div className="flex items-center gap-1 mt-1">
