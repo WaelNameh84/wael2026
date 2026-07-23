@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import i18n from "@/i18n";
+import { authFetch } from "@/lib/api-url";
 
 const LS_KEY_NAME = "app_config_name";
 const LS_KEY_LOGO = "app_config_logo";
@@ -138,17 +139,21 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
       logoSaveTimer.current = null;
       const queued = pendingLogoFields.current;
       pendingLogoFields.current = {};
-      logoSaveInFlight.current = fetch("/api/settings/app", {
+      const request = authFetch("/api/settings/app", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(queued),
-      })
-        .then(() => undefined)
-        .catch(() => { /* value is already updated in-state and localStorage */ })
-        .finally(() => {
+      }).then(async response => {
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data?.error || `Logo settings save failed (${response.status})`);
+        }
+      });
+      logoSaveInFlight.current = request.finally(() => {
           logoSaveInFlight.current = null;
         });
+      // This is a debounced background save. Keep its error available to an
+      // explicit flush, but prevent an unhandled rejection before then.
+      logoSaveInFlight.current.catch(() => {});
     }, 250);
   };
 
@@ -161,17 +166,19 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
       if (Object.keys(pendingLogoFields.current).length > 0 && !logoSaveInFlight.current) {
         const queued = pendingLogoFields.current;
         pendingLogoFields.current = {};
-        logoSaveInFlight.current = fetch("/api/settings/app", {
+        const request = authFetch("/api/settings/app", {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify(queued),
-        })
-          .then(() => undefined)
-          .catch(() => { /* value is already updated in-state and localStorage */ })
-          .finally(() => {
+        }).then(async response => {
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data?.error || `Logo settings save failed (${response.status})`);
+          }
+        });
+        logoSaveInFlight.current = request.finally(() => {
             logoSaveInFlight.current = null;
           });
+        logoSaveInFlight.current.catch(() => {});
       }
       if (logoSaveInFlight.current) await logoSaveInFlight.current;
     }

@@ -124,7 +124,12 @@ router.get("/", requireAuth, async (req: any, res) => {
 router.patch("/", requireAuth, async (req: any, res) => {
   try {
     const schema = z.object({
-      theme: z.enum(["light", "dark", "system", "ocean", "forest", "rose", "sunset", "purple", "gold", "ruby", "slate", "indigo", "lime", "coral", "midnight"]).optional(),
+      theme: z.enum([
+        "light", "dark", "system", "ocean", "forest", "rose", "sunset",
+        "purple", "gold", "ruby", "slate", "indigo", "lime", "coral",
+        "midnight", "deepPurple", "violet", "navy", "magenta", "amber",
+        "copper", "sakura", "arctic",
+      ]).optional(),
       fontSize: z.enum(["small", "medium", "large"]).optional(),
       language: z.enum(["ar", "en", "sv"]).optional(),
     });

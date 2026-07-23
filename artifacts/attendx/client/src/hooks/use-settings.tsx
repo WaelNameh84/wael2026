@@ -714,15 +714,21 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       serverSaveTimer.current = null;
       const queued = pendingServerUiSettings.current;
       pendingServerUiSettings.current = {};
-      serverSaveInFlight.current = authFetch("/api/settings/app", {
+      const request = authFetch("/api/settings/app", {
         method: "PATCH",
         body: JSON.stringify({ uiSettings: queued }),
-      })
-        .then(() => undefined)
-        .catch(() => { /* localStorage remains the immediate source of truth */ })
-        .finally(() => {
+      }).then(async response => {
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data?.error || `UI settings save failed (${response.status})`);
+        }
+      });
+      serverSaveInFlight.current = request.finally(() => {
           serverSaveInFlight.current = null;
         });
+      // Debounced background saves are best-effort, while an explicit flush
+      // still receives the original error.
+      serverSaveInFlight.current.catch(() => {});
     }, 250);
   }
 
@@ -736,15 +742,19 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (Object.keys(pendingServerUiSettings.current).length > 0 && !serverSaveInFlight.current) {
         const queued = pendingServerUiSettings.current;
         pendingServerUiSettings.current = {};
-        serverSaveInFlight.current = authFetch("/api/settings/app", {
+        const request = authFetch("/api/settings/app", {
           method: "PATCH",
           body: JSON.stringify({ uiSettings: queued }),
-        })
-          .then(() => undefined)
-          .catch(() => { /* localStorage remains the immediate source of truth */ })
-          .finally(() => {
+        }).then(async response => {
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data?.error || `UI settings save failed (${response.status})`);
+          }
+        });
+        serverSaveInFlight.current = request.finally(() => {
             serverSaveInFlight.current = null;
           });
+        serverSaveInFlight.current.catch(() => {});
       }
       if (serverSaveInFlight.current) await serverSaveInFlight.current;
     }

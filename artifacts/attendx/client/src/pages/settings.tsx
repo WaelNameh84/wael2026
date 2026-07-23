@@ -99,6 +99,14 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+async function requireSuccessfulJson(response: Response, fallback: string) {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error || data?.message || `${fallback} (${response.status})`);
+  }
+  return data;
+}
+
 const Toggle = ({ enabled, onChange, label }: { enabled: boolean; onChange: (v: boolean) => void; label?: string }) => (
   <button
     type="button"
@@ -1782,7 +1790,7 @@ export default function SettingsPage() {
         authFetch("/api/settings/app", {
           method: "PATCH",
           body: JSON.stringify(appChanges),
-        }).then(r => r.json()).then(d => {
+        }).then(r => requireSuccessfulJson(r, "App settings save failed")).then(d => {
           if (d.appName) setAppName(d.appName);
         })
       );
@@ -1793,7 +1801,7 @@ export default function SettingsPage() {
         if (emailChanged) body.email = adminForm.email.trim();
         tasks.push(
           authFetch(`/api/users/${me.id}`, { method: "PATCH", body: JSON.stringify(body) })
-            .then(r => { if (!r.ok) return r.json().then((d: any) => { throw new Error(d.error); }); })
+            .then(r => requireSuccessfulJson(r, "Profile save failed"))
         );
       }
     }
@@ -1804,8 +1812,12 @@ export default function SettingsPage() {
       tasks.push(flushServerSettings(), flushLogoSettings());
       await Promise.all(tasks);
       toast({ title: isArabic ? t("all_settings_saved") : "✅ All settings saved" });
-    } catch {
-      toast({ title: t("failed"), variant: "destructive" });
+    } catch (err: any) {
+      toast({
+        title: t("failed"),
+        description: err?.message || (isArabic ? "تعذر حفظ الإعدادات" : "Could not save settings"),
+        variant: "destructive",
+      });
     } finally {
       setGlobalSaving(false);
     }
