@@ -6,7 +6,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { useDoubleClickClose } from "@/hooks/use-double-click-close"
 
 const Sheet = SheetPrimitive.Root
 
@@ -58,18 +57,6 @@ const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
 >(({ side = "right", className, children, ...props }, ref) => (
-  <SheetContentInner ref={ref} side={side} className={className} {...props}>
-    {children}
-  </SheetContentInner>
-))
-
-const SheetContentInner = React.forwardRef<
-  React.ElementRef<typeof SheetPrimitive.Content>,
-  SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => {
-  const requireDoubleClick = useDoubleClickClose();
-
-  return (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
@@ -78,9 +65,9 @@ const SheetContentInner = React.forwardRef<
       {...props}
     >
       <SheetPrimitive.Close
-        onClick={requireDoubleClick}
-        title="اضغط مرتين للإغلاق"
-        className="absolute right-4 top-4 rounded-full p-1.5 text-muted-foreground bg-muted/60 hover:bg-muted focus:outline-none disabled:pointer-events-none"
+        data-no-swipe-back
+        aria-label="Close"
+        className="absolute right-4 top-4 rounded-full p-1.5 text-muted-foreground bg-muted/60 hover:bg-muted focus:outline-none disabled:pointer-events-none [touch-action:none]"
       >
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
@@ -88,9 +75,7 @@ const SheetContentInner = React.forwardRef<
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
-  );
-})
-SheetContentInner.displayName = SheetPrimitive.Content.displayName
+))
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({

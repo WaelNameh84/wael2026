@@ -1,0 +1,1 @@
+- [Ripple and positioned controls](ripple-position.md) — ripple effects must preserve an existing button position or absolute close controls jump on first touch.

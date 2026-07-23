@@ -12,6 +12,19 @@ export function useSwipeBack() {
     let edgeSwipe = false;
 
     function onTouchStart(e: TouchEvent) {
+      const target = e.target as HTMLElement | null;
+      // Never treat an intentional control interaction as a back gesture.
+      // This is especially important for close buttons placed near the RTL
+      // screen edge: the global listener must not compete with the button.
+      if (
+        target?.closest(
+          "button, a, input, textarea, select, label, [role='button'], [data-no-swipe-back]"
+        )
+      ) {
+        edgeSwipe = false;
+        return;
+      }
+
       const touch = e.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
@@ -25,6 +38,15 @@ export function useSwipeBack() {
 
     function onTouchEnd(e: TouchEvent) {
       if (!edgeSwipe) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest(
+          "button, a, input, textarea, select, label, [role='button'], [data-no-swipe-back]"
+        )
+      ) {
+        edgeSwipe = false;
+        return;
+      }
       const touch = e.changedTouches[0];
       const dx = touch.clientX - startX;
       const dy = Math.abs(touch.clientY - startY);

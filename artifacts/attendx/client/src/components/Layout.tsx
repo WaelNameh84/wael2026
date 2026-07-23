@@ -12,7 +12,6 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { useSwipeBack } from "@/hooks/use-swipe-back";
 import { useKeyboardAvoid } from "@/hooks/use-keyboard-avoid";
 import { useNetworkStatus } from "@/hooks/use-network-status";
 import { usePageProgress } from "@/hooks/use-page-progress";
@@ -78,7 +77,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const direction = trackNavDirection(location);
 
   usePullToRefresh(mainRef);
-  useSwipeBack();
   useKeyboardAvoid();
 
   const isOnline = useNetworkStatus();

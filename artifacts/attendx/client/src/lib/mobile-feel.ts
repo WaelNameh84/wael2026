@@ -16,8 +16,18 @@ function triggerRipple(e: PointerEvent) {
   const target = e.currentTarget as HTMLElement;
   if (!target) return;
 
+  // Some controls (especially dialog/sheet close buttons) are absolutely
+  // positioned. `.ripple-host` uses `position: relative` so the wave can be
+  // anchored to the button, but overriding an existing position moves the
+  // control on the first tap. Preserve the computed position before adding
+  // the ripple class.
+  const originalPosition = getComputedStyle(target).position;
+
   // أضف الكلاس اللي يحتاجه الـ ripple
   target.classList.add("ripple-host");
+  if (originalPosition !== "static") {
+    target.style.position = originalPosition;
+  }
 
   const rect  = target.getBoundingClientRect();
   const wave  = document.createElement("span");
@@ -56,30 +66,6 @@ const observer = new MutationObserver((mutations) => {
   }
 });
 
-/* ── Swipe to go back — من الحافة اليسرى (LTR) أو اليمنى (RTL) ── */
-export function initSwipeBack() {
-  const isRTL = document.documentElement.dir === "rtl";
-  let startX = 0, startY = 0;
-
-  document.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener("touchend", (e) => {
-    const dx = e.changedTouches[0].clientX - startX;
-    const dy = Math.abs(e.changedTouches[0].clientY - startY);
-    if (dy > 60) return; // مجرد تمرير عمودي
-
-    const W = window.innerWidth;
-    const fromEdge = isRTL
-      ? startX > W - 40 && dx < -80   // RTL: من اليمين لليسار
-      : startX < 40    && dx > 80;    // LTR: من اليسار لليمين
-
-    if (fromEdge) window.history.back();
-  }, { passive: true });
-}
-
 /* ── Theme color — يحدّث لون شريط الساعة ليتطابق مع لون التطبيق ── */
 export function syncThemeColor() {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -98,7 +84,6 @@ export function syncThemeColor() {
 export function initMobileFeel() {
   scanAndAttach();
   observer.observe(document.body, { childList: true, subtree: true });
-  initSwipeBack();
 
   // مزامنة أولية ثم مراقبة تغييرات الثيم
   syncThemeColor();

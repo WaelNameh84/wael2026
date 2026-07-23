@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next";
 import { InlineLoader, PageLoader } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -801,7 +800,6 @@ export default function DashboardPage() {
   const [hoursDialogOpen,  setHoursDialogOpen]  = useState(false);
   const [rateDialogOpen,   setRateDialogOpen]   = useState(false);
   const [leavesDialogOpen, setLeavesDialogOpen] = useState(false);
-  const closeWrImage = useDoubleClickClose(() => setWrViewImg(null));
 
   /* ── Settings ── */
   const {
@@ -1867,9 +1865,9 @@ export default function DashboardPage() {
       <Dialog open={!!wrViewImg} onOpenChange={v => { if (!v) setWrViewImg(null); }}>
         <DialogContent className="max-w-2xl p-2 bg-black border-0">
           <button
-            onClick={closeWrImage}
-            className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white"
-            title="اضغط مرتين للإغلاق"
+            onClick={() => setWrViewImg(null)}
+            data-no-swipe-back
+            className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white [touch-action:none]"
           >
             <X className="w-4 h-4" />
           </button>

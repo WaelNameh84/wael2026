@@ -13,7 +13,6 @@ import {
   Trash2, Clock, ChevronDown, ChevronUp, FolderOpen, CheckSquare, Square,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 
 /* ─── Compress image to JPEG ≤ 500 KB ─────────────────────── */
 function compressImage(file: File, maxKB = 500): Promise<string> {
@@ -65,7 +64,6 @@ export default function TaskDocumentation() {
   const [loading,    setLoading]    = useState(false);
   const [showAll,    setShowAll]    = useState(false);
   const [viewImg,    setViewImg]    = useState<string | null>(null);
-  const closeImage = useDoubleClickClose(() => setViewImg(null));
 
   /* ── Select-to-delete state ── */
   const [selectMode, setSelectMode] = useState(false);
@@ -415,9 +413,9 @@ export default function TaskDocumentation() {
       <Dialog open={!!viewImg} onOpenChange={v => { if (!v) setViewImg(null); }}>
         <DialogContent className="max-w-2xl p-2 bg-black border-0">
           <button
-            onClick={closeImage}
-            className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors"
-            title="اضغط مرتين للإغلاق"
+            onClick={() => setViewImg(null)}
+            data-no-swipe-back
+            className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors [touch-action:none]"
           >
             <X className="w-4 h-4" />
           </button>

@@ -3,7 +3,6 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { useDoubleClickClose } from "@/hooks/use-double-click-close"
 
 const Dialog = DialogPrimitive.Root
 
@@ -32,18 +31,6 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideClose?: boolean }
 >(({ className, children, hideClose = false, ...props }, ref) => (
-  <DialogContentInner ref={ref} className={className} hideClose={hideClose} {...props}>
-    {children}
-  </DialogContentInner>
-))
-
-const DialogContentInner = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideClose?: boolean }
->(({ className, children, hideClose = false, ...props }, ref) => {
-  const requireDoubleClick = useDoubleClickClose();
-
-  return (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -56,9 +43,9 @@ const DialogContentInner = React.forwardRef<
     >
       {!hideClose && (
         <DialogPrimitive.Close
-          onClick={requireDoubleClick}
-          title="اضغط مرتين للإغلاق"
-          className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-muted-foreground bg-muted/70 focus:outline-none disabled:pointer-events-none"
+          data-no-swipe-back
+          aria-label="Close"
+          className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-muted-foreground bg-muted/70 focus:outline-none disabled:pointer-events-none [touch-action:none]"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
@@ -67,9 +54,7 @@ const DialogContentInner = React.forwardRef<
       {children}
     </DialogPrimitive.Content>
   </DialogPortal>
-  );
-})
-DialogContentInner.displayName = DialogPrimitive.Content.displayName
+))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
