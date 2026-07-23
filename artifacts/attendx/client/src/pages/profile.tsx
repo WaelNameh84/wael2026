@@ -248,32 +248,19 @@ export default function ProfilePage() {
                 className="hidden"
                 onChange={handleAvatarUpload}
               />
-              {/* Avatar with camera overlay */}
-              <div className="relative group">
+              {/* Avatar with camera badge */}
+              <div className="relative">
                 <div className="w-36 h-36 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-5xl font-bold shadow-xl overflow-hidden">
                   {me?.avatarUrl
                     ? <img src={apiUrl(me.avatarUrl)} alt={me.name} className="w-full h-full object-cover" />
                     : initials}
                 </div>
-                {/* Upload overlay */}
+                {/* Camera badge — always visible, single tap opens picker */}
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading}
-                  className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  title="تغيير الصورة الشخصية"
-                >
-                  {uploading
-                    ? <Loader2 className="w-7 h-7 text-white animate-spin" />
-                    : <Camera className="w-7 h-7 text-white" />
-                  }
-                </button>
-                {/* Always-visible small camera badge */}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute -bottom-2 -end-2 w-9 h-9 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md hover:bg-primary/90 transition-colors"
+                  className="absolute -bottom-2 -end-2 w-10 h-10 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md"
                   title="تغيير الصورة"
                 >
                   {uploading

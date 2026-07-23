@@ -4,6 +4,12 @@
 * { font-feature-settings: "lnum" 1; }
 body { font-variant-numeric: normal; font-weight: var(--font-weight-override, 400); }
 
+/* Fix iOS double-tap: fire clicks immediately on first tap for all buttons/links */
+a, button, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";

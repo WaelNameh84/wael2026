@@ -328,7 +328,7 @@ function AvatarUploadButton({ onUploaded }: { onUploaded: (url: string) => void 
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="absolute -bottom-1 -end-1 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow hover:bg-primary/90 transition-colors"
+        className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow"
         title="تغيير الصورة"
       >
         {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}

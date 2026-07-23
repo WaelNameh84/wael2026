@@ -447,7 +447,7 @@ export default function FloatingAI() {
     if (!isDragging.current) return;
     const dx = e.clientX - dragStart.current.px;
     const dy = e.clientY - dragStart.current.py;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved.current = true;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) hasMoved.current = true;
     if (!hasMoved.current) return;
     // move button directly on DOM — zero React re-renders during drag
     const next = clamp({ x: dragStart.current.bx + dx, y: dragStart.current.by + dy });
