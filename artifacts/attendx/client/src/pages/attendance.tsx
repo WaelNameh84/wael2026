@@ -21,27 +21,11 @@ import {
   Camera, Upload, X as XIcon, ExternalLink, User,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { format } from "date-fns";
 import { apiUrl, authHeaders } from "@/lib/api-url";
 import TaskDocumentation from "@/components/TaskDocumentation";
 import { NoAttendanceIllustration } from "@/components/ui/empty-illustrations";
 import { cn } from "@/lib/utils";
-
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <div className="text-center space-y-1" data-testid="text-live-clock">
-      <p className="text-5xl font-mono font-bold tracking-widest text-primary tabular-nums">
-        {format(time, "HH:mm:ss")}
-      </p>
-      <p className="text-sm text-muted-foreground">{format(time, "EEEE, MMMM d, yyyy")}</p>
-    </div>
-  );
-}
+import ClockWidget from "@/components/ClockWidget";
 
 function statusBadge(s: string): "default" | "secondary" | "destructive" | "outline" {
   const map: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -475,7 +459,7 @@ export default function AttendancePage() {
 
         {/* Clock + action card */}
         <div className="bg-card border border-card-border rounded-xl p-8 flex flex-col items-center gap-6">
-          <LiveClock />
+          <ClockWidget />
 
           {todayLoading ? (
             <InlineLoader />
