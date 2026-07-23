@@ -15,7 +15,6 @@ interface GeminiConfig {
   appName?: string;
   appLogo?: string;
   workStartTime?: string;
-  workEndTime?: string;
   lateGraceMinutes?: number;
   breakMinutes?: number;
   appTimezone?: string;
@@ -90,7 +89,6 @@ export async function initConfigCache(): Promise<void> {
         appName: row.appName ?? undefined,
         appLogo: row.appLogo ?? undefined,
         workStartTime: row.workStartTime ?? undefined,
-        workEndTime: (row as any).workEndTime ?? undefined,
         lateGraceMinutes: row.lateGraceMinutes ?? undefined,
         breakMinutes: row.breakMinutes ?? undefined,
         appTimezone: row.appTimezone ?? undefined,
@@ -143,7 +141,6 @@ async function persistNow(config: GeminiConfig): Promise<void> {
     appName: config.appName ?? null,
     appLogo: config.appLogo ?? null,
     workStartTime: config.workStartTime ?? null,
-    workEndTime: config.workEndTime ?? null,
     lateGraceMinutes: config.lateGraceMinutes ?? null,
     breakMinutes: config.breakMinutes ?? null,
     appTimezone: config.appTimezone ?? null,
@@ -280,15 +277,6 @@ export function getWorkStartTime(): string {
 
 export function saveWorkStartTime(time: string): void {
   persist({ workStartTime: time });
-}
-
-/** workEndTime stored as "HH:MM" UTC, default "17:00" */
-export function getWorkEndTime(): string {
-  return cache.workEndTime ?? "17:00";
-}
-
-export function saveWorkEndTime(time: string): void {
-  persist({ workEndTime: time });
 }
 
 /** Grace period in minutes after work start before marking late, default 15 */
