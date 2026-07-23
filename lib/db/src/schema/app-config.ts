@@ -11,6 +11,7 @@ export const appConfigTable = pgTable("app_config", {
   appName: varchar("app_name", { length: 100 }),
   appLogo: text("app_logo"),
   workStartTime: varchar("work_start_time", { length: 5 }),
+  workEndTime: varchar("work_end_time", { length: 5 }),
   lateGraceMinutes: integer("late_grace_minutes"),
   breakMinutes: integer("break_minutes"),
   appTimezone: varchar("app_timezone", { length: 100 }),

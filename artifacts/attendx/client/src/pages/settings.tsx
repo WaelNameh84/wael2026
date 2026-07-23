@@ -1193,6 +1193,7 @@ export default function SettingsPage() {
 
   /* ── Work Schedule ── */
   const [workStartTime, setWorkStartTime] = useState("09:00");
+  const [workEndTime, setWorkEndTime] = useState("17:00");
   const [lateGraceMinutes, setLateGraceMinutes] = useState(15);
   const [breakMinutes, setBreakMinutes] = useState(0);
   const [appTimezone, setAppTimezone] = useState("Europe/Stockholm");
@@ -1225,14 +1226,11 @@ export default function SettingsPage() {
   const [pushStatus, setPushStatus] = useState<"idle" | "subscribing" | "subscribed" | "error">("idle");
   const [pushErrorMsg, setPushErrorMsg] = useState("");
 
-  // Auto-sync alarm start/end from work schedule whenever workStartTime or breakMinutes changes
+  // Auto-sync alarm start/end from work schedule whenever workStartTime or workEndTime changes
   useEffect(() => {
     if (!workStartTime) return;
-    const [hh, mm] = workStartTime.split(":").map(Number);
-    const endMin = hh * 60 + mm + 8 * 60 + breakMinutes;
-    const calcEnd = `${String(Math.floor(endMin / 60) % 24).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}`;
-    setAlarmSettingsState(s => ({ ...s, startTime: workStartTime, endTime: calcEnd }));
-  }, [workStartTime, breakMinutes]);
+    setAlarmSettingsState(s => ({ ...s, startTime: workStartTime, endTime: workEndTime }));
+  }, [workStartTime, workEndTime]);
 
   // On mount: sync subscription with server and update UI state
   useEffect(() => {
@@ -1380,6 +1378,7 @@ export default function SettingsPage() {
     if (!isAdmin) return;
     authFetch("/api/settings/app").then(r => r.ok ? r.json() : null).then(data => {
       if (data?.workStartTime) setWorkStartTime(data.workStartTime);
+      if (data?.workEndTime) setWorkEndTime(data.workEndTime);
       if (data?.lateGraceMinutes != null) setLateGraceMinutes(data.lateGraceMinutes);
       if (data?.breakMinutes != null) setBreakMinutes(data.breakMinutes);
       if (data?.appTimezone) setAppTimezone(data.appTimezone);
@@ -1776,7 +1775,7 @@ export default function SettingsPage() {
         authFetch("/api/settings/app", {
           method: "PATCH",
           body: JSON.stringify({
-            workStartTime, lateGraceMinutes, breakMinutes, appTimezone,
+            workStartTime, workEndTime, lateGraceMinutes, breakMinutes, appTimezone,
             gpsEnabled, gpsRadius: parseInt(gpsRadius) || 200,
           }),
         }).catch(() => {})
@@ -2286,37 +2285,30 @@ export default function SettingsPage() {
                   {isArabic ? t("shift_schedule") : "Work Schedule"}
                 </span>
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono">{workStartTime}</span>
+                  <span className="font-mono">{workStartTime} — {workEndTime}</span>
                   <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", scheduleOpen && "rotate-180")} />
                 </span>
               </button>
               {scheduleOpen && <div className="space-y-3 pt-1">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isArabic ? "وقت بداية الدوام" : "Start Time"}</Label>
+                  <Label className="text-xs text-muted-foreground">{isArabic ? "ساعة الحضور" : "Check-in Time"}</Label>
                   <Input type="time" value={workStartTime} onChange={e => setWorkStartTime(e.target.value)} className="font-mono" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isArabic ? t("grace_period_min") : "Grace Period (min)"}</Label>
-                  <Input type="number" min={0} max={120} value={lateGraceMinutes} onChange={e => setLateGraceMinutes(Math.max(0, Math.min(120, parseInt(e.target.value) || 0)))} className="font-mono" />
+                  <Label className="text-xs text-muted-foreground">{isArabic ? "ساعة الانصراف" : "Check-out Time"}</Label>
+                  <Input type="time" value={workEndTime} onChange={e => setWorkEndTime(e.target.value)} className="font-mono" />
                 </div>
               </div>
-              {/* Break duration row */}
+              {/* Break + grace row */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{isArabic ? "مدة الاستراحة (دقيقة)" : "Break Duration (min)"}</Label>
                   <Input type="number" min={0} max={240} value={breakMinutes} onChange={e => setBreakMinutes(Math.max(0, Math.min(240, parseInt(e.target.value) || 0)))} className="font-mono" placeholder="0" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isArabic ? "نهاية الدوام المحسوبة" : "Calculated Shift End"}</Label>
-                  <div className="h-9 flex items-center px-3 rounded-md border border-input bg-muted/40 font-mono text-sm text-primary font-semibold">
-                    {(() => {
-                      const [hh, mm] = workStartTime.split(":").map(Number);
-                      // workHoursPerDay default 8; shown as reference
-                      const endMin = hh * 60 + mm + 8 * 60 + breakMinutes;
-                      return `${String(Math.floor(endMin / 60) % 24).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}`;
-                    })()}
-                  </div>
+                  <Label className="text-xs text-muted-foreground">{isArabic ? t("grace_period_min") : "Grace Period (min)"}</Label>
+                  <Input type="number" min={0} max={120} value={lateGraceMinutes} onChange={e => setLateGraceMinutes(Math.max(0, Math.min(120, parseInt(e.target.value) || 0)))} className="font-mono" />
                 </div>
               </div>
               {breakMinutes > 0 && (

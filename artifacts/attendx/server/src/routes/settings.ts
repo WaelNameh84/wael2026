@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireAuth, requireAdmin } from "./auth.js";
 import {
   getAppName, saveAppName, getAppLogo, saveAppLogo,
-  getWorkStartTime, saveWorkStartTime, getLateGraceMinutes, saveLateGraceMinutes,
+  getWorkStartTime, saveWorkStartTime, getWorkEndTime, saveWorkEndTime, getLateGraceMinutes, saveLateGraceMinutes,
   getBreakMinutes, saveBreakMinutes,
   getAppTimezone, saveAppTimezone,
   getCloudinaryConfig, saveCloudinaryConfig, clearCloudinaryConfig, isCloudinaryConfigured,
@@ -26,6 +26,7 @@ function appConfigResponse(adminEmail: string) {
     appLogo: getAppLogo(),
     adminEmail,
     workStartTime: getWorkStartTime(),
+    workEndTime: getWorkEndTime(),
     lateGraceMinutes: getLateGraceMinutes(),
     breakMinutes: getBreakMinutes(),
     appTimezone: getAppTimezone(),
@@ -51,6 +52,7 @@ router.patch("/app", requireAuth, requireAdmin, async (req, res) => {
       appName: z.string().min(1).max(100).optional(),
       appLogo: z.string().optional(),
       workStartTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      workEndTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       lateGraceMinutes: z.number().int().min(0).max(120).optional(),
       breakMinutes: z.number().int().min(0).max(240).optional(),
       appTimezone: z.string().min(1).max(100).optional(),
@@ -75,6 +77,7 @@ router.patch("/app", requireAuth, requireAdmin, async (req, res) => {
     if (body.appName !== undefined) changes.appName = body.appName.trim();
     if (body.appLogo !== undefined) changes.appLogo = body.appLogo;
     if (body.workStartTime !== undefined) changes.workStartTime = body.workStartTime;
+    if (body.workEndTime !== undefined) changes.workEndTime = body.workEndTime;
     if (body.lateGraceMinutes !== undefined) changes.lateGraceMinutes = body.lateGraceMinutes;
     if (body.breakMinutes !== undefined) changes.breakMinutes = body.breakMinutes;
     if (body.appTimezone !== undefined) changes.appTimezone = body.appTimezone;
