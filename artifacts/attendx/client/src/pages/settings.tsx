@@ -1092,6 +1092,7 @@ export default function SettingsPage() {
     logoBgEnabled, logoBgColor, logoBgOpacity, logoBgRadius,
     setAppName, setAppLogo, setLogoWidth, setLogoHeight, setLogoRotation, setLogoOffsetX, setLogoOffsetY,
     setLogoBgEnabled, setLogoBgColor, setLogoBgOpacity, setLogoBgRadius, resetLogoBg,
+    flushLogoSettings,
   } = useAppConfig();
   const updateSettingsMut = useUpdateSettings();
   const changePasswordMut = useChangePassword();
@@ -1762,42 +1763,46 @@ export default function SettingsPage() {
     );
 
     if (isAdmin) {
-      // Save work schedule
-      tasks.push(
-        authFetch("/api/settings/app", {
-          method: "PATCH",
-          body: JSON.stringify({
-            workStartTime, lateGraceMinutes, breakMinutes, appTimezone,
-            gpsEnabled, gpsRadius: parseInt(gpsRadius) || 200,
-          }),
-        }).catch(() => {})
-      );
+      // Save all app-level values in one request instead of one request per field.
+      const appChanges: Record<string, unknown> = {
+        workStartTime, lateGraceMinutes, breakMinutes, appTimezone,
+        gpsEnabled, gpsRadius: parseInt(gpsRadius) || 200,
+      };
+
+      // Include app name when it changed.
+      if (adminForm.appName.trim() && adminForm.appName.trim() !== appName) {
+        appChanges.appName = adminForm.appName.trim();
+      }
 
       // Save admin profile if changed
       const nameChanged = adminForm.username.trim() !== (me?.name ?? "");
       const emailChanged = adminForm.email.trim() !== (me?.email ?? "");
 
-      if (adminForm.appName.trim() && adminForm.appName.trim() !== appName) {
-        tasks.push(
-          authFetch("/api/settings/app", { method: "PATCH", body: JSON.stringify({ appName: adminForm.appName.trim() }) })
-            .then(r => r.json()).then(d => { if (d.appName) setAppName(d.appName); }).catch(() => {})
-        );
-      }
+      tasks.push(
+        authFetch("/api/settings/app", {
+          method: "PATCH",
+          body: JSON.stringify(appChanges),
+        }).then(r => r.json()).then(d => {
+          if (d.appName) setAppName(d.appName);
+        })
+      );
+
       if ((nameChanged || emailChanged) && me?.id) {
         const body: Record<string, string> = {};
         if (nameChanged) body.name = adminForm.username.trim();
         if (emailChanged) body.email = adminForm.email.trim();
         tasks.push(
           authFetch(`/api/users/${me.id}`, { method: "PATCH", body: JSON.stringify(body) })
-            .then(r => { if (!r.ok) return r.json().then((d: any) => { throw new Error(d.error); }); return undefined; })
-            .catch(() => {})
+            .then(r => { if (!r.ok) return r.json().then((d: any) => { throw new Error(d.error); }); })
         );
       }
     }
 
     try {
+      // The setters queue their server writes so all UI and logo changes are
+      // sent as one request each. Wait for those queues before confirming.
+      tasks.push(flushServerSettings(), flushLogoSettings());
       await Promise.all(tasks);
-      await refetchMe();
       toast({ title: isArabic ? t("all_settings_saved") : "✅ All settings saved" });
     } catch {
       toast({ title: t("failed"), variant: "destructive" });

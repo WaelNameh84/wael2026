@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import i18n, { applyDirection } from "@/i18n";
 import { authFetch } from "@/lib/api-url";
 
@@ -175,11 +175,16 @@ interface SettingsContextType {
   setSplashAppName: (v: string) => void;
   splashStyle: SplashStyle;
   setSplashStyle: (v: SplashStyle) => void;
+  flushServerSettings: () => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const pendingServerUiSettings = useRef<Record<string, unknown>>({});
+  const serverSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serverSaveInFlight = useRef<Promise<void> | null>(null);
+
   /* ── Existing settings ─────────────────────────────────────────── */
   const [language, setLanguageState]           = useState<Language>(() => (localStorage.getItem("settings_lang") as Language) || "en");
   const [theme, setThemeState]                 = useState<Theme>(() => (localStorage.getItem("settings_theme") as Theme) || "system");
@@ -692,14 +697,62 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   /* ── Server sync helpers ───────────────────────────────────────── */
 
-  /** Fire-and-forget: persist a partial UI settings patch to the server so
-   *  any other device/browser gets the same config when it next loads.    */
+  /** Queue UI settings patches and persist them as one request.
+   *
+   * Settings screens apply many values together when the user presses Save.
+   * Sending one PATCH per setter made that action slow and overloaded the
+   * server. The local state still updates immediately; only server sync is
+   * batched.
+   */
   function saveToServer(patch: Record<string, unknown>) {
-    authFetch("/api/settings/app", {
-      method: "PATCH",
-      body: JSON.stringify({ uiSettings: patch }),
-    }).catch(() => { /* ignore network errors — localStorage is always fresh */ });
+    pendingServerUiSettings.current = {
+      ...pendingServerUiSettings.current,
+      ...patch,
+    };
+    if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+    serverSaveTimer.current = setTimeout(() => {
+      serverSaveTimer.current = null;
+      const queued = pendingServerUiSettings.current;
+      pendingServerUiSettings.current = {};
+      serverSaveInFlight.current = authFetch("/api/settings/app", {
+        method: "PATCH",
+        body: JSON.stringify({ uiSettings: queued }),
+      })
+        .then(() => undefined)
+        .catch(() => { /* localStorage remains the immediate source of truth */ })
+        .finally(() => {
+          serverSaveInFlight.current = null;
+        });
+    }, 250);
   }
+
+  async function flushServerSettings() {
+    if (serverSaveTimer.current) {
+      clearTimeout(serverSaveTimer.current);
+      serverSaveTimer.current = null;
+    }
+
+    while (Object.keys(pendingServerUiSettings.current).length > 0 || serverSaveInFlight.current) {
+      if (Object.keys(pendingServerUiSettings.current).length > 0 && !serverSaveInFlight.current) {
+        const queued = pendingServerUiSettings.current;
+        pendingServerUiSettings.current = {};
+        serverSaveInFlight.current = authFetch("/api/settings/app", {
+          method: "PATCH",
+          body: JSON.stringify({ uiSettings: queued }),
+        })
+          .then(() => undefined)
+          .catch(() => { /* localStorage remains the immediate source of truth */ })
+          .finally(() => {
+            serverSaveInFlight.current = null;
+          });
+      }
+      if (serverSaveInFlight.current) await serverSaveInFlight.current;
+    }
+  }
+
+  useEffect(() => () => {
+    if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+  }, []);
 
   /** Apply a uiSettings blob that arrived from the server.
    *  Uses internal *State setters so we never trigger another server save. */
@@ -867,7 +920,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       currency, setCurrency,
       setSplashBgGradient, setSplashTagline, setSplashDuration, setSplashShowStars, setSplashShowParticles,
       setSplashLogoUrl, setSplashLogoWidth, setSplashLogoHeight, setSplashLogoRadius, setSplashLogoOffsetX, setSplashLogoOffsetY, setSplashLogoBgSize,
-      setSplashAppName, setSplashStyle,
+       setSplashAppName, setSplashStyle, flushServerSettings,
     }}>
       {children}
     </SettingsContext.Provider>

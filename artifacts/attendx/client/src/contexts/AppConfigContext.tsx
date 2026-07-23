@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import i18n from "@/i18n";
 
 const LS_KEY_NAME = "app_config_name";
@@ -39,6 +39,7 @@ interface AppConfigContextValue {
   setLogoBgOpacity: (o: number) => void;
   setLogoBgRadius: (r: number) => void;
   resetLogoBg: () => void;
+  flushLogoSettings: () => Promise<void>;
   refreshAppConfig: () => void;
 }
 
@@ -67,6 +68,7 @@ const AppConfigContext = createContext<AppConfigContextValue>({
   setLogoBgOpacity: () => {},
   setLogoBgRadius: () => {},
   resetLogoBg: () => {},
+  flushLogoSettings: async () => {},
   refreshAppConfig: () => {},
 });
 
@@ -124,14 +126,55 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
     return isNaN(v) ? 16 : v;
   });
 
-  // Helper: save one or more logo display fields to the server (fire-and-forget)
+  const pendingLogoFields = useRef<Record<string, unknown>>({});
+  const logoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const logoSaveInFlight = useRef<Promise<void> | null>(null);
+
+  // Queue logo display fields so changing several controls only creates one PATCH.
   const saveLogoFieldsToServer = (fields: Record<string, unknown>) => {
-    fetch("/api/settings/app", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(fields),
-    }).catch(() => { /* ignore — value already updated in-state and LS */ });
+    pendingLogoFields.current = { ...pendingLogoFields.current, ...fields };
+    if (logoSaveTimer.current) clearTimeout(logoSaveTimer.current);
+    logoSaveTimer.current = setTimeout(() => {
+      logoSaveTimer.current = null;
+      const queued = pendingLogoFields.current;
+      pendingLogoFields.current = {};
+      logoSaveInFlight.current = fetch("/api/settings/app", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(queued),
+      })
+        .then(() => undefined)
+        .catch(() => { /* value is already updated in-state and localStorage */ })
+        .finally(() => {
+          logoSaveInFlight.current = null;
+        });
+    }, 250);
+  };
+
+  const flushLogoSettings = async () => {
+    if (logoSaveTimer.current) {
+      clearTimeout(logoSaveTimer.current);
+      logoSaveTimer.current = null;
+    }
+    while (Object.keys(pendingLogoFields.current).length > 0 || logoSaveInFlight.current) {
+      if (Object.keys(pendingLogoFields.current).length > 0 && !logoSaveInFlight.current) {
+        const queued = pendingLogoFields.current;
+        pendingLogoFields.current = {};
+        logoSaveInFlight.current = fetch("/api/settings/app", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(queued),
+        })
+          .then(() => undefined)
+          .catch(() => { /* value is already updated in-state and localStorage */ })
+          .finally(() => {
+            logoSaveInFlight.current = null;
+          });
+      }
+      if (logoSaveInFlight.current) await logoSaveInFlight.current;
+    }
   };
 
   const fetchConfig = () => {
@@ -164,6 +207,10 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => { fetchConfig(); }, []);
+
+  useEffect(() => () => {
+    if (logoSaveTimer.current) clearTimeout(logoSaveTimer.current);
+  }, []);
 
   useEffect(() => {
     const updateTitle = () => {
@@ -261,8 +308,9 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
       logoBgEnabled, logoBgColor, logoBgOpacity, logoBgRadius,
       configLoaded,
       setAppName, setAppLogo, setLogoWidth, setLogoHeight,
-      setLogoRotation, setLogoOffsetX, setLogoOffsetY,
-      setLogoBgEnabled, setLogoBgColor, setLogoBgOpacity, setLogoBgRadius, resetLogoBg,
+       setLogoRotation, setLogoOffsetX, setLogoOffsetY,
+       setLogoBgEnabled, setLogoBgColor, setLogoBgOpacity, setLogoBgRadius, resetLogoBg,
+       flushLogoSettings,
       refreshAppConfig: fetchConfig,
     }}>
       {children}
