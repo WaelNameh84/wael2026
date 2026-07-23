@@ -942,6 +942,7 @@ export default function SettingsPage() {
     splashLogoBgSize: liveSplashLogoBgSize, setSplashLogoBgSize: applySplashLogoBgSize,
     splashAppName: liveSplashAppName, setSplashAppName: applySplashAppName,
     splashStyle: liveSplashStyle, setSplashStyle: applySplashStyle,
+    flushServerSettings,
   } = useSettings();
 
   /* ── Draft (buffered) copies of every setting below ──────────────────
