@@ -1,3 +1,4 @@
 - [Ripple and positioned controls](ripple-position.md) — ripple effects must preserve an existing button position or absolute close controls jump on first touch.
 - [iOS PWA notification sender](ios-pwa-notification-sender.md) — the “from …” label comes from the installed PWA name, not the notification body.
 - [GitHub push authentication](github-push-auth.md) — when the GitHub connector is unavailable, use the existing secret through temporary askpass rather than embedding credentials in the remote URL.
+- [Manual shift alarm times](manual-shift-alarms.md) — alarm start/end times are user-controlled and must not be recalculated from the work schedule.
