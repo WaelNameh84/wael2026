@@ -9,7 +9,7 @@ import {
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -478,7 +478,7 @@ export default function AttendancePage() {
           <LiveClock />
 
           {todayLoading ? (
-            <Skeleton className="h-10 w-64" />
+            <InlineLoader />
           ) : today ? (
             <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-medium text-sm ${
               currentlyCheckedIn
@@ -713,21 +713,7 @@ export default function AttendancePage() {
             <h2 className="font-semibold">{t("attendance_history")}</h2>
           </div>
           {histLoading ? (
-            <div className="divide-y divide-border">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="px-5 py-3 flex items-center gap-3">
-                  <div className="flex-1 space-y-1.5">
-                    <Skeleton className="h-3.5 w-24" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <div className="flex gap-1.5">
-                    <Skeleton className="h-4 w-14 rounded" />
-                    <Skeleton className="h-4 w-14 rounded" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <InlineLoader />
           ) : (
             <div className="divide-y divide-border">
               {history?.slice(0, visibleCount).map((rec: any) => {

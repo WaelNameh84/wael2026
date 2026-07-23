@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, MapPin, Trash2, Loader2, Navigation, ChevronRight, LocateFixed } from "lucide-react";
@@ -284,11 +284,7 @@ export default function LocationsPage() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-2xl" />
-            ))}
-          </div>
+          <InlineLoader />
         ) : locations?.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
             <MapPin className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />

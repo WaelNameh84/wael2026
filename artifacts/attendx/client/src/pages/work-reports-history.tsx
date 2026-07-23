@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { InlineLoader } from "@/components/ui/spinner";
 import Layout from "@/components/Layout";
 import { useTranslation } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -229,11 +230,7 @@ export default function WorkReportsHistoryPage() {
 
         {/* ── Grid ───────────────────────────────────────────── */}
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
-            ))}
-          </div>
+          <InlineLoader />
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />

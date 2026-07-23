@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { InlineLoader } from "@/components/ui/spinner";
 import { NoMessagesIllustration } from "@/components/ui/empty-illustrations";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
@@ -220,9 +221,7 @@ function MessagesContent() {
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
+            <InlineLoader />
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
               <NoMessagesIllustration />

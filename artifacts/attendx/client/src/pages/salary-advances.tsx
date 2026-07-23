@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -289,7 +289,7 @@ export default function SalaryAdvancesPage() {
         {/* List */}
         <div className="bg-card border border-card-border rounded-xl overflow-hidden">
           {isLoading ? (
-            <div className="p-4 space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
+            <InlineLoader />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
               <NoPayrollIllustration />

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -212,9 +212,7 @@ export default function AttendanceCorrectionsPage() {
         )}
 
         {isLoading && (
-          <div className="space-y-3">
-            {[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
-          </div>
+          <InlineLoader />
         )}
 
         {!isLoading && corrections.length === 0 && (

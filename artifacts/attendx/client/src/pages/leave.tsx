@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -545,22 +545,7 @@ export default function LeavePage() {
         {/* Leave list */}
         <div className="bg-card border border-card-border rounded-xl divide-y divide-border">
           {isLoading ? (
-            <div className="divide-y divide-border">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="px-5 py-4 flex items-start gap-4">
-                  <Skeleton className="w-9 h-9 rounded-full flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                    </div>
-                    <Skeleton className="h-3 w-48" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                  <Skeleton className="h-7 w-20 rounded-md" />
-                </div>
-              ))}
-            </div>
+            <InlineLoader />
           ) : leaves?.map(leave => (
             <div key={leave.id} className="px-5 py-4 flex items-start gap-4" data-testid={`row-leave-${leave.id}`}>
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">

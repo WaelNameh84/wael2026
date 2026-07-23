@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Building2, Users, Trash2, AlertTriangle, Search, Loader2 } from "lucide-react";
 import { authFetch } from "@/lib/api-url";
@@ -577,17 +577,7 @@ export default function DepartmentsPage() {
 
         {/* ── Grid ── */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-card border border-card-border rounded-2xl overflow-hidden">
-                <Skeleton className="h-24 w-full rounded-none" />
-                <div className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-3 w-1/3" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <InlineLoader />
         ) : filtered.length === 0 && departments.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">

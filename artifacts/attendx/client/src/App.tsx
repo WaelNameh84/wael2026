@@ -10,6 +10,7 @@ import { lazy, Suspense, useEffect } from "react";
 import FloatingClock from "@/components/FloatingClock";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SplashScreen from "@/components/SplashScreen";
+import { PageLoader } from "@/components/ui/spinner";
 import { bootNotifications } from "@/lib/notifications";
 import { bootShiftAlarms } from "@/lib/alarm";
 import { useAutoUpdate } from "@/hooks/use-auto-update";
@@ -92,28 +93,6 @@ if (typeof window !== "undefined") {
   window.addEventListener("pagehide", saveCache);
 }
 
-function PageLoader() {
-  return (
-    <div className="space-y-5 max-w-3xl">
-      {/* Page title */}
-      <div className="skeleton h-7 w-36 rounded-lg" />
-      {/* Stat cards row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="skeleton h-24 rounded-2xl" />
-        ))}
-      </div>
-      {/* Main content block */}
-      <div className="skeleton h-48 rounded-2xl" />
-      {/* List rows */}
-      <div className="space-y-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="skeleton h-16 rounded-xl" style={{ opacity: 1 - i * 0.15 }} />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated } = useAuth();

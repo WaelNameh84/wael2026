@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import {
   User, Calendar, FileDown, FileText, Mail, Printer,
   CheckCircle, XCircle, Clock,
@@ -306,17 +306,7 @@ export default function EmployeeRecordDialog({ user, onClose }: Props) {
               </div>
 
               {isLoading ? (
-                <div className="divide-y divide-border">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="px-4 py-3 flex gap-3">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-5 w-20 rounded-full ms-auto" />
-                    </div>
-                  ))}
-                </div>
+                <InlineLoader />
               ) : records.length === 0 ? (
                 <div className="px-4 py-12 text-center text-sm text-muted-foreground">
                   لا توجد سجلات في هذه الفترة

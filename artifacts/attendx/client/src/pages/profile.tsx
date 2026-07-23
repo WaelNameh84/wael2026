@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetMe, getGetMeQueryKey } from "@/lib/api-client/index";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiUrl, authHeaders, authFetch } from "@/lib/api-url";
@@ -163,13 +163,7 @@ export default function ProfilePage() {
   if (meLoading) {
     return (
       <Layout>
-        <div className="p-6 space-y-4 max-w-4xl mx-auto">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-          </div>
-          <Skeleton className="h-64 rounded-xl" />
-        </div>
+        <InlineLoader />
       </Layout>
     );
   }

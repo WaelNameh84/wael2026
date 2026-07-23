@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -171,7 +171,7 @@ function HistoryPanel({ t, qc }: { t: (k: string) => string; qc: ReturnType<type
         {open && (
           <div className="border-t border-border">
             {isLoading ? (
-              <div className="p-4 space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
+              <InlineLoader />
             ) : reports.length === 0 ? (
               <p className="px-5 py-6 text-center text-sm text-muted-foreground">{t("no_payroll_reports")}</p>
             ) : (
@@ -560,8 +560,8 @@ export default function PayrollPage() {
             <div className="space-y-1 min-w-0">
               <Label>{t("employee")}</Label>
 
-              {/* Loading skeleton */}
-              {usersLoading && <Skeleton className="h-9 w-full" />}
+              {/* Loading */}
+              {usersLoading && <InlineLoader />}
 
               {/* Fetch error */}
               {!usersLoading && usersError && (

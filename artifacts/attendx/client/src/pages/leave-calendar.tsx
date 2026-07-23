@@ -5,7 +5,7 @@ import { useListLeave, getListLeaveQueryKey } from "@/lib/api-client/index";
 import { useHolidays } from "@/pages/holidays";
 import { DayPicker } from "react-day-picker";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { CalendarDays, Circle, PartyPopper } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -128,7 +128,7 @@ export default function LeaveCalendarPage() {
           {/* Calendar */}
           <div className="bg-card border border-card-border rounded-xl p-4 flex-shrink-0 flex justify-center">
             {isLoading ? (
-              <Skeleton className="w-64 h-72" />
+              <InlineLoader />
             ) : (
               <DayPicker
                 month={month}
@@ -191,7 +191,7 @@ export default function LeaveCalendarPage() {
             <div className="bg-card border border-card-border rounded-xl p-4 space-y-3">
               <p className="text-sm font-semibold">{t("leave_requests")}</p>
               {isLoading ? (
-                <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
+                <InlineLoader />
               ) : leaves?.length === 0 ? (
                 <p className="text-xs text-muted-foreground">{t("no_leave_requests")}</p>
               ) : (

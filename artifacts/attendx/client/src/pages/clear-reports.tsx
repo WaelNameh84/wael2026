@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -245,9 +245,7 @@ export default function ClearReportsPage() {
           </div>
 
           {isLoading ? (
-            <div className="p-4 space-y-2">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}
-            </div>
+            <InlineLoader />
           ) : records.length === 0 ? (
             <div className="py-16 text-center space-y-2">
               <CalendarX className="w-10 h-10 mx-auto text-muted-foreground/30" />

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { InlineLoader } from "@/components/ui/spinner";
 import { useTranslation } from "@/lib/i18n";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -482,7 +483,7 @@ function ActionCenterContent() {
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         {isLoading ? (
-          <div className="py-16 text-center text-muted-foreground text-sm">{t("loading")}</div>
+          <InlineLoader />
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Bell className="w-10 h-10 mx-auto mb-3 text-muted-foreground/20" />

@@ -20,7 +20,7 @@ import AttendanceHeatmap from "@/components/AttendanceHeatmap";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { useTranslation } from "react-i18next";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineLoader, PageLoader } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -620,11 +620,7 @@ function EmployeeDetailModal({
 
         <div className="space-y-3 mt-1">
           {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(2)].map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-xl" />
-              ))}
-            </div>
+            <InlineLoader />
           ) : sessions && sessions.length > 0 ? (
             sessions
               .slice()
@@ -1173,77 +1169,7 @@ export default function DashboardPage() {
   }
 
   if (isLoading || !me) {
-    return (
-      <Layout>
-        <div className="space-y-6">
-          {/* Hero banner skeleton */}
-          <div className="relative overflow-hidden rounded-2xl bg-card border border-card-border p-6">
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-7 w-52" />
-                <Skeleton className="h-3 w-36 mt-1" />
-                <Skeleton className="h-8 w-32 rounded-lg mt-3" />
-              </div>
-              <Skeleton className="h-20 w-36 rounded-xl" />
-            </div>
-          </div>
-
-          {/* 5 stat cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-card border border-card-border rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-9 w-9 rounded-lg" />
-                </div>
-                <Skeleton className="h-8 w-12" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            ))}
-          </div>
-
-          {/* 3 metric cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-card border border-card-border rounded-2xl p-5 space-y-3">
-                <div className="absolute top-0 inset-x-0 h-1 rounded-t-2xl bg-muted" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                  <Skeleton className="h-4 w-28" />
-                </div>
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="h-3 w-36" />
-              </div>
-            ))}
-          </div>
-
-          {/* Chart + activity feed */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-card border border-card-border rounded-2xl p-5 space-y-4">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-48 w-full rounded-xl" />
-            </div>
-            <div className="bg-card border border-card-border rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-border">
-                <Skeleton className="h-5 w-36" />
-              </div>
-              <div className="divide-y divide-border">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="px-5 py-3 flex items-center gap-3">
-                    <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-3.5 w-28" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
-                    <Skeleton className="h-5 w-14 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
+    return <PageLoader />;
   }
 
   return (
@@ -1361,11 +1287,7 @@ export default function DashboardPage() {
 
         {/* Stats grid — 5 drag-and-drop sortable cards */}
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-28 rounded-xl" />
-            ))}
-          </div>
+          <InlineLoader />
         ) : stats ? (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={cardOrder} strategy={rectSortingStrategy}>
