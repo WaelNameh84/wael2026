@@ -272,18 +272,40 @@ export default function FloatingAI() {
         : `أهلاً! أنا ${name}. كيف أساعدك؟`;
       setMessages([{ role: "assistant", content: greet }]);
     }
-    if (open && !localStorage.getItem("gemini_api_key")) {
+    if (open) {
       const token = localStorage.getItem("auth_token");
-      fetch("/api/settings/my-ai-key", { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // Check the shared admin key first. A user may have an old personal key
+      // in localStorage, but that must not make the app ask for a new key when
+      // the administrator has already configured the assistant.
+      fetch("/api/ai/status", { headers })
         .then(r => r.ok ? r.json() : null)
-        .then(data => {
+        .then(async (status) => {
+          if (status?.serverHasKey) {
+            setShowKeySetup(false);
+            return;
+          }
+
+          const localKey = localStorage.getItem("gemini_api_key");
+          if (localKey) {
+            setShowKeySetup(false);
+            return;
+          }
+
+          const data = await fetch("/api/settings/my-ai-key", { headers })
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
           if (data?.key) {
             localStorage.setItem("gemini_api_key", data.key);
+            setShowKeySetup(false);
           } else {
             setShowKeySetup(true);
           }
         })
-        .catch(() => setShowKeySetup(true));
+        .catch(() => {
+          if (!localStorage.getItem("gemini_api_key")) setShowKeySetup(true);
+        });
     }
   }, [open, me?.name, assistantName]);
 

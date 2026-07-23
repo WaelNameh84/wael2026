@@ -55,7 +55,11 @@ router.post("/chat", requireAuth, async (req: any, res) => {
     });
     const body = schema.parse(req.body);
 
-    const apiKey = body.clientApiKey || getGeminiApiKey();
+    // The admin-configured key is shared by the whole organization. Prefer it
+    // over any stale personal key stored in a user's browser so managers and
+    // employees never need to enter their own key when the admin has already
+    // configured the assistant.
+    const apiKey = getGeminiApiKey() || body.clientApiKey;
     if (!apiKey) {
       return res.status(503).json({ error: "AI assistant is not configured. Please set VITE_GEMINI_API_KEY in your environment variables." });
     }
