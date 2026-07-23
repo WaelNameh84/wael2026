@@ -1225,15 +1225,6 @@ export default function SettingsPage() {
   const [pushStatus, setPushStatus] = useState<"idle" | "subscribing" | "subscribed" | "error">("idle");
   const [pushErrorMsg, setPushErrorMsg] = useState("");
 
-  // Auto-sync alarm start/end from work schedule whenever workStartTime or breakMinutes changes
-  useEffect(() => {
-    if (!workStartTime) return;
-    const [hh, mm] = workStartTime.split(":").map(Number);
-    const endMin = hh * 60 + mm + 8 * 60 + breakMinutes;
-    const calcEnd = `${String(Math.floor(endMin / 60) % 24).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}`;
-    setAlarmSettingsState(s => ({ ...s, startTime: workStartTime, endTime: calcEnd }));
-  }, [workStartTime, breakMinutes]);
-
   // On mount: sync subscription with server and update UI state
   useEffect(() => {
     (async () => {
@@ -3685,7 +3676,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <span>🔗</span>
-                {isArabic ? "مزامنة تلقائية من جدول الدوام — يمكنك تعديلها هنا" : "Auto-synced from Work Schedule — you can still adjust"}
+                {isArabic ? "وقت مستقل عن جدول الدوام — تحكّم به كما تريد" : "Independent from Work Schedule — set it manually"}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1"><Label className="text-xs">{isArabic ? t("shift_start") : "Start"}</Label>
