@@ -1,1 +1,2 @@
 - [Ripple and positioned controls](ripple-position.md) — ripple effects must preserve an existing button position or absolute close controls jump on first touch.
+- [iOS PWA notification sender](ios-pwa-notification-sender.md) — the “from …” label comes from the installed PWA name, not the notification body.
