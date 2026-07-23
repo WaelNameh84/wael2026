@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 
 interface BottomSheetProps {
   open: boolean;
@@ -42,6 +43,8 @@ export function BottomSheet({
   className,
   children,
 }: BottomSheetProps) {
+  const requireDoubleClick = useDoubleClickClose();
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
@@ -59,8 +62,10 @@ export function BottomSheet({
             {showClose && (
               <DrawerClose asChild>
                 <button
+                  onClick={requireDoubleClick}
                   className="absolute start-4 top-2 rounded-full p-1.5 text-muted-foreground hover:bg-muted transition-colors"
                   aria-label="إغلاق"
+                  title="اضغط مرتين للإغلاق"
                 >
                   <X className="w-4 h-4" />
                 </button>

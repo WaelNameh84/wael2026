@@ -357,18 +357,18 @@ export default function PurchasesPage() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" size="sm" className="flex-1 gap-1.5" onClick={() => cameraRef.current?.click()}>
+                    <label htmlFor="purchase-camera-file" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 h-9 text-sm font-medium cursor-pointer">
                       <Camera className="w-3.5 h-3.5" />
                       {isArabic ? "تصوير" : "Take Photo"}
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" className="flex-1 gap-1.5" onClick={() => galleryRef.current?.click()}>
+                    </label>
+                    <label htmlFor="purchase-gallery-file" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 h-9 text-sm font-medium cursor-pointer">
                       <FolderOpen className="w-3.5 h-3.5" />
                       {isArabic ? "من المعرض" : "From Gallery"}
-                    </Button>
+                    </label>
                   </div>
                 )}
-                <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
-                <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input ref={cameraRef} id="purchase-camera-file" type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+                <input ref={galleryRef} id="purchase-gallery-file" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               </div>
             </div>
             <DialogFooter>

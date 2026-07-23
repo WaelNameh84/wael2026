@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { apiUrl, authHeaders } from "@/lib/api-url";
 import { useGetMe } from "@/lib/api-client/index";
 import { useToast } from "@/hooks/use-toast";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 
 const TYPE_ICON: Record<string, React.ElementType> = {
   REGISTRATION:       UserPlus,
@@ -88,6 +89,7 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
   const [relatedData, setRelatedData]           = useState<any | null>(null);
   const [loadingRelated, setLoadingRelated]     = useState(false);
   const [fullImg, setFullImg]                   = useState<string | null>(null);
+  const closeFullImage = useDoubleClickClose(() => setFullImg(null));
   /** Justification associated with an EARLY_LEAVE attendance notification (fetched separately) */
   const [earlyLeaveJustif, setEarlyLeaveJustif] = useState<any | null>(null);
 
@@ -452,8 +454,8 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
 
       {/* ── Notification Detail Dialog ── */}
       <Dialog open={!!selectedNotif} onOpenChange={v => { if (!v) { setSelectedNotif(null); setRelatedData(null); } }}>
-        <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-3 flex-shrink-0 border-b border-border/40">
             <DialogTitle className="flex items-center gap-2.5 text-base">
               {selectedNotif && (() => {
                 const Icon = getDetailIcon(selectedNotif);
@@ -468,6 +470,7 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
             </DialogTitle>
           </DialogHeader>
 
+          <div className="overflow-y-auto flex-1 px-6 py-4">
           {selectedNotif && (
             <div className="space-y-3 pb-2">
 
@@ -1377,13 +1380,18 @@ export default function NotificationsPanel({ onClose }: { onClose: () => void })
               </Button>
             </div>
           )}
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* ── Full Screen Image Viewer ── */}
       <Dialog open={!!fullImg} onOpenChange={v => { if (!v) setFullImg(null); }}>
         <DialogContent className="max-w-3xl p-2 bg-black border-0">
-          <button onClick={() => setFullImg(null)} className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white">
+          <button
+            onClick={closeFullImage}
+            title="اضغط مرتين للإغلاق"
+            className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white"
+          >
             <X className="w-4 h-4" />
           </button>
           {fullImg && <img src={fullImg} alt="full" className="w-full rounded object-contain max-h-[85vh]" />}

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 
 interface Message { role: "user" | "assistant"; content: string; }
 
@@ -478,6 +479,11 @@ export default function FloatingAI() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (listening) stopListening(); handleSend(); }
   };
 
+  const closeAssistant = useDoubleClickClose(() => {
+    setOpen(false);
+    stopSpeaking();
+  });
+
   const panelStyle = getPanelStyle(pos);
   const name = assistantName || "المساعد الذكي";
   const initial = name.charAt(0);
@@ -513,7 +519,11 @@ export default function FloatingAI() {
                 {listening ? "🎙 يستمع..." : isSpeaking ? "🔊 يتحدث..." : pending ? "يفكر..." : "متاح للمساعدة"}
               </p>
             </div>
-            <button onClick={() => { setOpen(false); stopSpeaking(); }} className="p-1 hover:bg-white/20 rounded-lg transition-colors">
+            <button
+              onClick={closeAssistant}
+              title="اضغط مرتين للإغلاق"
+              className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, GripHorizontal, Minimize2, Maximize2, Clock, LogIn, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 import ClockWidget from "@/components/ClockWidget";
 import { useSettings } from "@/hooks/use-settings";
 import {
@@ -137,6 +138,7 @@ export default function FloatingClock() {
 
   const handleClose = () => { setIsOpen(false); localStorage.setItem(OPEN_KEY, "false"); };
   const handleReopen = () => { setIsOpen(true); localStorage.setItem(OPEN_KEY, "true"); };
+  const requireDoubleClickClose = useDoubleClickClose(handleClose);
 
   if (!floatingClockEnabled) return null;
 
@@ -194,7 +196,7 @@ export default function FloatingClock() {
           </button>
           <button
             onMouseDown={e => e.stopPropagation()}
-            onClick={handleClose}
+            onClick={requireDoubleClickClose}
             className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             title="Close"
           >

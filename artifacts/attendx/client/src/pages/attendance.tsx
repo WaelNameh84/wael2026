@@ -1089,10 +1089,10 @@ export default function AttendancePage() {
 
           <div className="space-y-4">
             {/* Preview area */}
-            <div
-              onClick={() => checkInFileRef.current?.click()}
-              className={`relative aspect-video rounded-xl overflow-hidden border-2 border-dashed cursor-pointer transition-colors ${
-                checkInPreview ? "border-primary/40" : "border-muted-foreground/30 hover:border-primary/50"
+            <label
+              htmlFor="checkin-file"
+              className={`relative aspect-video rounded-xl overflow-hidden border-2 border-dashed cursor-pointer ${
+                checkInPreview ? "border-primary/40" : "border-muted-foreground/30"
               } bg-muted/50 flex items-center justify-center`}
             >
               {checkInPreview ? (
@@ -1117,10 +1117,11 @@ export default function AttendancePage() {
                   </p>
                 </div>
               )}
-            </div>
+            </label>
 
             <input
               ref={checkInFileRef}
+              id="checkin-file"
               type="file"
               accept="image/*"
               capture="environment"

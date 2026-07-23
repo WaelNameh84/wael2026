@@ -240,13 +240,15 @@ export default function ProfilePage() {
                   تعديل الملف ←
                 </Button>
               </Link>
-              {/* Hidden file input */}
+              {/* Hidden file input — use label to avoid iOS double-tap */}
               <input
                 ref={fileRef}
+                id="profile-avatar-file"
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={handleAvatarUpload}
+                disabled={uploading}
               />
               {/* Avatar with camera badge */}
               <div className="relative">
@@ -255,19 +257,17 @@ export default function ProfilePage() {
                     ? <img src={apiUrl(me.avatarUrl)} alt={me.name} className="w-full h-full object-cover" />
                     : initials}
                 </div>
-                {/* Camera badge — always visible, single tap opens picker */}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute -bottom-2 -end-2 w-10 h-10 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md"
+                {/* Camera badge — label triggers file input directly on iOS */}
+                <label
+                  htmlFor="profile-avatar-file"
+                  className="absolute -bottom-2 -end-2 w-10 h-10 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-md cursor-pointer"
                   title="تغيير الصورة"
                 >
                   {uploading
                     ? <Loader2 className="w-4 h-4 text-white animate-spin" />
                     : <Camera className="w-4 h-4 text-white" />
                   }
-                </button>
+                </label>
               </div>
             </div>
           </div>

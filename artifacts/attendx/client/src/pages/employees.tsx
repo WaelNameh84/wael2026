@@ -324,15 +324,22 @@ function AvatarUploadButton({ onUploaded }: { onUploaded: (url: string) => void 
 
   return (
     <>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      <button
-        type="button"
-        onClick={() => fileRef.current?.click()}
-        className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow"
+      <input
+        ref={fileRef}
+        id="emp-avatar-file"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+        disabled={uploading}
+      />
+      <label
+        htmlFor="emp-avatar-file"
+        className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow cursor-pointer"
         title="تغيير الصورة"
       >
         {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
-      </button>
+      </label>
     </>
   );
 }
@@ -531,22 +538,24 @@ export default function EmployeesPage() {
                 <Plus className="w-4 h-4" /> {t("add_employee")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+              <DialogHeader className="px-6 pt-6 pb-3 flex-shrink-0 border-b border-border/40">
                 <DialogTitle className="flex items-center gap-2 text-lg">
                   <Plus className="w-5 h-5" /> {t("add_employee")}
                 </DialogTitle>
               </DialogHeader>
-              <FormAddEdit
-                isEdit={false}
-                formData={form as FormData}
-                setFormData={setForm as any}
-                onSubmit={handleCreate}
-                isPending={createMut.isPending}
-                departments={departments}
-                isArabic={isArabic}
-                t={t}
-              />
+              <div className="overflow-y-auto flex-1 px-6 py-4">
+                <FormAddEdit
+                  isEdit={false}
+                  formData={form as FormData}
+                  setFormData={setForm as any}
+                  onSubmit={handleCreate}
+                  isPending={createMut.isPending}
+                  departments={departments}
+                  isArabic={isArabic}
+                  t={t}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -737,23 +746,25 @@ export default function EmployeesPage() {
 
         {/* Edit Dialog */}
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+            <DialogHeader className="px-6 pt-6 pb-3 flex-shrink-0 border-b border-border/40">
               <DialogTitle className="flex items-center gap-3">
                 <EmpAvatar name={editUser?.name ?? "?"} avatarUrl={editUser?.avatarUrl} size="sm" />
                 {t("edit_employee")}: {editUser?.name}
               </DialogTitle>
             </DialogHeader>
-            <FormAddEdit
-              isEdit={true}
-              formData={editForm as FormData}
-              setFormData={setEditForm as any}
-              onSubmit={handleEdit}
-              isPending={updateMut.isPending}
-              departments={departments}
-              isArabic={isArabic}
-              t={t}
-            />
+            <div className="overflow-y-auto flex-1 px-6 py-4">
+              <FormAddEdit
+                isEdit={true}
+                formData={editForm as FormData}
+                setFormData={setEditForm as any}
+                onSubmit={handleEdit}
+                isPending={updateMut.isPending}
+                departments={departments}
+                isArabic={isArabic}
+                t={t}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       </div>

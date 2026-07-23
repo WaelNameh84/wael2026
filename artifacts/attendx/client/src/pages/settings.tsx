@@ -691,12 +691,11 @@ function BackupSection({ isArabic }: { isArabic: boolean }) {
         <p className="text-xs text-amber-700 dark:text-amber-400">
           {L("ارفع ملف نسخة احتياطية لاستعادة جميع البيانات. سيتم استبدال البيانات الحالية.", "Upload a backup file to restore all data. Current data will be replaced.")}
         </p>
-        <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleFileSelect} />
-        <Button variant="outline" size="sm" className="gap-2 border-amber-300 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-          onClick={() => fileRef.current?.click()}>
+        <input ref={fileRef} id="settings-restore-file" type="file" accept=".json" className="hidden" onChange={handleFileSelect} />
+        <label htmlFor="settings-restore-file" className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-background px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300 cursor-pointer">
           <Upload className="w-3.5 h-3.5" />
           {L("اختيار ملف النسخة", "Choose Backup File")}
-        </Button>
+        </label>
       </div>
 
       {/* ── نافذة تأكيد الاستعادة ── */}
@@ -3989,6 +3988,7 @@ export default function SettingsPage() {
                   {/* Hidden file input */}
                   <input
                     ref={welcomeImgRef}
+                    id="settings-welcome-img"
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -4014,19 +4014,16 @@ export default function SettingsPage() {
                       }
                     }}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => welcomeImgRef.current?.click()}
-                    disabled={welcomeImgUploading}
-                    className="shrink-0 gap-1.5"
+                  <label
+                    htmlFor="settings-welcome-img"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-input bg-background px-3 h-9 text-sm font-medium cursor-pointer"
+                    style={welcomeImgUploading ? { pointerEvents: "none", opacity: 0.5 } : {}}
                   >
                     {welcomeImgUploading
                       ? <Loader2 className="w-4 h-4 animate-spin" />
                       : <Camera className="w-4 h-4" />}
                     {isArabic ? "رفع صورة" : "Upload"}
-                  </Button>
+                  </label>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isArabic ? "ارفع صورة من جهازك أو أدخل إيموجي أو رابط" : "Upload an image or enter an emoji / URL"}
@@ -4451,6 +4448,7 @@ export default function SettingsPage() {
               <div className="flex flex-col gap-2 flex-1">
                 <input
                   ref={splashLogoRef}
+                  id="settings-splash-logo"
                   type="file"
                   accept="image/*"
                   className="hidden"
@@ -4478,17 +4476,14 @@ export default function SettingsPage() {
                     }
                   }}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => splashLogoRef.current?.click()}
-                  disabled={splashLogoUploading}
-                  className="gap-1.5"
+                <label
+                  htmlFor="settings-splash-logo"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 h-9 text-sm font-medium cursor-pointer"
+                  style={splashLogoUploading ? { pointerEvents: "none", opacity: 0.5 } : {}}
                 >
                   {splashLogoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                   {isArabic ? "رفع لوغو" : "Upload Logo"}
-                </Button>
+                </label>
                 {splashLogoUrl && (
                   <Button type="button" variant="ghost" size="sm" className="text-destructive gap-1.5" onClick={() => setSplashLogoUrl("")}>
                     <Trash2 className="w-3.5 h-3.5" />

@@ -497,12 +497,12 @@ export default function LeavePage() {
                         {t("upload_document_optional")}
                       </Label>
                       {!selectedFile ? (
-                        <button type="button" onClick={() => fileInputRef.current?.click()}
-                          className="w-full border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
+                        <label htmlFor="leave-file-input"
+                          className="w-full border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer">
                           <UploadCloud className="w-7 h-7 text-muted-foreground" />
                           <span className="text-sm font-medium">{t("upload_document")}</span>
                           <span className="text-xs text-muted-foreground text-center">{t("upload_document_hint")}</span>
-                        </button>
+                        </label>
                       ) : (
                         <div className="border rounded-lg p-3 flex items-center gap-3">
                           <FileText className="w-8 h-8 text-primary flex-shrink-0" />
@@ -523,7 +523,7 @@ export default function LeavePage() {
                           <button type="button" onClick={handleRemoveFile} className="text-muted-foreground hover:text-destructive flex-shrink-0"><X className="w-4 h-4" /></button>
                         </div>
                       )}
-                      <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+                      <input ref={fileInputRef} id="leave-file-input" type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
                     </div>
                   )}
 

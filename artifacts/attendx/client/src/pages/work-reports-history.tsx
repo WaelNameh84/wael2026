@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 import {
   Camera, Eye, Trash2, X, Download, Filter, Search,
   Image as ImageIcon, FileText, Calendar, User,
@@ -38,6 +39,7 @@ export default function WorkReportsHistoryPage() {
   const [deleting,       setDeleting]   = useState(false);
   const [clearOpen,      setClearOpen]  = useState(false);
   const [clearing,       setClearing]   = useState(false);
+  const closeImage = useDoubleClickClose(() => setViewImg(null));
 
   const { data: reports = [], isLoading } = useQuery<any[]>({
     queryKey: ["work-reports-history"],
@@ -304,8 +306,9 @@ export default function WorkReportsHistoryPage() {
       <Dialog open={!!viewImg} onOpenChange={v => { if (!v) setViewImg(null); }}>
         <DialogContent className="max-w-2xl p-2 bg-black border-0">
           <button
-            onClick={() => setViewImg(null)}
+            onClick={closeImage}
             className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white"
+            title="اضغط مرتين للإغلاق"
           >
             <X className="w-4 h-4" />
           </button>

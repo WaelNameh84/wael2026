@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { InlineLoader, PageLoader } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useDoubleClickClose } from "@/hooks/use-double-click-close";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -582,10 +583,10 @@ function EmployeeDetailModal({
   return (
     <Dialog open onOpenChange={v => { if (!v) onClose(); }}>
       <DialogContent
-        className="max-w-lg max-h-[90vh] overflow-y-auto"
+        className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0"
         dir={isArabic ? "rtl" : "ltr"}
       >
-        <DialogHeader>
+        <DialogHeader className="px-6 pt-6 pb-3 flex-shrink-0 border-b border-border/40">
           <DialogTitle className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-sm">
               {selected.userName.slice(0, 2).toUpperCase()}
@@ -596,7 +597,7 @@ function EmployeeDetailModal({
             </div>
           </DialogTitle>
         </DialogHeader>
-
+        <div className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
         <div className="flex items-center gap-3 px-1">
           <Badge variant={statusBadgeVariant(overallStatus)} className={`capitalize ${statusBadgeExtraClass(overallStatus)}`}>
             {t(overallStatus)}
@@ -648,6 +649,7 @@ function EmployeeDetailModal({
             {t("close")}
           </Button>
         </div>
+        </div>{/* end overflow-y-auto */}
       </DialogContent>
     </Dialog>
   );
@@ -799,6 +801,7 @@ export default function DashboardPage() {
   const [hoursDialogOpen,  setHoursDialogOpen]  = useState(false);
   const [rateDialogOpen,   setRateDialogOpen]   = useState(false);
   const [leavesDialogOpen, setLeavesDialogOpen] = useState(false);
+  const closeWrImage = useDoubleClickClose(() => setWrViewImg(null));
 
   /* ── Settings ── */
   const {
@@ -1864,8 +1867,9 @@ export default function DashboardPage() {
       <Dialog open={!!wrViewImg} onOpenChange={v => { if (!v) setWrViewImg(null); }}>
         <DialogContent className="max-w-2xl p-2 bg-black border-0">
           <button
-            onClick={() => setWrViewImg(null)}
+            onClick={closeWrImage}
             className="absolute top-3 end-3 z-10 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white"
+            title="اضغط مرتين للإغلاق"
           >
             <X className="w-4 h-4" />
           </button>
