@@ -1081,26 +1081,57 @@ router.patch("/:id/overtime-approve", requireAdmin, async (req: any, res) => {
   }
 });
 
-router.delete("/bulk", requireAdmin, async (req: any, res) => {
+router.delete("/bulk", requireAuth, async (req: any, res) => {
   try {
-    const { ids } = req.body as { ids: number[] };
-    if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ error: "ids must be a non-empty array" });
+    const ids = z.array(z.number().int().positive()).min(1).parse(req.body?.ids);
+    const uniqueIds = [...new Set(ids)];
+    const [me] = await db.select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, req.userId))
+      .limit(1);
+    const canDeleteAny = !!me && ["admin", "manager"].includes(me.role);
+
+    // Employees may remove only their own records; admin and manager can
+    // remove records for the whole company.
+    if (!canDeleteAny) {
+      const owned = await db.select({ id: attendanceTable.id })
+        .from(attendanceTable)
+        .where(and(
+          inArray(attendanceTable.id, uniqueIds),
+          eq(attendanceTable.userId, req.userId),
+        ));
+      if (owned.length !== uniqueIds.length) {
+        return res.status(403).json({ error: "You can only delete your own attendance records" });
+      }
     }
-    // inArray is already imported at the top of this file — no dynamic import needed
-    await db.delete(lateJustificationsTable).where(inArray(lateJustificationsTable.attendanceId, ids));
-    await db.delete(attendanceTable).where(inArray(attendanceTable.id, ids));
-    return res.json({ deleted: ids.length });
+
+    await db.delete(lateJustificationsTable).where(inArray(lateJustificationsTable.attendanceId, uniqueIds));
+    await db.delete(attendanceTable).where(inArray(attendanceTable.id, uniqueIds));
+    return res.json({ deleted: uniqueIds.length });
   } catch (err: any) {
     return res.status(httpStatus(err)).json({ error: err.message });
   }
 });
 
-router.delete("/:id", requireAdmin, async (req: any, res) => {
+router.delete("/:id", requireAuth, async (req: any, res) => {
   try {
     const id = parseId(req.params.id);
-    const [exists] = await db.select({ id: attendanceTable.id }).from(attendanceTable).where(eq(attendanceTable.id, id)).limit(1);
-    if (!exists) return res.status(404).json({ error: "Record not found" });
+    const [record] = await db.select({
+      id: attendanceTable.id,
+      userId: attendanceTable.userId,
+    })
+      .from(attendanceTable)
+      .where(eq(attendanceTable.id, id))
+      .limit(1);
+    if (!record) return res.status(404).json({ error: "Record not found" });
+    const [me] = await db.select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, req.userId))
+      .limit(1);
+    const canDeleteAny = !!me && ["admin", "manager"].includes(me.role);
+    if (!canDeleteAny && record.userId !== req.userId) {
+      return res.status(403).json({ error: "You can only delete your own attendance records" });
+    }
     await db.delete(lateJustificationsTable).where(eq(lateJustificationsTable.attendanceId, id));
     await db.delete(attendanceTable).where(eq(attendanceTable.id, id));
     return res.status(204).send();
