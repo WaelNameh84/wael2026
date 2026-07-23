@@ -46,9 +46,9 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       // 5 minutes: data stays fresh across page navigations without re-fetching
-      staleTime: 5 * 60_000,
-      // 15 minutes: keep unused data in memory so navigating back is instant
-      gcTime: 15 * 60_000,
+      staleTime: 10 * 60_000,
+      // 60 minutes: keep unused data in memory so navigating back is instant
+      gcTime: 60 * 60_000,
       refetchOnWindowFocus: false,
       refetchIntervalInBackground: false,
     },

@@ -48,22 +48,17 @@ function trackNavDirection(location: string): "forward" | "back" {
   return _lastDirection;
 }
 
-/* ── Framer-motion slide variants (iOS-style) ── */
+/* ── Framer-motion fade variants — simple opacity, no slide ── */
 const slideVariants = {
-  initial: (dir: "forward" | "back") => ({
-    x: dir === "back" ? "-28%" : "100%",
-    opacity: dir === "back" ? 0.6 : 0,
-  }),
+  initial: { opacity: 0 },
   animate: {
-    x: 0,
     opacity: 1,
-    transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const },
+    transition: { duration: 0.18, ease: "easeOut" },
   },
-  exit: (dir: "forward" | "back") => ({
-    x: dir === "back" ? "100%" : "-28%",
-    opacity: dir === "back" ? 0 : 0.5,
-    transition: { duration: 0.26, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  }),
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.12, ease: "easeIn" },
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -498,10 +493,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           className="flex-1 overflow-y-auto overflow-x-hidden relative"
           style={{ scrollbarGutter: "stable" }}
         >
-          <AnimatePresence mode="wait" custom={direction} initial={false}>
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location}
-              custom={direction}
               variants={slideVariants}
               initial="initial"
               animate="animate"
